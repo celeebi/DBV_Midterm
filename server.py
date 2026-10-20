@@ -19,6 +19,7 @@ from starlette.staticfiles import StaticFiles
 # Core calculation and rule engines
 from src.data.loader import FinancialDataLoader
 from src.data.country_data import INDONESIA_MACRO
+from src.data.coverage import COVERAGE_UNIVERSE
 from src.rules.sanity_checks import ModelSanityChecker
 from src.rules.recommendations import ValuationRecommender
 from src.models.parameters import CapitalStructureModel
@@ -29,6 +30,7 @@ from src.models.rim import ResidualIncomeModel
 from src.models.ddm import DividendDiscountModel
 from src.models.scenarios import ScenarioForecaster
 from src.models.ensemble import ValuationEnsemble
+from src.models.three_statement import ThreeStatementModel
 from src.analytics.audit_trail import ValuationAuditTrail
 from src.analytics.sensitivity import SensitivityMatrix
 from src.analytics.exporter import ExcelModelExporter
@@ -55,6 +57,11 @@ async def get_company(request):
         return JSONResponse({"status": "success", "data": data})
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+
+
+async def get_coverage(request):
+    """Returns the pre-configured coverage universe for Indonesian property equities and conglomerates."""
+    return JSONResponse({"status": "success", "data": COVERAGE_UNIVERSE})
 
 
 async def recalculate(request):
@@ -240,6 +247,16 @@ async def recalculate(request):
             shares_outstanding=shares_b
         )
 
+        # 13. Integrated 3-Statement Model
+        three_stmt_res = ThreeStatementModel.generate_three_statements(
+            growth_rates=growth_rates,
+            margins=margins,
+            tax_rate=tax_rate,
+            dividend_payout=payout_ratio
+        )
+        bs_df = three_stmt_res["balance_sheet"]
+        is_balanced = bool((bs_df["balance_check"].abs() < 0.01).all())
+
         # Build response JSON
         ddm_out = {
             "ddm_price": ddm_res["ddm_price"],
@@ -257,6 +274,12 @@ async def recalculate(request):
             "company": company,
             "wacc": wacc_res,
             "pro_forma_schedule": pf_res["schedule"].to_dict(orient="records"),
+            "three_statement": {
+                "income_statement": three_stmt_res["income_statement"].to_dict(orient="records"),
+                "balance_sheet": bs_df.to_dict(orient="records"),
+                "cash_flow": three_stmt_res["cash_flow_statement"].to_dict(orient="records"),
+                "is_balanced": is_balanced
+            },
             "dcf": dcf_res,
             "comps": {
                 "comps_target_price": comps_res["comps_target_price"],
@@ -388,6 +411,7 @@ async def export_excel(request):
 
 routes = [
     Route("/", endpoint=index, methods=["GET"]),
+    Route("/api/coverage", endpoint=get_coverage, methods=["GET"]),
     Route("/api/company", endpoint=get_company, methods=["GET"]),
     Route("/api/recalculate", endpoint=recalculate, methods=["POST"]),
     Route("/api/export-excel", endpoint=export_excel, methods=["POST"]),

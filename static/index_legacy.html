@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MM6026 Digital Business Valuation Platform</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  
+  <!-- KaTeX for formula rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #070b14;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.22) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+        radial-gradient(at 50% 20%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: "tnum" 1;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .glass-panel:hover {
+      border-color: rgba(56, 189, 248, 0.25);
+    }
+
+    .tab-active {
+      color: #38bdf8 !important;
+      border-bottom: 2px solid #38bdf8 !important;
+      background: linear-gradient(180deg, transparent 0%, rgba(56, 189, 248, 0.08) 100%);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #1e293b;
+      height: 6px;
+      border-radius: 9999px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b1120;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="p-3 md:p-6 space-y-6">
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP INSTITUTIONAL TELEMETRY BAR -->
+  <!-- ========================================================================= -->
+  <header class="glass-panel rounded-2xl p-4 md:p-5 flex flex-col lg:flex-row items-center justify-between gap-4">
+    <div class="flex items-center space-x-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 font-bold text-lg text-white">
+        Ω
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono">MM6026 // DIGITAL VALUATION PLATFORM</span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            ● LIVE CALC ENGINE
+          </span>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <h1 id="hdr-company-name" class="text-xl md:text-2xl font-extrabold text-white">PT Pakuwon Jati Tbk</h1>
+          <span id="hdr-ticker-badge" class="font-mono text-cyan-400 font-bold text-sm bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">PWON.JK</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticker Switcher & Quick Pills -->
+    <div class="flex items-center space-x-2 w-full lg:w-auto">
+      <div class="relative flex-1 lg:w-48">
+        <input type="text" id="inp-ticker" value="PWON.JK" placeholder="Search Ticker..." class="w-full bg-[#0a0f1d] border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+      </div>
+      <button onclick="loadTicker(document.getElementById('inp-ticker').value)" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-cyan-600/20">
+        Load
+      </button>
+
+      <!-- Quick Ticker Pills -->
+      <div class="hidden sm:flex items-center space-x-1 pl-2 border-l border-slate-800 text-[11px] font-mono">
+        <button onclick="loadTicker('PWON.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">PWON</button>
+        <button onclick="loadTicker('BSDE.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">BSDE</button>
+        <button onclick="loadTicker('CTRA.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">CTRA</button>
+        <button onclick="loadTicker('ASII.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">ASII</button>
+      </div>
+
+      <button onclick="triggerExcelDownload()" class="ml-2 px-3 py-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20">
+        <span>📥</span>
+        <span>Export .xlsx</span>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- ========================================================================= -->
+  <!-- 2. HIGH-DENSITY KPI TELEMETRY RIBBON -->
+  <!-- ========================================================================= -->
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+    
+    <!-- KPI 1: Observed Market Price -->
+    <div class="glass-panel p-4 rounded-xl space-y-1">
+      <div class="text-[11px] font-semibold text-slate-400">Observed Market Price</div>
+      <div class="text-xl md:text-2xl font-extrabold font-mono text-white" id="kpi-market-price">IDR 5,250</div>
+      <div class="text-[10px] text-slate-400">Valuation Date: 2026-10-20</div>
+    </div>
+
+    <!-- KPI 2: Composite Fair Value Target -->
+    <div class="glass-panel p-4 rounded-xl space-y-1 border-cyan-500/30 bg-cyan-950/20">
+      <div class="text-[11px] font-semibold text-cyan-400 flex justify-between">
+        <span>Composite Fair Value</span>
+        <span id="kpi-upside-badge" class="font-mono text-emerald-400 font-bold">+18.3%</span>
+      </div>
+      <div class="text-xl md:text-2xl font-extrabold font-mono text-cyan-300" id="kpi-target-price">IDR 6,210</div>
+      <div class="text-[10px] text-slate-400">Triangulated Fair Value</div>
+    </div>
+
+    <!-- KPI 3: Institutional Recommendation -->
+    <div class="glass-panel p-4 rounded-xl space-y-1">
+      <div class="text-[11px] font-semibold text-slate-400">Recommendation</div>
+      <div class="text-lg md:text-xl font-extrabold font-mono text-emerald-400" id="kpi-rec-badge">🟢 BUY</div>
+      <div class="text-[10px] text-slate-400" id="kpi-rec-sub">Margin of Safety &gt; +15%</div>
+    </div>
+
+    <!-- KPI 4: Justified Fair Value Range -->
+    <div class="glass-panel p-4 rounded-xl space-y-1">
+      <div class="text-[11px] font-semibold text-slate-400">Fair-Value Range</div>
+      <div class="text-sm md:text-base font-extrabold font-mono text-slate-200" id="kpi-range">IDR 4,850 — 7,550</div>
+      <div class="text-[10px] text-slate-400">Bear Case ➔ Bull Case</div>
+    </div>
+
+    <!-- KPI 5: WACC Hurdle Rate -->
+    <div class="glass-panel p-4 rounded-xl space-y-1">
+      <div class="text-[11px] font-semibold text-slate-400 flex justify-between">
+        <span>WACC (Hurdle Rate)</span>
+        <span class="text-[10px] text-cyan-400 font-mono">Ke: 12.72%</span>
+      </div>
+      <div class="text-xl md:text-2xl font-extrabold font-mono text-white" id="kpi-wacc">9.52%</div>
+      <div class="text-[10px] text-emerald-400 font-mono" id="kpi-sanity-status">✓ Boundary Guardrails Safe</div>
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================================= -->
+  <!-- 3. NAVIGATION PILL TABS -->
+  <!-- ========================================================================= -->
+  <nav class="flex overflow-x-auto space-x-1 border-b border-slate-800 pb-1 text-xs md:text-sm font-semibold">
+    <button onclick="switchTab('tab-proforma')" id="btn-tab-proforma" class="tab-btn tab-active px-4 py-2.5 rounded-t-xl text-slate-300 transition flex items-center space-x-2">
+      <span>📊</span>
+      <span>1. Pro Forma Statement Engine</span>
+    </button>
+    <button onclick="switchTab('tab-workbench')" id="btn-tab-workbench" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 transition flex items-center space-x-2">
+      <span>⚖️</span>
+      <span>2. Valuation Workbench</span>
+    </button>
+    <button onclick="switchTab('tab-fanchart')" id="btn-tab-fanchart" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 transition flex items-center space-x-2">
+      <span>📈</span>
+      <span>3. 10-Year Fan Chart & Scenarios</span>
+    </button>
+    <button onclick="switchTab('tab-comps')" id="btn-tab-comps" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 transition flex items-center space-x-2">
+      <span>🏢</span>
+      <span>4. Relative Peer Comps</span>
+    </button>
+    <button onclick="switchTab('tab-inspector')" id="btn-tab-inspector" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 transition flex items-center space-x-2">
+      <span>🔍</span>
+      <span>5. Calculation Inspector</span>
+    </button>
+    <button onclick="switchTab('tab-sensitivity')" id="btn-tab-sensitivity" class="tab-btn px-4 py-2.5 rounded-t-xl text-slate-400 transition flex items-center space-x-2">
+      <span>📉</span>
+      <span>6. 2D Sensitivity Grid</span>
+    </button>
+  </nav>
+
+
+  <!-- ========================================================================= -->
+  <!-- TAB 1: 10-YEAR PRO FORMA STATEMENT ENGINE -->
+  <!-- ========================================================================= -->
+  <main id="tab-proforma" class="tab-content space-y-4">
+    
+    <!-- Action Bar & Controls -->
+    <div class="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="text-sm md:text-base font-bold text-white">Interactive 10-Year Pro Forma Financial Statements</h2>
+        <p class="text-xs text-slate-400">Edit year-by-year explicit forecasts and thesis drivers. Recalculates all intrinsic valuations instantaneously.</p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleAdvancedDrawer()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 transition flex items-center space-x-1.5">
+          <span>⚙️</span>
+          <span id="advToggleLabel">Show Advanced Levers (CapEx, Tax, WACC)</span>
+        </button>
+        <button onclick="applyAutoFadeHelper()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-950/50 hover:bg-indigo-900/50 text-indigo-300 border border-indigo-700/60 transition">
+          🪄 Auto-Fade Helper
+        </button>
+        <button onclick="resetProFormaBaseline()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          ↺ Reset Baseline
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== ADVANCED LEVERS DRAWER (GRANULAR 6 CONTROLS) ==================== -->
+    <div id="advancedDrawer" class="hidden glass-panel p-5 rounded-2xl space-y-4 border-cyan-500/30 bg-[#090e1c]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 font-mono">Granular Valuation Drivers & Stress-Testing Engine</span>
+          <p class="text-[11px] text-slate-400">Direct numeric floating-point inputs across macroeconomic, operational, and capital structure parameters</p>
+        </div>
+        <button onclick="resetAdvancedToAcademicDefaults()" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-mono underline">
+          ↺ Reset to Academic Benchmarks
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-mono">
+        
+        <!-- Lever 1: Terminal Value Engine -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
+            <span>1. Terminal Value ($g$ & Multiple)</span>
+            <span class="text-[10px] text-cyan-400 font-mono bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-800">PERPETUITY</span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400 text-[11px] font-sans">Terminal Growth ($g$ %):</span>
+              <input type="number" id="inp-terminal-g" value="1.5" step="0.1" min="0.0" max="6.0" oninput="updateTerminalGInput(this.value)" class="w-16 bg-[#070b14] border border-cyan-500/50 rounded px-2 py-0.5 text-cyan-300 font-bold text-right">
+            </div>
+            <input type="range" id="slider-terminal-g" min="0.5" max="4.5" step="0.1" value="1.5" oninput="updateTerminalGInput(this.value)" class="w-full">
+            <div class="flex justify-between text-[10px] text-slate-500 font-sans">
+              <span>0.5% (Bear)</span>
+              <span id="badge-terminal-g" class="text-emerald-400 font-semibold font-sans">✓ Safe (1.5% &lt; GDP 4.0%)</span>
+              <span>4.0% (GDP Cap)</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+            <span class="text-slate-400 text-[11px] font-sans">Exit EV/EBITDA Multiple:</span>
+            <div class="flex items-center space-x-1">
+              <input type="number" id="inp-exit-mult" value="6.0" step="0.1" min="2.0" max="15.0" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-purple-300 font-bold text-right">
+              <span class="text-purple-300 font-bold">x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lever 2: WACC & CAPM Engine -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
+            <span>2. WACC & CAPM Engine</span>
+            <span id="disp-computed-wacc" class="text-[10px] text-cyan-300 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">WACC: 10.42%</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span class="text-slate-400 font-sans">Risk-Free ($R_f$ %):</span>
+              <input type="number" id="inp-rf" value="6.60" step="0.05" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
+            </div>
+            <div>
+              <span class="text-slate-400 font-sans">Equity Beta ($\beta$):</span>
+              <input type="number" id="inp-beta" value="0.75" step="0.05" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
+            </div>
+            <div>
+              <span class="text-slate-400 font-sans">Eq. Risk Prem ($ERP$ %):</span>
+              <input type="number" id="inp-erp" value="7.20" step="0.10" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
+            </div>
+            <div>
+              <span class="text-slate-400 font-sans">Pre-tax Debt ($K_d$ %):</span>
+              <input type="number" id="inp-kd" value="6.50" step="0.10" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px]">
+            <span class="text-slate-400 font-sans">Target Debt Weight ($W_d$ %):</span>
+            <input type="number" id="inp-wd" value="20.0" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-cyan-500/40 rounded px-2 py-0.5 text-cyan-300 font-bold text-right">
+          </div>
+        </div>
+
+        <!-- Lever 3: Reinvestment & CapEx -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
+            <span>3. CapEx & Reinvestment</span>
+            <span class="text-[10px] text-emerald-400 font-mono bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800">CAPITAL</span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400 text-[11px] font-sans">Maintenance CapEx (% Rev):</span>
+              <input type="number" id="inp-capex-pct" value="8.0" step="0.1" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-emerald-500/50 rounded px-2 py-0.5 text-emerald-300 font-bold text-right">
+            </div>
+            <input type="range" id="slider-capex-pct" min="1.0" max="15.0" step="0.1" value="8.0" oninput="document.getElementById('inp-capex-pct').value = this.value; triggerRecalculate();" class="w-full">
+          </div>
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+            <span class="text-slate-400 text-[11px] font-sans">Lump-Sum Expansion (Y2 Rp T):</span>
+            <input type="number" id="inp-expansion-capex" value="0.0" step="1.0" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-300 font-bold text-right">
+          </div>
+        </div>
+
+        <!-- Lever 4: Working Capital Dynamics -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
+            <span>4. Working Capital Dynamics</span>
+            <span class="text-[10px] text-blue-400 font-mono bg-blue-950/40 px-2 py-0.5 rounded border border-blue-800">LIQUIDITY</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 text-[11px] font-sans">ΔNWC Intensity (% ΔRev):</span>
+            <input type="number" id="inp-nwc-pct" value="5.0" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-blue-500/50 rounded px-2 py-0.5 text-blue-300 font-bold text-right">
+          </div>
+          <div class="text-[10px] text-slate-500 font-sans">Accounts for cash absorption in trade receivables & inventory per Rp 1 of incremental revenue.</div>
+        </div>
+
+        <!-- Lever 5: Fiscal Policy & Tax Holidays -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
+            <span>5. Tax Policy & Incentives</span>
+            <span class="text-[10px] text-amber-400 font-mono bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800">FISCAL</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 text-[11px] font-sans">Statutory Corporate Tax ($t$ %):</span>
+            <input type="number" id="inp-tax-rate" value="22.0" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-amber-500/50 rounded px-2 py-0.5 text-amber-300 font-bold text-right">
+          </div>
+          <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+            <label class="flex items-center space-x-2 cursor-pointer text-[11px] font-sans text-slate-300">
+              <input type="checkbox" id="chk-tax-holiday" onchange="triggerRecalculate()" class="rounded text-amber-500">
+              <span>EV Pioneer Tax Holiday</span>
+            </label>
+            <span class="text-[10px] text-amber-300 font-mono">10% in Y1–Y3</span>
+          </div>
+        </div>
+
+        <!-- Lever 6: Comps Outliers & Metrics -->
+        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
+            <span>6. Peer Benchmark Rules</span>
+            <span class="text-[10px] text-purple-400 font-mono bg-purple-950/40 px-2 py-0.5 rounded border border-purple-800">RELATIVE</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 text-[11px] font-sans">Multiple Statistic:</span>
+            <select id="sel-comps-stat" onchange="triggerRecalculate()" class="bg-[#070b14] border border-purple-500/40 rounded px-2 py-0.5 text-purple-300 text-xs">
+              <option value="median" selected>Sector Median</option>
+              <option value="25th">25th Percentile</option>
+              <option value="harmonic_mean">Harmonic Mean</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-2 text-[11px] font-sans text-slate-300">
+            <input type="checkbox" id="chk-filter-outliers" checked onchange="triggerRecalculate()" class="rounded text-purple-500">
+            <span>Filter Outliers (P/E &gt; 40x or Negative)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pro Forma Schedule Grid Table -->
+    <div class="glass-panel rounded-2xl overflow-hidden border border-slate-800">
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left border-collapse font-mono" id="table-proforma">
+          <thead class="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px] font-sans border-b border-slate-800">
+            <tr>
+              <th class="py-3 px-3">Period</th>
+              <th class="py-3 px-3 text-cyan-300">Revenue Growth (%)</th>
+              <th class="py-3 px-3 text-emerald-300">EBIT Margin (%)</th>
+              <th class="py-3 px-3">Proj. Revenue (Rp T)</th>
+              <th class="py-3 px-3">Proj. EBIT (Rp T)</th>
+              <th class="py-3 px-3 text-cyan-300">FCFF (Rp T)</th>
+              <th class="py-3 px-3 text-slate-400 font-sans">Analyst Thesis / Driver Notes (Editable)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/80" id="tbody-proforma">
+            <!-- Dynamic Pro Forma Rows will be rendered here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Educational Masterclass Callout Box -->
+    <div class="p-4 rounded-xl bg-gradient-to-r from-blue-950/40 to-slate-900/60 border border-blue-500/30 text-xs space-y-1.5">
+      <div class="font-bold text-cyan-300 flex items-center space-x-2">
+        <span>🎓</span>
+        <span>Corporate Valuation Masterclass: Phase 1 (Explicit Forecast) vs. Phase 2 (Competitive Fade)</span>
+      </div>
+      <p class="text-slate-300 leading-relaxed font-sans">
+        In rigorous valuation practice (McKinsey & Aswath Damodaran), multi-stage modeling acknowledges that excess returns and high growth cannot persist forever. <strong>Years 1–5</strong> represent your explicit forecast where management guidance and competitive advantages drive earnings. <strong>Years 6–10</strong> linearly fade growth toward macroeconomic equilibrium ($g = 1.5\%$), ensuring the terminal Gordon Growth calculation avoids cliff-edge distortions.
+      </p>
+    </div>
+
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- TAB 2: VALUATION WORKBENCH & METHOD SELECTION -->
+  <!-- ========================================================================= -->
+  <main id="tab-workbench" class="tab-content space-y-6 hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left: Method Selection & Weighting Sliders -->
+      <div class="lg:col-span-5 glass-panel p-6 rounded-2xl space-y-5">
+        <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-sm text-white">Active Valuation Methods</h3>
+            <p class="text-xs text-slate-400">Triangulate fundamental and relative pricing approaches</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">100% Normalized</span>
+        </div>
+
+        <!-- Dual-Mode Selector -->
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-2">
+          <div class="font-bold text-slate-200">Weighting Selection Mode:</div>
+          <div class="flex items-center space-x-4">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="radio" name="weightMode" value="rule" checked onchange="toggleWeightMode(this.value)" class="text-cyan-500">
+              <span class="text-slate-300">Rule Engine Suggested</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="radio" name="weightMode" value="manual" onchange="toggleWeightMode(this.value)" class="text-cyan-500">
+              <span class="text-slate-300">Manual Analyst Discretion</span>
+            </label>
+          </div>
+          <div id="rule-justification-box" class="text-[11px] text-cyan-300/80 font-sans italic pt-1 border-t border-slate-800/80">
+            Suggested for Property & Real Estate: 50% DCF-FCFF, 25% Relative Comps, 15% Residual Income, 10% Dividend Discount.
+          </div>
+        </div>
+
+        <!-- Sliders -->
+        <div class="space-y-4">
+          <!-- 1. DCF -->
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-use-dcf" checked onchange="triggerRecalculate()" class="rounded text-cyan-500">
+                <span class="text-xs font-bold text-slate-200">1. DCF (10Y Pro Forma FCFF)</span>
+              </label>
+              <span class="text-xs font-mono font-bold text-cyan-400" id="bench-dcf-price">IDR 531</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <input type="range" id="w-dcf" min="0" max="100" value="50" oninput="adjustMethodSlider('dcf')" class="flex-1">
+              <span class="text-xs font-mono font-bold text-cyan-300 w-12 text-right bg-slate-800 px-2 py-0.5 rounded" id="lbl-w-dcf">50%</span>
+            </div>
+          </div>
+
+          <!-- 2. Relative Comps -->
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-use-comps" checked onchange="triggerRecalculate()" class="rounded text-purple-500">
+                <span class="text-xs font-bold text-slate-200">2. Relative Valuation (Peer Comps)</span>
+              </label>
+              <span class="text-xs font-mono font-bold text-purple-400" id="bench-comps-price">IDR 341</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <input type="range" id="w-comps" min="0" max="100" value="25" oninput="adjustMethodSlider('comps')" class="flex-1">
+              <span class="text-xs font-mono font-bold text-purple-300 w-12 text-right bg-slate-800 px-2 py-0.5 rounded" id="lbl-w-comps">25%</span>
+            </div>
+          </div>
+
+          <!-- 3. RIM -->
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-use-rim" checked onchange="triggerRecalculate()" class="rounded text-emerald-500">
+                <span class="text-xs font-bold text-slate-200">3. Residual Income Model (RIM)</span>
+              </label>
+              <span class="text-xs font-mono font-bold text-emerald-400" id="bench-rim-price">IDR 480</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <input type="range" id="w-rim" min="0" max="100" value="15" oninput="adjustMethodSlider('rim')" class="flex-1">
+              <span class="text-xs font-mono font-bold text-emerald-300 w-12 text-right bg-slate-800 px-2 py-0.5 rounded" id="lbl-w-rim">15%</span>
+            </div>
+          </div>
+
+          <!-- 4. DDM -->
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-use-ddm" checked onchange="triggerRecalculate()" class="rounded text-amber-500">
+                <span class="text-xs font-bold text-slate-200">4. Dividend Discount Model (DDM)</span>
+              </label>
+              <span class="text-xs font-mono font-bold text-amber-400" id="bench-ddm-price">IDR 174</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <input type="range" id="w-ddm" min="0" max="100" value="10" oninput="adjustMethodSlider('ddm')" class="flex-1">
+              <span class="text-xs font-mono font-bold text-amber-300 w-12 text-right bg-slate-800 px-2 py-0.5 rounded" id="lbl-w-ddm">10%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Football Field Spread & Reconciled Synthesis -->
+      <div class="lg:col-span-7 glass-panel p-6 rounded-2xl space-y-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <h3 class="font-bold text-sm text-white">Valuation Football Field Distribution</h3>
+              <p class="text-xs text-slate-400">Range comparison against observed market price</p>
+            </div>
+            <div class="flex items-center space-x-3 text-xs font-mono">
+              <span class="text-slate-400">Market: <strong class="text-rose-400" id="ff-lbl-market">IDR 5,250</strong></span>
+              <span class="text-cyan-400">Target: <strong id="ff-lbl-target">IDR 6,210</strong></span>
+            </div>
+          </div>
+
+          <!-- Football Field Floating Bars Container -->
+          <div class="space-y-4 pt-5" id="football-field-bars">
+            <!-- Dynamic bars rendered here -->
+          </div>
+        </div>
+
+        <!-- Synthesis Callout -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-xs space-y-1.5 font-sans">
+          <div class="font-bold text-slate-200 flex justify-between">
+            <span>Executive Synthesis & Recommendation</span>
+            <span id="synth-rating-badge" class="font-mono text-emerald-400 font-bold">🟢 BUY</span>
+          </div>
+          <p id="synth-thesis" class="text-slate-300 leading-relaxed">
+            Target price of IDR 6,210 implies +18.3% upside above market price IDR 5,250. Fundamental intrinsic cash flows indicate an attractive margin of safety for long-term investors.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- TAB 3: 10-YEAR MULTI-STAGE FAN CHART & SCENARIOS -->
+  <!-- ========================================================================= -->
+  <main id="tab-fanchart" class="tab-content space-y-6 hidden">
+    <div class="glass-panel p-6 rounded-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 class="font-bold text-base text-white">10-Year Multi-Stage Revenue Projection Fan Chart</h3>
+          <p class="text-xs text-slate-400">Audited Historical Actuals (2021–2025) ➔ Explicit Forecast (2026–2030) ➔ Macroeconomic Fade (2031–2035)</p>
+        </div>
+        <div class="flex items-center space-x-4 text-xs font-mono">
+          <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span><span class="text-slate-300">Bear</span></span>
+          <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span><span class="text-slate-300">Base</span></span>
+          <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span><span class="text-slate-300">Bull</span></span>
+        </div>
+      </div>
+
+      <!-- High-Performance SVG Bézier Fan Chart -->
+      <div class="w-full h-80 relative overflow-hidden bg-slate-950/40 rounded-xl border border-slate-800/80 p-2">
+        <svg id="svg-fan-chart" class="w-full h-full" viewBox="0 0 900 300" preserveAspectRatio="none">
+          <!-- Rendered dynamically by JavaScript -->
+        </svg>
+      </div>
+
+      <!-- Scenario Metrics Matrix Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs pt-2">
+        
+        <!-- Bear -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border-l-4 border-rose-500 space-y-2">
+          <div class="flex justify-between font-bold text-rose-400 font-sans">
+            <span>🔴 Bear Case</span>
+            <span id="scen-bear-price">IDR 4,850</span>
+          </div>
+          <div class="text-[11px] text-slate-400 space-y-1">
+            <div class="flex justify-between"><span>Revenue CAGR:</span><span class="text-slate-200">2.1%</span></div>
+            <div class="flex justify-between"><span>EBIT Margin:</span><span class="text-slate-200">11.8%</span></div>
+            <div class="flex justify-between"><span>Terminal g:</span><span class="text-slate-200">1.0%</span></div>
+          </div>
+        </div>
+
+        <!-- Base -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border-l-4 border-cyan-500 space-y-2">
+          <div class="flex justify-between font-bold text-cyan-400 font-sans">
+            <span>🔵 Base Case</span>
+            <span id="scen-base-price">IDR 6,210</span>
+          </div>
+          <div class="text-[11px] text-slate-400 space-y-1">
+            <div class="flex justify-between"><span>Revenue CAGR:</span><span class="text-slate-200">3.8%</span></div>
+            <div class="flex justify-between"><span>EBIT Margin:</span><span class="text-slate-200">13.8%</span></div>
+            <div class="flex justify-between"><span>Terminal g:</span><span class="text-slate-200">1.5%</span></div>
+          </div>
+        </div>
+
+        <!-- Bull -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border-l-4 border-emerald-500 space-y-2">
+          <div class="flex justify-between font-bold text-emerald-400 font-sans">
+            <span>🟢 Bull Case</span>
+            <span id="scen-bull-price">IDR 7,550</span>
+          </div>
+          <div class="text-[11px] text-slate-400 space-y-1">
+            <div class="flex justify-between"><span>Revenue CAGR:</span><span class="text-slate-200">5.8%</span></div>
+            <div class="flex justify-between"><span>EBIT Margin:</span><span class="text-slate-200">15.2%</span></div>
+            <div class="flex justify-between"><span>Terminal g:</span><span class="text-slate-200">2.5%</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- TAB 4: RELATIVE PEER COMPS -->
+  <!-- ========================================================================= -->
+  <main id="tab-comps" class="tab-content space-y-6 hidden">
+    <div class="glass-panel p-6 rounded-2xl space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 class="font-bold text-base text-white">Relative Valuation: Direct IDX Peer Multiples</h3>
+          <p class="text-xs text-slate-400">Calibrated to direct Indonesian competitors with outlier filtration</p>
+        </div>
+        <div class="flex items-center space-x-2 text-xs font-mono">
+          <span class="text-slate-400">Benchmark Metric:</span>
+          <span id="badge-comps-stat" class="font-bold text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800">Sector Median</span>
+        </div>
+      </div>
+
+      <!-- Peers Table -->
+      <div class="overflow-x-auto rounded-xl border border-slate-800 font-mono text-xs">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-slate-900/90 text-slate-400 text-[11px] font-sans border-b border-slate-800">
+            <tr>
+              <th class="py-3 px-4">Company Name</th>
+              <th class="py-3 px-4">Ticker</th>
+              <th class="py-3 px-4 text-emerald-300">EV/EBITDA</th>
+              <th class="py-3 px-4 text-purple-300">P/E</th>
+              <th class="py-3 px-4 text-blue-300">P/B</th>
+              <th class="py-3 px-4">ROE (%)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/80" id="tbody-peers">
+            <!-- Dynamic peers rendered here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Implied Price Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <div class="text-slate-400 font-sans">EV/EBITDA Implied Price</div>
+          <div class="text-lg font-bold text-emerald-400" id="implied-ev-ebitda">IDR 5,750</div>
+          <div class="text-[10px] text-slate-500">Benchmark: 4.2x EV/EBITDA</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <div class="text-slate-400 font-sans">P/E Implied Price</div>
+          <div class="text-lg font-bold text-purple-400" id="implied-pe">IDR 5,620</div>
+          <div class="text-[10px] text-slate-500">Benchmark: 6.8x P/E</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+          <div class="text-slate-400 font-sans">P/B Implied Price</div>
+          <div class="text-lg font-bold text-blue-400" id="implied-pb">IDR 5,980</div>
+          <div class="text-[10px] text-slate-500">Benchmark: 1.1x P/B</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- TAB 5: CALCULATION INSPECTOR (EXAM RUBRIC CORE) -->
+  <!-- ========================================================================= -->
+  <main id="tab-inspector" class="tab-content space-y-6 hidden">
+    <div class="glass-panel p-6 rounded-2xl space-y-5">
+      <div class="pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-base text-white">Calculation Inspector & Transparent Audit Trail</h3>
+        <p class="text-xs text-slate-400">Step-by-step substituted mathematical proofs eliminating black-box outputs. Verifiable against audited financial statements.</p>
+      </div>
+
+      <div class="space-y-4" id="inspector-cards">
+        <!-- Rendered dynamically with KaTeX formulas and substituted numbers -->
+      </div>
+    </div>
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- TAB 6: 2D SENSITIVITY GRID -->
+  <!-- ========================================================================= -->
+  <main id="tab-sensitivity" class="tab-content space-y-6 hidden">
+    <div class="glass-panel p-6 rounded-2xl space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 class="font-bold text-base text-white">2D Sensitivity Stress-Test Grid</h3>
+          <p class="text-xs text-slate-400">DCF Fair Value per share across varying Cost of Capital (WACC) and Terminal Perpetuity Growth ($g$)</p>
+        </div>
+        <button onclick="triggerExcelDownload()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20">
+          <span>📥</span>
+          <span>Download Formula-Active Model (.xlsx)</span>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-800 font-mono text-xs">
+        <table class="w-full text-center border-collapse" id="table-sensitivity">
+          <!-- Rendered dynamically -->
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Application Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
