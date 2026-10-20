@@ -25,7 +25,7 @@
     }
   </script>
 
-  <!-- KaTeX for LaTeX mathematical equations -->
+  <!-- KaTeX for LaTeX equations -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
@@ -39,9 +39,8 @@
   <!-- Lucide Icons UMD via CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- PropTypes & Recharts UMD via CDN -->
-  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-  <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+  <!-- Pre-loaded Indonesian Coverage Universe Data -->
+  <script src="/static/coverage_data.js"></script>
 
   <style>
     body {
@@ -55,7 +54,6 @@
       font-family: 'JetBrains Mono', monospace;
       font-feature-settings: "tnum" 1;
     }
-    /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -87,6 +85,21 @@
       }
     }
   </style>
+
+  <!-- Global Error Logger -->
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error("Global Error Caught:", e);
+      var root = document.getElementById('root');
+      if (root && (!root.innerHTML || root.innerHTML.includes('Initializing MM6026'))) {
+        root.innerHTML = '<div style="padding: 24px; font-family: monospace; background: #fff1f2; color: #9f1239; border: 2px solid #f43f5e; margin: 20px; border-radius: 6px;">' +
+          '<h2 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Runtime Error:</h2>' +
+          '<p>' + (e.message || 'Unknown script error') + '</p>' +
+          '<pre style="background: white; padding: 12px; margin-top: 10px; font-size: 11px; overflow: auto;">' + (e.error ? e.error.stack : '') + '</pre>' +
+          '</div>';
+      }
+    });
+  </script>
 </head>
 <body class="bg-[#F4F6F8] text-slate-900">
   <div id="root">

@@ -7,37 +7,143 @@
 
 const { useState, useMemo, useEffect, useRef } = React;
 
-// Safe Recharts accessor
-const RechartsObj = window.Recharts || {};
-const {
-  ResponsiveContainer,
-  ComposedChart,
-  Line,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ReferenceLine,
-  AreaChart,
-  Area,
-  BarChart,
-  Cell
-} = RechartsObj;
+// Native SVG Chart Components (Zero external charting library dependencies)
+function DislocationBarChart({ data = [] }) {
+  if (!data || data.length === 0) return <div className="h-64 flex items-center justify-center text-slate-400 font-mono text-xs">Loading dislocation data...</div>;
+  const maxAbsUpside = Math.max(...data.map(d => Math.abs(d.upside || 0)), 20);
+
+  return (
+    <div className="space-y-3 my-2">
+      {data.map((entry, idx) => {
+        const isPos = (entry.upside || 0) >= 0;
+        const widthPct = Math.min(100, Math.max(8, (Math.abs(entry.upside || 0) / maxAbsUpside) * 100));
+        return (
+          <div key={idx} className="flex items-center space-x-2 text-xs font-mono">
+            <span className="w-16 font-bold text-slate-900 text-left shrink-0">{entry.ticker}</span>
+            <div className="flex-1 bg-slate-100 h-6 rounded-xs relative overflow-hidden flex items-center border border-slate-200">
+              <div
+                style={{ width: `${widthPct}%` }}
+                className={`h-full rounded-xs transition-all duration-500 flex items-center px-2 ${
+                  isPos ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                }`}
+              >
+                <span className="text-[10px] font-bold whitespace-nowrap">
+                  {isPos ? '+' : ''}{entry.upside}%
+                </span>
+              </div>
+            </div>
+            <span className="w-24 text-right text-[11px] text-slate-600 shrink-0 font-medium">
+              IV: Rp{entry.intrinsicValue?.toLocaleString()}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PriceHistoryChart({ data = [] }) {
+  if (!data || data.length === 0) return <div className="h-56 flex items-center justify-center text-slate-400 font-mono text-xs">No price history available</div>;
+
+  const width = 600;
+  const height = 220;
+  const padding = { top: 20, right: 30, bottom: 30, left: 60 };
+
+  const prices = data.map(d => d.price || 0);
+  const intrinsics = data.map(d => d.intrinsic || 0);
+  const allVals = [...prices, ...intrinsics];
+  const minVal = Math.min(...allVals) * 0.92;
+  const maxVal = Math.max(...allVals) * 1.08;
+
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
+
+  const getX = (idx) => padding.left + (idx / Math.max(1, data.length - 1)) * chartW;
+  const getY = (val) => padding.top + chartH - ((val - minVal) / Math.max(1, maxVal - minVal)) * chartH;
+
+  const pricePoints = data.map((d, i) => `${getX(i)},${getY(d.price)}`);
+  const pricePath = `M ${pricePoints.join(' L ')}`;
+
+  const intrinsicPoints = data.map((d, i) => `${getX(i)},${getY(d.intrinsic)}`);
+  const intrinsicPath = `M ${intrinsicPoints.join(' L ')}`;
+  const areaPath = `M ${getX(0)},${getY(data[0].intrinsic)} L ${intrinsicPoints.join(' L ')} L ${getX(data.length - 1)},${padding.top + chartH} L ${getX(0)},${padding.top + chartH} Z`;
+
+  const yTicks = [0, 0.33, 0.66, 1].map(r => minVal + r * (maxVal - minVal));
+
+  return (
+    <div className="w-full h-56 flex flex-col justify-between">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+        {yTicks.map((tVal, idx) => {
+          const y = getY(tVal);
+          return (
+            <g key={idx}>
+              <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#E2E8F0" strokeDasharray="3 3" />
+              <text x={padding.left - 8} y={y + 3} textAnchor="end" fontSize="10" fill="#64748B" fontFamily="monospace">
+                Rp{Math.round(tVal)}
+              </text>
+            </g>
+          );
+        })}
+        <path d={areaPath} fill="rgba(37, 99, 235, 0.10)" />
+        <path d={intrinsicPath} fill="none" stroke="#2563EB" strokeWidth="2" strokeDasharray="4 4" />
+        <path d={pricePath} fill="none" stroke="#0F172A" strokeWidth="2.5" />
+        {data.map((d, i) => (
+          <circle key={i} cx={getX(i)} cy={getY(d.price)} r="3.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="1.5" />
+        ))}
+        {data.map((d, i) => (
+          <text key={i} x={getX(i)} y={height - 8} textAnchor="middle" fontSize="10" fill="#64748B" fontFamily="sans-serif">
+            {d.month}
+          </text>
+        ))}
+      </svg>
+      <div className="flex items-center justify-center space-x-6 text-[11px] font-mono pt-1 text-slate-600">
+        <span className="flex items-center space-x-1.5">
+          <span className="w-4 h-0.5 bg-[#0F172A] inline-block"></span>
+          <span>Market Price (IDR)</span>
+        </span>
+        <span className="flex items-center space-x-1.5">
+          <span className="w-4 h-0.5 bg-blue-600 border-b border-dashed border-blue-600 inline-block"></span>
+          <span>House Intrinsic Target (IDR)</span>
+        </span>
+      </div>
+    </div>
+  );
+}
 
 // Generic Lucide Icon Renderer
 const Icon = ({ name, size = 16, className = "" }) => {
   const ref = useRef(null);
   useEffect(() => {
-    if (window.lucide && window.lucide.icons && ref.current) {
-      const kebab = name.replace(/([A-Z0-9])/g, "-$1").toLowerCase().replace(/^-/, '');
-      const iconDef = window.lucide.icons[name] ||
-                      window.lucide.icons[name.toLowerCase()] ||
-                      window.lucide.icons[kebab];
-      if (iconDef) {
-        ref.current.innerHTML = iconDef.toSvg({ width: size, height: size, class: className });
+    if (!ref.current) return;
+    try {
+      ref.current.innerHTML = "";
+      if (window.lucide) {
+        const pascal = name.charAt(0).toUpperCase() + name.slice(1);
+        const iconDef = (window.lucide.icons && (window.lucide.icons[name] || window.lucide.icons[pascal])) ||
+                        window.lucide[name] || window.lucide[pascal];
+        if (iconDef && window.lucide.createElement) {
+          const svgEl = window.lucide.createElement(iconDef, {
+            width: size,
+            height: size,
+            class: className
+          });
+          ref.current.appendChild(svgEl);
+          return;
+        }
       }
+      const kebab = name.replace(/([A-Z0-9])/g, "-$1").toLowerCase().replace(/^-/, "");
+      const iEl = document.createElement("i");
+      iEl.setAttribute("data-lucide", kebab);
+      iEl.setAttribute("class", className);
+      iEl.style.width = size + "px";
+      iEl.style.height = size + "px";
+      iEl.style.display = "inline-block";
+      ref.current.appendChild(iEl);
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons({ root: ref.current });
+      }
+    } catch (err) {
+      // Never crash if an icon fails
     }
   }, [name, size, className]);
   return <span ref={ref} className="inline-flex items-center justify-center shrink-0" />;
@@ -262,8 +368,12 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
 
 // MAIN VALUEX APP COMPONENT
 function App() {
+  const defaultCoverage = (typeof window !== 'undefined' && window.INITIAL_COVERAGE && window.INITIAL_COVERAGE.length)
+    ? window.INITIAL_COVERAGE
+    : [];
+
   const [activeNav, setActiveNav] = useState('dashboard');
-  const [coverageCompanies, setCoverageCompanies] = useState([]);
+  const [coverageCompanies, setCoverageCompanies] = useState(defaultCoverage);
   const [selectedCompanyId, setSelectedCompanyId] = useState('pwon');
   const [watchlistIds, setWatchlistIds] = useState(['pwon', 'bsde', 'ctra']);
   const [compareIds, setCompareIds] = useState(['pwon', 'bsde', 'ctra']);
@@ -274,12 +384,29 @@ function App() {
 
   // Live market ticker state
   const [isLiveFeedActive, setIsLiveFeedActive] = useState(true);
-  const [livePricesMap, setLivePricesMap] = useState({});
+  const [livePricesMap, setLivePricesMap] = useState(() => {
+    const map = {};
+    defaultCoverage.forEach(c => {
+      map[c.id] = {
+        price: c.referencePrice,
+        change1D: c.priceChange1D,
+        lastDirection: null,
+        lastTickTime: Date.now()
+      };
+    });
+    return map;
+  });
   const [macroBenchmarks, setMacroBenchmarks] = useState(INITIAL_MACRO_BENCHMARKS);
   const [activeHeadlineIdx, setActiveHeadlineIdx] = useState(0);
 
   // Custom assumption state per security
-  const [customAssumptionsMap, setCustomAssumptionsMap] = useState({});
+  const [customAssumptionsMap, setCustomAssumptionsMap] = useState(() => {
+    const map = {};
+    defaultCoverage.forEach(c => {
+      map[c.id] = { ...c.defaultAssumptions };
+    });
+    return map;
+  });
   const [activityLog, setActivityLog] = useState([
     { id: 1, timestamp: '10:42 WIB', ticker: 'PWON.JK', parameter: 'WACC', oldVal: '10.8%', newVal: '10.42%', user: 'M. Vance' },
     { id: 2, timestamp: '09:15 WIB', ticker: 'BSDE.JK', parameter: 'EBITDA Margin', oldVal: '40.0%', newVal: '42.0%', user: 'E. Rostova' },
@@ -1189,7 +1316,7 @@ function ExecutiveDashboard({ companies, activityLog, onSelectCompany, onNavigat
           <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Top Conviction Pick:</span>
             <span className="font-mono font-bold text-emerald-700">
-              {sortedByUpside[0]?.ticker} ({fmtPct(sortedByUpside[0]?.valuation.impliedUpside)})
+              {sortedByUpside[0]?.ticker || 'PWON.JK'} ({fmtPct(sortedByUpside[0]?.valuation?.impliedUpside || 0)})
             </span>
           </div>
         </div>
@@ -1330,27 +1457,7 @@ function ExecutiveDashboard({ companies, activityLog, onSelectCompany, onNavigat
               <p className="text-[11px] text-slate-500">Target Fair Value vs. Current Market Price</p>
             </div>
 
-            <div className="h-64 w-full">
-              {ResponsiveContainer && (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 25, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E2E8F0" />
-                    <XAxis type="number" tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10, fill: '#475569' }} />
-                    <YAxis dataKey="ticker" type="category" tick={{ fontSize: 11, fontWeight: 700, fill: '#0F172A' }} width={50} />
-                    <Tooltip
-                      formatter={(val) => [`${val > 0 ? '+' : ''}${val}%`, 'Implied Upside']}
-                      contentStyle={{ fontSize: '11px', borderRadius: '2px', border: '1px solid #CBD5E1' }}
-                    />
-                    <ReferenceLine x={0} stroke="#0F172A" strokeWidth={1} />
-                    <Bar dataKey="upside" radius={[0, 2, 2, 0]} barSize={20}>
-                      {chartData.map((entry, idx) => (
-                        <Cell key={idx} fill={entry.upside >= 0 ? '#059669' : '#E11D48'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
+            <div className="h-64 w-full overflow-y-auto"><DislocationBarChart data={chartData} /></div>
           </div>
 
           <div className="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-600 flex items-center justify-between font-mono">
@@ -1650,21 +1757,7 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
             </span>
           </div>
 
-          <div className="h-56 w-full">
-            {ResponsiveContainer && (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={company.priceHistory || []} margin={{ top: 10, right: 15, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#64748B' }} />
-                  <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: '#64748B' }} tickFormatter={(val) => `Rp${val}`} />
-                  <Tooltip contentStyle={{ fontSize: '11px', borderRadius: '2px' }} />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Area type="monotone" dataKey="intrinsic" name="House Target (IDR)" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth={2} strokeDasharray="4 4" />
-                  <Line type="monotone" dataKey="price" name="Market Close (IDR)" stroke="#0F172A" strokeWidth={2.5} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          <div className="h-56 w-full"><PriceHistoryChart data={company.priceHistory || []} /></div>
         </div>
 
         {/* Valuation Methodology Football Field */}
@@ -3032,9 +3125,41 @@ function ReportsAndExport({ company, decision = {}, onDownloadExcel, onTriggerTo
   );
 }
 
+// Institutional React Error Boundary
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Valuation Terminal Error Caught:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '32px', margin: '24px', background: '#FFF1F2', border: '2px solid #F43F5E', borderRadius: '8px', fontFamily: 'monospace', color: '#9F1239' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Terminal Display Error</h2>
+          <p style={{ fontSize: '13px', marginBottom: '12px' }}>{this.state.error?.toString()}</p>
+          <button onClick={() => window.location.reload()} style={{ padding: '6px 16px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
+            Reload Terminal
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Mount React Root
 const rootElement = document.getElementById('root');
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(<App />);
+  root.render(
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
 }
