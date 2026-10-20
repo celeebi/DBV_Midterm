@@ -227,38 +227,50 @@ const BREAKING_WIRE_HEADLINES = [
   { id: 6, ticker: 'ASII.JK', sentiment: 'BULLISH', time: 'LIVE WIRE', headline: 'ASII: Generates IDR 22.5T free cash flow; pristine net cash balance sheet supports 7.2% dividend yield anchor.' }
 ];
 
-// Client-side quick valuation estimator (synchronized with Python backend)
+// Client-side quick valuation estimator (synchronized with Python backend) - Full 10-Year Horizon
 function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
-  const lastHist = company.historical[company.historical.length - 1];
-  const baseRev = lastHist.revenue;
+  const lastHist = company.historical && company.historical.length 
+    ? company.historical[company.historical.length - 1] 
+    : { revenue: 7110, ebitda: 3660, netIncome: 2350, eps: 48.8 };
+  const baseRev = lastHist.revenue || 7110;
+
+  const g5 = assumptions.revGrowthY5 ?? 7.0;
+  const tG = assumptions.terminalGrowth ?? 1.5;
+  const step = (g5 - tG) / 5.0;
+
   const growthRates = [
-    assumptions.revGrowthY1 * scenarioMult,
-    assumptions.revGrowthY2 * scenarioMult,
-    assumptions.revGrowthY3 * scenarioMult,
-    assumptions.revGrowthY4 * scenarioMult,
-    assumptions.revGrowthY5 * scenarioMult,
+    (assumptions.revGrowthY1 ?? 12.0) * scenarioMult,
+    (assumptions.revGrowthY2 ?? 14.0) * scenarioMult,
+    (assumptions.revGrowthY3 ?? 10.0) * scenarioMult,
+    (assumptions.revGrowthY4 ?? 8.0) * scenarioMult,
+    (assumptions.revGrowthY5 ?? 7.0) * scenarioMult,
+    (assumptions.revGrowthY6 ?? +(g5 - step).toFixed(1)) * scenarioMult,
+    (assumptions.revGrowthY7 ?? +(g5 - step * 2).toFixed(1)) * scenarioMult,
+    (assumptions.revGrowthY8 ?? +(g5 - step * 3).toFixed(1)) * scenarioMult,
+    (assumptions.revGrowthY9 ?? +(g5 - step * 4).toFixed(1)) * scenarioMult,
+    (assumptions.revGrowthY10 ?? +tG.toFixed(1)) * scenarioMult,
   ];
 
   const marginAdj = scenarioMult === 1 ? 0 : (scenarioMult > 1 ? 2.0 : -2.5);
-  const effMargin = Math.max(5, Math.min(80, assumptions.ebitdaMargin + marginAdj));
-  const effWacc = Math.max(5.0, assumptions.wacc + (scenarioMult === 1 ? 0 : (scenarioMult > 1 ? -0.5 : 0.8)));
-  const effTgr = Math.min(effWacc - 1.0, Math.max(0.5, assumptions.terminalGrowth));
+  const effMargin = Math.max(5, Math.min(80, (assumptions.ebitdaMargin || 50) + marginAdj));
+  const effWacc = Math.max(5.0, (assumptions.wacc || 10.42) + (scenarioMult === 1 ? 0 : (scenarioMult > 1 ? -0.5 : 0.8)));
+  const effTgr = Math.min(effWacc - 0.5, Math.max(0.5, assumptions.terminalGrowth || 1.5));
 
   let prevRev = baseRev;
   let sumPvFcf = 0;
   const projections = [];
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     const g = growthRates[i] / 100;
     const rev = prevRev * (1 + g);
     const revDelta = rev - prevRev;
     const ebitda = rev * (effMargin / 100);
-    const da = rev * (assumptions.daPercentRev / 100);
+    const da = rev * ((assumptions.daPercentRev || 7.3) / 100);
     const ebit = ebitda - da;
-    const taxes = Math.max(0, ebit * (assumptions.taxRate / 100));
+    const taxes = Math.max(0, ebit * ((assumptions.taxRate || 22.0) / 100));
     const nopat = ebit - taxes;
-    const capex = rev * (assumptions.capexPercentRev / 100);
-    const nwcChange = revDelta * (assumptions.nwcPercentRevChange / 100);
+    const capex = rev * ((assumptions.capexPercentRev || 8.0) / 100);
+    const nwcChange = revDelta * ((assumptions.nwcPercentRevChange || 5.0) / 100);
     const fcf = nopat + da - capex - nwcChange;
     const df = Math.pow(1 + effWacc / 100, i + 1);
     const pvFcf = fcf / df;
@@ -282,16 +294,16 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
     });
   }
 
-  const finalYear = projections[4];
+  const finalYear = projections[9];
   const tvPerpetuity = (finalYear.fcf * (1 + effTgr / 100)) / ((effWacc - effTgr) / 100);
-  const tvMultiple = finalYear.ebitda * assumptions.exitEbitdaMultiple;
+  const tvMultiple = finalYear.ebitda * (assumptions.exitEbitdaMultiple || 6.0);
   const terminalVal = (tvPerpetuity * 0.5) + (tvMultiple * 0.5);
-  const pvTerminalVal = terminalVal / Math.pow(1 + effWacc / 100, 5);
+  const pvTerminalVal = terminalVal / Math.pow(1 + effWacc / 100, 10);
 
   const dcfEv = sumPvFcf + pvTerminalVal;
-  const netDebt = company.totalDebt - company.cashAndEquivalents;
+  const netDebt = (company.totalDebt || 0) - (company.cashAndEquivalents || 0);
   const dcfEquity = Math.max(0, dcfEv - netDebt);
-  const dcfSharePrice = Math.round((dcfEquity / company.sharesOutstanding) * 1000) / 1000;
+  const dcfSharePrice = Math.round((dcfEquity / (company.sharesOutstanding || 1)) * 1000) / 1000;
 
   // Comps
   const avgCompEvEbitda = company.comps && company.comps.length
@@ -300,29 +312,29 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
   const ntmEbitda = projections[0].ebitda;
   const compsEv = ntmEbitda * avgCompEvEbitda;
   const compsEquity = Math.max(0, compsEv - netDebt);
-  const compsSharePrice = Math.round((compsEquity / company.sharesOutstanding) * 1000) / 1000;
+  const compsSharePrice = Math.round((compsEquity / (company.sharesOutstanding || 1)) * 1000) / 1000;
 
   // Residual Income Model (RIM)
   const bookEquity = lastHist.netIncome ? lastHist.netIncome * 10 : 22470;
   const ke = effWacc + 1.5;
   const equityCharge = bookEquity * (ke / 100);
-  const residualIncome = lastHist.netIncome - equityCharge;
+  const residualIncome = (lastHist.netIncome || 2350) - equityCharge;
   const pvResidualIncome = residualIncome / (ke / 100);
   const rimEquity = bookEquity + pvResidualIncome;
-  const rimSharePrice = Math.round((rimEquity / company.sharesOutstanding) * 1000) / 1000;
+  const rimSharePrice = Math.round((rimEquity / (company.sharesOutstanding || 1)) * 1000) / 1000;
 
-  // Dividend Discount Model (DDM)
+  // Dividend Discount Model (DDM) - 10-Year explicit schedule + Gordon Growth
   const payout = (assumptions.payoutRatio || 30.0) / 100;
-  const baseDps = (lastHist.eps || (lastHist.netIncome / company.sharesOutstanding)) * payout;
+  const baseDps = (lastHist.eps || ((lastHist.netIncome || 2350) / (company.sharesOutstanding || 1))) * payout;
   let sumPvDiv = 0;
   let currDps = baseDps;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     currDps = currDps * (1 + (growthRates[i] / 100));
     sumPvDiv += currDps / Math.pow(1 + ke / 100, i + 1);
   }
   const terminalDps = currDps * (1 + (effTgr / 100));
   const tvDiv = terminalDps / ((ke - effTgr) / 100);
-  const pvTvDiv = tvDiv / Math.pow(1 + ke / 100, 5);
+  const pvTvDiv = tvDiv / Math.pow(1 + ke / 100, 10);
   const ddmSharePrice = Math.round(sumPvDiv + pvTvDiv);
 
   // 4-Way Triangulation
@@ -381,6 +393,8 @@ function App() {
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [customTickerInput, setCustomTickerInput] = useState('');
+  const [isLoadingCustomTicker, setIsLoadingCustomTicker] = useState(false);
 
   // Live market ticker state
   const [isLiveFeedActive, setIsLiveFeedActive] = useState(true);
@@ -465,13 +479,167 @@ function App() {
       .catch(err => console.error('Failed to load coverage:', err));
   }, []);
 
-  // Fetch full valuation model from Python backend
-  const refreshBackendValuation = (ticker = 'PWON.JK') => {
+  // Universal Ticker Loader Function
+  const handleLoadCustomTicker = async (symbol) => {
+    if (!symbol || !symbol.trim()) return;
+    let formatted = symbol.trim().toUpperCase();
+    if (!formatted.includes('.')) {
+      formatted = `${formatted}.JK`;
+    }
+    const slug = formatted.replace('.JK', '').toLowerCase();
+
+    // Check if already in coverage
+    const existing = coverageCompanies.find(c => c.ticker === formatted || c.id === slug);
+    if (existing) {
+      openCompanyWorkspace(existing.id, 'valuation');
+      triggerToast(`Switched active security to ${formatted}`);
+      setCustomTickerInput('');
+      return;
+    }
+
+    // Fetch from backend
+    setIsLoadingCustomTicker(true);
+    triggerToast(`Fetching live audited financials for ${formatted} from IDX/Yahoo Finance...`);
+    try {
+      const res = await fetch(`/api/company?ticker=${encodeURIComponent(formatted)}`);
+      const json = await res.json();
+      if (json.status === "success" && json.data) {
+        const d = json.data;
+        const hist = d.historical || {};
+        const revs = hist.revenue || [1000];
+        const currentPrice = d.current_price || 1000;
+        const shares = d.shares_outstanding || 10;
+        const beta = d.beta || 1.0;
+        const debt = (hist.total_debt || 0) * 1000;
+        const cash = (hist.cash_and_equivalents || 0) * 1000;
+
+        const defAssumptions = {
+          revGrowthY1: 10.0,
+          revGrowthY2: 9.0,
+          revGrowthY3: 8.0,
+          revGrowthY4: 7.0,
+          revGrowthY5: 6.0,
+          revGrowthY6: 5.0,
+          revGrowthY7: 4.0,
+          revGrowthY8: 3.0,
+          revGrowthY9: 2.0,
+          revGrowthY10: 1.5,
+          ebitdaMargin: 25.0,
+          taxRate: 22.0,
+          capexPercentRev: 6.0,
+          daPercentRev: 5.0,
+          nwcPercentRevChange: 4.0,
+          wacc: +(6.6 + beta * 7.2 * 0.78).toFixed(2),
+          terminalGrowth: 1.5,
+          exitEbitdaMultiple: 6.5,
+          targetPeMultiple: 12.0,
+          payoutRatio: 30.0,
+          dcfWeight: 50,
+          compsWeight: 25,
+          rimWeight: 15,
+          ddmWeight: 10
+        };
+
+        const historicalItems = (hist.years || [2021, 2022, 2023, 2024, 2025]).map((yr, idx) => ({
+          year: `${yr}A`,
+          revenue: Math.round((hist.revenue?.[idx] || 1) * 1000),
+          ebitda: Math.round((hist.ebit?.[idx] || 0.3) * 1.25 * 1000),
+          netIncome: Math.round((hist.net_income?.[idx] || 0.2) * 1000),
+          fcf: Math.round((hist.fcff?.[idx] || 0.15) * 1000),
+          eps: Math.round(((hist.net_income?.[idx] || 0.2) * 1000 / shares) * 100) / 100,
+          capex: Math.round((hist.capex?.[idx] || 0.1) * 1000)
+        }));
+
+        const newCompany = {
+          id: slug,
+          ticker: formatted,
+          name: d.name || formatted,
+          exchange: "IDX",
+          sector: d.sector || "General Non-Financial",
+          industry: d.industry || "Diversified",
+          currency: d.currency || "IDR",
+          referencePrice: currentPrice,
+          priceChange1D: 0.0,
+          priceChangeYTD: 0.0,
+          sharesOutstanding: shares,
+          totalDebt: debt,
+          cashAndEquivalents: cash,
+          lastUpdated: "Just now (Live Market)",
+          analyst: "M. Vance, CFA",
+          confidence: "Dynamic Feed",
+          description: `${d.name} (${formatted}) fetched live via IDX market data loader.`,
+          historical: historicalItems,
+          priceHistory: [
+            { month: "Nov 25", price: currentPrice * 0.95, intrinsic: currentPrice * 1.15 },
+            { month: "Dec 25", price: currentPrice * 0.98, intrinsic: currentPrice * 1.15 },
+            { month: "Jan 26", price: currentPrice * 0.96, intrinsic: currentPrice * 1.15 },
+            { month: "Feb 26", price: currentPrice * 0.99, intrinsic: currentPrice * 1.15 },
+            { month: "Mar 26", price: currentPrice * 1.01, intrinsic: currentPrice * 1.15 },
+            { month: "Apr 26", price: currentPrice, intrinsic: currentPrice * 1.15 },
+          ],
+          defaultAssumptions: defAssumptions,
+          comps: [
+            { name: "Industry Peer 1", ticker: "PEER1", mcap: 15000, evEbitda: 7.2, pe: 10.5, revGrowth: 8.5, ebitdaMargin: 24.0 },
+            { name: "Industry Peer 2", ticker: "PEER2", mcap: 22000, evEbitda: 6.8, pe: 9.8, revGrowth: 7.2, ebitdaMargin: 26.5 },
+          ],
+          thesis: [
+            `Audited financials for ${d.name} loaded into the 10-year pro forma model.`,
+            `Calibrated with market beta ${beta.toFixed(2)} and shares ${shares.toFixed(2)}B.`,
+            `Adjust explicit 10-year growth and margin assumptions in the Assumptions workspace.`
+          ]
+        };
+
+        setCoverageCompanies(prev => [newCompany, ...prev]);
+        setCustomAssumptionsMap(prev => ({ ...prev, [slug]: defAssumptions }));
+        setSelectedCompanyId(slug);
+        setActiveNav('valuation');
+        setGlobalSearchOpen(false);
+        setCustomTickerInput('');
+        refreshBackendValuation(formatted, defAssumptions);
+        triggerToast(`Successfully loaded ${formatted} (${d.name}) from IDX live feed!`);
+      } else {
+        triggerToast(`Could not fetch data for ${formatted}: ${json.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      triggerToast(`Network error fetching ${formatted}: ${err.message}`);
+    } finally {
+      setIsLoadingCustomTicker(false);
+    }
+  };
+
+  // Fetch full valuation model from Python backend with 10-year parameters
+  const refreshBackendValuation = (ticker = 'PWON.JK', customAssumptions = null) => {
     setIsLoadingBackend(true);
+    const payload = { ticker };
+    if (customAssumptions) {
+      const g5 = customAssumptions.revGrowthY5 ?? 7.0;
+      const tG = customAssumptions.terminalGrowth ?? 1.5;
+      const step = (g5 - tG) / 5.0;
+      payload.growth_rates = [
+        customAssumptions.revGrowthY1 ?? 12.0,
+        customAssumptions.revGrowthY2 ?? 14.0,
+        customAssumptions.revGrowthY3 ?? 10.0,
+        customAssumptions.revGrowthY4 ?? 8.0,
+        customAssumptions.revGrowthY5 ?? 7.0,
+        customAssumptions.revGrowthY6 ?? +(g5 - step).toFixed(1),
+        customAssumptions.revGrowthY7 ?? +(g5 - step * 2).toFixed(1),
+        customAssumptions.revGrowthY8 ?? +(g5 - step * 3).toFixed(1),
+        customAssumptions.revGrowthY9 ?? +(g5 - step * 4).toFixed(1),
+        customAssumptions.revGrowthY10 ?? +tG.toFixed(1),
+      ];
+      payload.terminal_g = tG;
+      payload.exit_multiple = customAssumptions.exitEbitdaMultiple || 6.0;
+      if (customAssumptions.wacc) {
+        payload.wacc_params = {
+          beta: customAssumptions.beta || 0.75,
+          tax_rate: customAssumptions.taxRate || 22.0
+        };
+      }
+    }
     fetch('/api/recalculate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ticker })
+      body: JSON.stringify(payload)
     })
       .then(res => res.json())
       .then(data => {
@@ -612,6 +780,31 @@ function App() {
     }
   };
 
+  const applyAutoFade = (companyId) => {
+    const comp = coverageCompanies.find(c => c.id === companyId);
+    if (!comp) return;
+    const current = customAssumptionsMap[companyId] || comp.defaultAssumptions;
+    const g5 = parseFloat(current.revGrowthY5) || 7.0;
+    const tG = parseFloat(current.terminalGrowth) || 1.5;
+    const step = (g5 - tG) / 5.0;
+
+    const updated = {
+      ...current,
+      revGrowthY6: +(g5 - step).toFixed(1),
+      revGrowthY7: +(g5 - step * 2).toFixed(1),
+      revGrowthY8: +(g5 - step * 3).toFixed(1),
+      revGrowthY9: +(g5 - step * 4).toFixed(1),
+      revGrowthY10: +tG.toFixed(1)
+    };
+
+    setCustomAssumptionsMap(prev => ({
+      ...prev,
+      [companyId]: updated
+    }));
+    refreshBackendValuation(comp.ticker, updated);
+    triggerToast(`Applied Auto-Fade on ${comp.ticker}: Years 6–10 smoothly converged to ${tG}%.`);
+  };
+
   const resetAssumptions = (companyId) => {
     const comp = coverageCompanies.find(c => c.id === companyId);
     if (!comp) return;
@@ -619,6 +812,7 @@ function App() {
       ...prev,
       [companyId]: { ...comp.defaultAssumptions }
     }));
+    refreshBackendValuation(comp.ticker, comp.defaultAssumptions);
     triggerToast(`Reset ${comp.ticker} valuation parameters to audited institutional baseline.`);
   };
 
@@ -708,7 +902,7 @@ function App() {
       {/* 1. TOP LIVE MARKET TICKER RIBBON & BREAKING WIRE */}
       <div className="bg-[#050912] text-slate-200 border-b border-slate-800/90 sticky top-0 z-50 select-none">
         {/* Row 1: Real-time Equity & IDX Macro Ticker Strip */}
-        <div className="h-8 flex items-center justify-between border-b border-slate-800/80 overflow-hidden">
+        <div className="min-h-[44px] h-11 flex items-center justify-between border-b border-slate-800/80 overflow-hidden py-1">
           <div className="flex items-center space-x-2 px-3 h-full bg-[#0A1120] border-r border-slate-800 shrink-0 z-10">
             <span className="relative flex h-2 w-2">
               {isLiveFeedActive && (
@@ -804,7 +998,7 @@ function App() {
         </div>
 
         {/* Row 2: Rotating Institutional Real Estate Research Wire */}
-        <div className="h-6 bg-[#080E1C] px-3 flex items-center justify-between text-[11px] font-mono">
+        <div className="min-h-[32px] h-8 bg-[#080E1C] px-3 flex items-center justify-between text-[11px] font-mono py-1">
           <div className="flex items-center space-x-2.5 overflow-hidden pr-4">
             <span className="px-1.5 py-0.2 bg-blue-600/20 border border-blue-500/40 text-blue-300 font-bold text-[10px] rounded-xs shrink-0">
               RESEARCH WIRE
@@ -847,7 +1041,7 @@ function App() {
       </div>
 
       {/* 2. TOP INSTITUTIONAL TERMINAL HEADER */}
-      <header className="h-12 bg-[#0A1120] text-slate-200 border-b border-slate-800 px-4 flex items-center justify-between sticky top-14 z-40">
+      <header className="h-12 bg-[#0A1120] text-slate-200 border-b border-slate-800 px-4 flex items-center justify-between sticky top-[76px] z-40">
         <div className="flex items-center space-x-6">
           <div
             onClick={() => setActiveNav('dashboard')}
@@ -866,25 +1060,53 @@ function App() {
 
           {/* Active Security Context Pill */}
           {activeCompany && activeCompany.ticker && (
-            <div className="hidden lg:flex items-center bg-slate-900/90 border border-slate-800 rounded-xs px-2.5 py-1 text-xs space-x-3">
-              <span className="text-slate-400 font-mono text-[11px]">ACTIVE SECURITY:</span>
+            <div className="hidden lg:flex items-center bg-slate-900/90 border border-slate-800 rounded-xs px-2.5 py-1 text-xs space-x-2">
+              <span className="text-slate-400 font-mono text-[11px]">ACTIVE:</span>
               <span className="font-mono font-bold text-white">{activeCompany.ticker}</span>
-              <span className="text-slate-300 truncate max-w-[160px]">{activeCompany.name}</span>
+              <span className="text-slate-300 truncate max-w-[130px] hidden xl:inline">{activeCompany.name}</span>
               <span className="font-mono font-bold text-slate-200">
                 IDR {activeCompany.referencePrice?.toLocaleString()}
               </span>
-              <span className={`font-mono text-[11px] font-bold ${
-                activeCompany.priceChange1D >= 0 ? 'text-emerald-400' : 'text-rose-400'
-              }`}>
-                ({activeCompany.priceChange1D >= 0 ? '▲+' : '▼'}{activeCompany.priceChange1D?.toFixed(2)}%)
-              </span>
-              <span className={`font-mono font-semibold border-l border-slate-700 pl-2.5 ${
+              <span className={`font-mono font-semibold border-l border-slate-700 pl-2 ${
                 activeCompany.valuation?.impliedUpside >= 0 ? 'text-emerald-400' : 'text-rose-400'
               }`}>
                 IV: IDR {activeCompany.valuation?.compositeIntrinsicValue} ({fmtPct(activeCompany.valuation?.impliedUpside)})
               </span>
             </div>
           )}
+
+          {/* Quick Universal Ticker Search & Loader */}
+          <div className="flex items-center space-x-1.5 bg-slate-950/90 border border-slate-700/80 rounded-xs px-2 py-1 font-mono text-xs">
+            <Icon name="Search" size={12} className="text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search Any Ticker (e.g. BBCA, TLKM)..."
+              value={customTickerInput}
+              onChange={(e) => setCustomTickerInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleLoadCustomTicker(customTickerInput); }}
+              className="bg-transparent text-white placeholder-slate-500 text-[11px] w-32 sm:w-44 focus:outline-none"
+            />
+            <button
+              onClick={() => handleLoadCustomTicker(customTickerInput)}
+              disabled={isLoadingCustomTicker}
+              className="px-2 py-0.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white rounded-xs text-[10px] font-bold transition cursor-pointer"
+            >
+              {isLoadingCustomTicker ? '...' : 'Load'}
+            </button>
+            <div className="hidden 2xl:flex items-center space-x-1 pl-1.5 border-l border-slate-800 text-[10px]">
+              {['PWON', 'BSDE', 'CTRA', 'SMRA', 'ASII'].map(sym => (
+                <button
+                  key={sym}
+                  onClick={() => handleLoadCustomTicker(sym)}
+                  className={`px-1.5 py-0.2 rounded-xs hover:bg-slate-800 transition ${
+                    activeCompany.ticker?.startsWith(sym) ? 'text-blue-400 font-bold bg-slate-800' : 'text-slate-400'
+                  }`}
+                >
+                  {sym}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Top Action Buttons (Inspector, Excel, Command Search) */}
@@ -1471,10 +1693,11 @@ function ExecutiveDashboard({ companies, activityLog, onSelectCompany, onNavigat
 }
 
 // 2. COMPANY DISCOVERY / SCREENER
-function CompanyDiscovery({ companies, onSelectCompany, onToggleWatchlist }) {
+function CompanyDiscovery({ companies, onSelectCompany, onToggleWatchlist, onLoadCustomTicker, isLoadingCustomTicker }) {
   const [search, setSearch] = useState('');
   const [signalFilter, setSignalFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('upside');
+  const [screenerCustomTicker, setScreenerCustomTicker] = useState('');
 
   const filtered = useMemo(() => {
     return companies
@@ -1501,6 +1724,41 @@ function CompanyDiscovery({ companies, onSelectCompany, onToggleWatchlist }) {
           <p className="text-xs text-slate-600 mt-0.5">
             Filter covered Indonesian equities by ticker, recommendation signal, or valuation upside.
           </p>
+        </div>
+      </div>
+
+      {/* Universal Ticker Loader Card */}
+      <div className="bg-gradient-to-r from-[#0A1120] to-[#141E33] border border-blue-900/60 rounded-xs p-3.5 text-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-xs bg-blue-600/30 border border-blue-500/50 flex items-center justify-center text-blue-400">
+            <Icon name="PlusCircle" size={18} />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-white tracking-wide">
+              Analyze Any Indonesian or Global Security
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Enter any ticker (e.g. <strong className="text-blue-300">BBCA</strong>, <strong className="text-blue-300">TLKM</strong>, <strong className="text-blue-300">UNVR</strong>, <strong className="text-blue-300">BMRI</strong>, <strong className="text-blue-300">ICBP</strong>) to pull audited financials and model 10-year valuation.
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 w-full md:w-auto">
+          <input
+            type="text"
+            placeholder="e.g. BBCA, TLKM, UNVR..."
+            value={screenerCustomTicker}
+            onChange={(e) => setScreenerCustomTicker(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') onLoadCustomTicker && onLoadCustomTicker(screenerCustomTicker); }}
+            className="bg-slate-900 border border-slate-700 rounded-xs px-3 py-1.5 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-48"
+          />
+          <button
+            onClick={() => onLoadCustomTicker && onLoadCustomTicker(screenerCustomTicker)}
+            disabled={isLoadingCustomTicker}
+            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white rounded-xs text-xs font-bold font-mono transition shrink-0 cursor-pointer shadow-sm"
+          >
+            {isLoadingCustomTicker ? 'Fetching...' : 'Load & Value'}
+          </button>
         </div>
       </div>
 
@@ -2382,7 +2640,7 @@ function ThreeStatementWorkspace({ company, backendData, onDownloadExcel }) {
 }
 
 // 5. VALUATION MODEL ASSUMPTIONS & PARAMETER EDITOR
-function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions, onNavigate }) {
+function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions, onApplyAutoFade, onNavigate }) {
   const a = company.assumptions || {};
   const v = company.valuation || {};
 
@@ -2443,40 +2701,127 @@ function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions,
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Column 1: Growth */}
+        {/* Column 1: Explicit 10-Year Growth Curve & Auto-Fade */}
         <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs space-y-3">
-          <h2 className="text-xs font-bold uppercase font-mono text-slate-800 border-b border-slate-200 pb-2">
-            1. Explicit Revenue Growth Curve (%)
-          </h2>
-          {[
-            { key: 'revGrowthY1', label: 'Year 1 (2026E) Growth %' },
-            { key: 'revGrowthY2', label: 'Year 2 (2027E) Growth %' },
-            { key: 'revGrowthY3', label: 'Year 3 (2028E) Growth %' },
-            { key: 'revGrowthY4', label: 'Year 4 (2029E) Growth %' },
-            { key: 'revGrowthY5', label: 'Year 5 (2030E) Growth %' },
-          ].map(item => (
-            <div key={item.key} className="flex items-center justify-between text-xs py-1">
-              <label className="text-slate-700 font-medium">{item.label}</label>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="range"
-                  min="-5"
-                  max="35"
-                  step="0.5"
-                  value={a[item.key] || 10}
-                  onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
-                  className="w-24 accent-blue-600"
-                />
-                <input
-                  type="number"
-                  step="0.5"
-                  value={a[item.key] || 10}
-                  onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
-                  className="w-16 text-right font-mono font-bold text-blue-700 bg-blue-50/50 border border-blue-300 rounded-xs px-1.5 py-1"
-                />
-              </div>
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div>
+              <h2 className="text-xs font-bold uppercase font-mono text-slate-800">
+                1. Explicit 10-Year Growth Curve (%)
+              </h2>
+              <span className="text-[10px] text-slate-500">Phase 1 (Y1–Y5) & Phase 2 Fade (Y6–Y10)</span>
             </div>
-          ))}
+            <button
+              onClick={() => onApplyAutoFade && onApplyAutoFade()}
+              className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xs text-[10px] font-mono font-bold flex items-center space-x-1 transition cursor-pointer shadow-2xs"
+              title="Linearly interpolate Years 6-10 down to terminal growth rate"
+            >
+              <Icon name="Zap" size={11} />
+              <span>⚡ Auto-Fade (Y6–Y10)</span>
+            </button>
+          </div>
+
+          {/* Phase 1: High Growth */}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded-xs block mb-1">
+              Phase 1: Explicit High Growth (Years 1–5)
+            </span>
+            {[
+              { key: 'revGrowthY1', label: 'Y1 (2026E) Growth %' },
+              { key: 'revGrowthY2', label: 'Y2 (2027E) Growth %' },
+              { key: 'revGrowthY3', label: 'Y3 (2028E) Growth %' },
+              { key: 'revGrowthY4', label: 'Y4 (2029E) Growth %' },
+              { key: 'revGrowthY5', label: 'Y5 (2030E) Growth %' },
+            ].map(item => (
+              <div key={item.key} className="flex items-center justify-between text-xs py-0.5">
+                <label className="text-slate-700 font-medium text-[11px]">{item.label}</label>
+                <div className="flex items-center space-x-1.5">
+                  <input
+                    type="range"
+                    min="-5"
+                    max="35"
+                    step="0.5"
+                    value={a[item.key] ?? 10}
+                    onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
+                    className="w-20 accent-blue-600"
+                  />
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={a[item.key] ?? 10}
+                    onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
+                    className="w-14 text-right font-mono font-bold text-blue-700 bg-blue-50/50 border border-blue-300 rounded-xs px-1 py-0.5 text-xs"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Phase 2: Fade & Transition */}
+          <div className="space-y-1 pt-2 border-t border-slate-100">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded-xs block mb-1">
+              Phase 2: Transition & Fade Phase (Years 6–10)
+            </span>
+            {[
+              { key: 'revGrowthY6', label: 'Y6 (2031E) Fade %' },
+              { key: 'revGrowthY7', label: 'Y7 (2032E) Fade %' },
+              { key: 'revGrowthY8', label: 'Y8 (2033E) Fade %' },
+              { key: 'revGrowthY9', label: 'Y9 (2034E) Fade %' },
+              { key: 'revGrowthY10', label: 'Y10 (2035E) Terminal %' },
+            ].map(item => {
+              const g5Val = a.revGrowthY5 ?? 7.0;
+              const tGVal = a.terminalGrowth ?? 1.5;
+              const stepVal = (g5Val - tGVal) / 5.0;
+              const defaultVal = item.key === 'revGrowthY6' ? +(g5Val - stepVal).toFixed(1)
+                               : item.key === 'revGrowthY7' ? +(g5Val - stepVal * 2).toFixed(1)
+                               : item.key === 'revGrowthY8' ? +(g5Val - stepVal * 3).toFixed(1)
+                               : item.key === 'revGrowthY9' ? +(g5Val - stepVal * 4).toFixed(1)
+                               : +tGVal.toFixed(1);
+              const curVal = a[item.key] ?? defaultVal;
+
+              return (
+                <div key={item.key} className="flex items-center justify-between text-xs py-0.5">
+                  <label className="text-slate-700 font-medium text-[11px]">{item.label}</label>
+                  <div className="flex items-center space-x-1.5">
+                    <input
+                      type="range"
+                      min="-5"
+                      max="35"
+                      step="0.5"
+                      value={curVal}
+                      onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
+                      className="w-20 accent-purple-600"
+                    />
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={curVal}
+                      onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
+                      className="w-14 text-right font-mono font-bold text-purple-700 bg-purple-50/50 border border-purple-300 rounded-xs px-1 py-0.5 text-xs"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Amateur Financier Convergence Warning */}
+          {((a.revGrowthY10 ?? a.terminalGrowth ?? 1.5) > 4.0 || (a.revGrowthY10 ?? 1.5) >= (a.wacc ?? 10.42)) && (
+            <div className="bg-amber-50 border border-amber-300 text-amber-900 p-2.5 rounded-xs text-xs space-y-1.5 animate-fadeIn">
+              <div className="font-bold flex items-center space-x-1.5 text-amber-800">
+                <Icon name="AlertTriangle" size={13} className="text-amber-600" />
+                <span className="text-[11px] uppercase tracking-wide">Macro Convergence Warning</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-amber-800">
+                Year 10 growth is set to <strong>{a.revGrowthY10 ?? 1.5}%</strong>, which exceeds the sustainable Indonesian nominal GDP ceiling (4.0%–5.0%). In corporate finance (Damodaran & McKinsey), steady-state firms cannot permanently outgrow the macroeconomy.
+              </p>
+              <button
+                onClick={() => onApplyAutoFade && onApplyAutoFade()}
+                className="w-full py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xs text-[10px] uppercase font-mono tracking-wider cursor-pointer transition shadow-2xs"
+              >
+                ⚡ Click to Auto-Fade Y6–Y10 to {a.terminalGrowth ?? 1.5}%
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Column 2: Margins */}
