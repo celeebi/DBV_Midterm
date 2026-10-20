@@ -1,311 +1,297 @@
-# 🏛️ Institutional Valuation Platform & 3-Statement Financial Model
+# 🏛️ VALUEX | Institutional Digital Business Valuation Platform
 ### MM6026 Digital Business Valuation — Highest-Score Implementation Tier
+**Calibrated to IDX:PWON (PT Pakuwon Jati Tbk) & Indonesian Property Universe**
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests: 15 Passed](https://img.shields.io/badge/Tests-15%20Passed-brightgreen.svg)](tests/)
 [![Architecture: Clean Modular](https://img.shields.io/badge/Architecture-Clean%20Modular-orange.svg)](src/)
 [![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Benchmark-PWON.JK-informational.svg)](https://www.idx.co.id/)
+[![Git Branch: develop](https://img.shields.io/badge/Branch-develop-blueviolet.svg)](https://github.com/celeebi/DBV_Midterm)
 
-An institutional-grade, multi-stage equity valuation and 3-statement financial modeling platform tailored for Indonesian corporations listed on the Indonesia Stock Exchange (**IDX**). 
+An institutional-grade equity research, 4-way valuation triangulation, and 10-year 3-statement financial modeling platform engineered for Indonesian equities listed on the Indonesia Stock Exchange (**IDX**).
 
-Calibrated to **PT Pakuwon Jati Tbk (`PWON.JK`)** using audited 2021–2025 actuals, the system integrates live market data ingestion via `yfinance`, dynamic 10-year pro forma statement projections, multi-model approach triangulation (DCF, Relative Valuation, and RIM), automated LaTeX mathematical proofs, and an institutional **6-sheet formula-active Microsoft Excel export (`.xlsx`)** with exact zero-balance checks ($A = L + E$).
+The platform pairs a high-performance **Python Starlette/Uvicorn backend** with a **zero-Node.js/npm React 18 frontend** (the **VALUEX Terminal**). Default benchmarked to **PT Pakuwon Jati Tbk (`PWON.JK`)** and its property peers (`BSDE.JK`, `CTRA.JK`, `SMRA.JK`, `ASII.JK`), the system also features **Universal Ticker Search & Live Loading** from IDX/Yahoo Finance (`BBCA`, `TLKM`, `UNVR`, `BMRI`, `ICBP`), full **10-year explicit forecast sliders with auto-fade**, integrated **10-year 3-statement modeling with zero-balance checks** ($\text{Assets} \equiv \text{Liabilities} + \text{Equity}$), and a live **formula-active 6-sheet Microsoft Excel exporter (`.xlsx`)**.
 
 ---
 
 ## 📑 Table of Contents
-- [Key Features](#-key-features)
+- [Executive Overview](#-executive-overview)
+- [The 8 Institutional Workflow Tabs](#-the-8-institutional-workflow-tabs)
+- [Key Modeling Capabilities](#-key-modeling-capabilities)
+  - [1. 4-Way Valuation Triangulation](#1-4-way-valuation-triangulation)
+  - [2. Universal Ticker Search & Live Fetcher](#2-universal-ticker-search--live-fetcher)
+  - [3. Full 10-Year Explicit Forecasts & Auto-Fade](#3-full-10-year-explicit-forecasts--auto-fade)
+  - [4. Integrated 10-Year 3-Statement Financial Model](#4-integrated-10-year-3-statement-financial-model)
+  - [5. Simulated Order Blotter & Execution Management](#5-simulated-order-blotter--execution-management)
+  - [6. Formula-Active 6-Sheet Microsoft Excel Export](#6-formula-active-6-sheet-microsoft-excel-export)
 - [System Architecture](#-system-architecture)
 - [Repository Structure](#-repository-structure)
 - [Quick Start Guide](#-quick-start-guide)
   - [Prerequisites](#prerequisites)
   - [1-Click Launch (Windows)](#1-click-launch-windows)
-  - [Command-Line Launch](#command-line-launch)
-  - [Running Unit Tests](#running-unit-tests)
-- [Financial Modeling Methodology](#-financial-modeling-methodology)
-  - [1. Cost of Capital (CAPM & WACC)](#1-cost-of-capital-capm--wacc)
-  - [2. Multi-Stage DCF-FCFF Engine](#2-multi-stage-dcf-fcff-engine)
-  - [3. Integrated 10-Year 3-Statement Model](#3-integrated-10-year-3-statement-model)
-  - [4. Property Sector Comps & Residual Income (RIM)](#4-property-sector-comps--residual-income-rim)
-  - [5. Justified Triangulation & Margin of Safety](#5-justified-triangulation--margin-of-safety)
-- [Formula-Active 6-Sheet Excel Export](#-formula-active-6-sheet-excel-export)
-- [Auditing & Academic Verification](#-auditing--academic-verification)
+  - [Command-Line Execution](#command-line-execution)
+  - [Running Automated Unit Tests](#running-automated-unit-tests)
+- [Git Branching & Safety Policy](#-git-branching--safety-policy)
 - [License & Academic Disclosure](#-license--academic-disclosure)
 
 ---
 
-## 🚀 Key Features
+## 🌟 Executive Overview
 
-### 1. Multi-Stage Discounted Cash Flow (DCF-FCFF)
-- **10-Year Projection Horizon**: 5 years of explicit operational forecasting followed by a 5-year macroeconomic fade into long-term terminal perpetuity.
-- **Granular Levers**: Dynamic inputs for statutory tax rates (UU HPP 22%), pioneer tax holidays, maintenance CapEx, expansion CapEx lump sums, and working capital intensity ($\Delta NWC$).
-- **Dual Terminal Value Benchmarking**: Multi-stage Gordon Growth model cross-checked against EV/EBITDA Exit Multiple heuristics.
+```mermaid
+flowchart LR
+    Tape["Live Market Tape & Real Estate News Wire"] --> Nav["Institutional Header & Universal Ticker Search"]
+    Nav --> V1["⌘1 Dashboard"]
+    Nav --> V2["⌘2 Screener"]
+    Nav --> V3["⌘3 Valuation (DCF / Comps / RIM / DDM)"]
+    Nav --> V4["⌘4 3-Statement Model (IS, BS, CFS)"]
+    Nav --> V5["⌘5 Assumptions (10-Yr Sliders + Auto-Fade)"]
+    Nav --> V6["⌘6 Decision Blotter (EMS)"]
+    Nav --> V7["⌘7 Watchlist & Comps"]
+    Nav --> V8["⌘8 Tear Sheet (PDF / Excel)"]
+```
 
-### 2. Integrated 3-Statement Financial Modeling Engine
-- **Full Statement Articulation**: Mathematically coupled Income Statement, Balance Sheet, and Cash Flow Statement across all 10 forecast years.
-- **Dynamic Balance Check**: Actively monitors that $\text{Assets} - (\text{Liabilities} + \text{Equity}) \equiv 0.00$ in every single period with zero hallucination.
-- **Working Capital & PP&E Schedules**: Working capital driven by Days Sales Outstanding (DSO = 15 days), Days Inventory Outstanding (DIO = 521 days for property inventories), and Days Payable Outstanding (DPO = 72 days).
+The VALUEX Terminal implements an end-to-end investment banking equity research workflow. Every metric displayed in the interface is backed by pure-Python mathematical modules, ensuring complete auditability and zero hallucination.
 
-### 3. Relative Valuation (Comps) & Outlier Filtering
-- **IDX Property & Real Estate Peer Group**: Automated peer benchmarking across Indonesian real estate leaders:
-  - `BSDE.JK` (PT Bumi Serpong Damai Tbk)
-  - `CTRA.JK` (PT Ciputra Development Tbk)
-  - `SMRA.JK` (PT Summarecon Agung Tbk)
-  - `ASRI.JK` (PT Alam Sutera Realty Tbk)
-  - `LPKR.JK` (PT Lippo Karawaci Tbk)
-- **Flexible Multiple Aggregation**: Switch between Median, Harmonic Mean, and 25th percentile multiples, with automatic interquartile outlier filtering.
+---
 
-### 4. Residual Income Model (RIM)
-- **Clean Surplus Accounting**: Computes residual equity income based on beginning Book Value of Equity, ROE trajectory, and the Cost of Equity ($K_e$).
+## 🖥️ The 8 Institutional Workflow Tabs
 
-### 5. Multi-Stage Dividend Discount Model (DDM)
-- **Direct Cash-to-Shareholders Valuation**: Explicit 10-year projection of per-share cash dividends ($DPS_t = EPS_t \times \text{Payout Ratio}$) discounted at the Cost of Equity ($K_e$).
-- **Perpetual Dividend Perpetuity**: Evaluates long-term terminal dividend value via Gordon Growth ($TV_{10} = \frac{DPS_{10} \times (1 + g)}{K_e - g}$).
+1. **Top Live Market Ribbon & Real Estate Wire**:
+   - Expanded unclipped real-time ticker tape displaying `PWON.JK` (IDR 270, Intrinsic IDR 575), property peers (`BSDE`, `CTRA`, `SMRA`, `ASII`), and macroeconomic benchmarks: `IHSG (7,785)`, `ID 10Y Yield (6.60%)`, `USD/IDR (15,850)`, `BI 7-Day Repo (6.00%)`, and `IDX Property Index (824.50)`.
+   - Live stream toggle (`[● LIVE FEED] / [❚❚ PAUSED]`) with rotating real estate research wire bulletins.
+2. **`⌘1` Executive Dashboard**:
+   - Coverage market capitalization summary, average universe upside, and recommendation signal distribution.
+   - Valuation Dislocation horizontal bar chart with BUY hurdle reference lines (+15%).
+   - Direct launch links to valuation models.
+3. **`⌘2` Company Screener (Discovery)**:
+   - Filter by recommendation signal (`BUY`, `HOLD`, `SELL`) and sort by upside or market cap.
+   - **Universal Ticker Search & Ingestion Card**: Input any IDX/global equity (e.g. `BBCA`, `TLKM`, `UNVR`) to pull live audited financials and calculate intrinsic valuation instantly.
+4. **`⌘3` Valuation Workspace**:
+   - 12M historical market price vs intrinsic target area chart.
+   - Valuation Methodology Football Field (DCF, Comps, RIM, DDM, and Composite range) with current price marker.
+   - 6 Methodology Sub-Tabs:
+     - **Tab 1: Multi-Stage DCF**: 10-year FCFF pro forma schedule + Enterprise-to-Equity bridge.
+     - **Tab 2: Property Comps**: EV/EBITDA, P/E, P/B peer matrix with subject comparisons.
+     - **Tab 3: Residual Income Model (RIM)**: Book value equity + PV of economic profits schedule.
+     - **Tab 4: Dividend Discount Model (DDM)**: 10-year explicit dividend schedule + Gordon Growth terminal value.
+     - **Tab 5: 5x5 WACC Sensitivity**: Heatmap matrix across WACC (9.42%–11.42%) vs $g$ (1.0%–2.0%).
+     - **Tab 6: KaTeX Mathematical Proofs**: Substituted step-by-step LaTeX formula derivations.
+5. **`⌘4` 3-Statement Financial Model**:
+   - First-class view showcasing 10-year articulated financial statements (2026E–2035E).
+   - Dedicated statement selector: Balance Sheet, Income Statement, and Cash Flow Statement.
+   - **Zero-Balance Check Row**: Proves $\text{Assets} - (\text{Liabilities} + \text{Equity}) \equiv \text{IDR } 0.00$ with green checkmark across all 10 periods.
+6. **`⌘5` Model Assumptions & Parameter Editor**:
+   - **Phase 1: Explicit High Growth (Years 1–5)**: 5 individual sliders/inputs for high-growth explicit period.
+   - **Phase 2: Transition & Fade Phase (Years 6–10)**: 5 individual sliders/inputs for transition period.
+   - **⚡ Auto-Fade Helper (Y6–Y10)**: Linearly fades Year 5 growth into terminal $g$ ($1.5\%$).
+   - **Amateur Financier / Convergence Warning**: Educational alert banner triggered if Year 10 growth is set higher than sustainable GDP ($5.0\%$) or WACC.
+   - Operating margin levers, CapEx %, D&A %, NWC intensity, tax rates, and method weighting sliders.
+7. **`⌘6` Buy / Sell Decision Workspace**:
+   - Investment thesis pillars, catalyst monitoring, and downside risks.
+   - Portfolio Committee decision parameters (Entry/Exit targets, holding horizon, analyst memo).
+   - **Simulated Order Ticket (EMS Preview)**: Standard **IDX 100-share lot** quantity input, limit price, and gross notional calculation.
+8. **`⌘7` Watchlist & Comps Matrix**:
+   - Equity watchlist with side-by-side fundamental and multiple comparison matrix.
+9. **`⌘8` Research Report Tear Sheet**:
+   - Formal investment banking equity research memo format.
+   - **"Print / Save PDF"** button (invoking `@media print` clean report layout).
+   - **"Download Excel Model (.xlsx)"** button.
+10. **Persistent "Inspector 🔍" KaTeX Flyout Drawer**:
+    - Accessible from any screen via top header button.
+    - Slides out KaTeX LaTeX equations with substituted figures for WACC, Terminal Value, Enterprise Bridge, DDM, and Triangulation.
 
-### 6. Multi-Scenario Fan Charts & 2D Sensitivity Grid
-- **Scenario Forecaster**: Instant Bear (property credit tightening & slowdown), Base (consensus retail occupancy & superblock expansion), and Bull (mortgage VAT incentives & retail consumer boom) trajectories.
-- **2D Stress-Test Matrix**: Sensitivity analysis of target share prices across hurdle rates ($WACC \pm 1.0\%$) and perpetual growth ($g \pm 1.0\%$).
+---
 
-### 6. Calculation Inspector (Transparent LaTeX Audit Trail)
-- Step-by-step LaTeX formula derivations with substituted balance sheet figures for WACC, FCFF roll-forward, Gordon Growth terminal value, and Enterprise-to-Equity reconciliation.
+## 📐 Key Modeling Capabilities
 
-### 7. Modern Institutional Web UI & Companion Streamlit App
-- Dark Koyfin/Bloomberg-style terminal interface built with Starlette and Tailwind CSS (zero Node.js/npm dependencies).
-- Companion Streamlit interface (`app.py`) for alternative analytical workflows.
+### 1. 4-Way Valuation Triangulation
+The platform computes four distinct, mathematically verified corporate finance valuation methods:
+- **DCF-FCFF**: 10-year explicit unlevered free cash flows discounted at live WACC, cross-checked with dual terminal value (Gordon Growth and EV/EBITDA exit multiple).
+- **Property Comps**: Enterprise-based and equity-based multiple benchmarking against Indonesian property peers (`BSDE`, `CTRA`, `SMRA`, `ASRI`, `LPKR`).
+- **Residual Income Model (RIM)**: Book value of equity augmented by present value of economic profits (clean surplus accounting).
+- **Multi-Stage DDM**: 10-year explicit dividend schedule ($DPS_t = EPS_t \times \text{Payout}$) discounted at Cost of Equity ($K_e$), with Gordon Growth perpetual terminal value.
+- **Composite Triangulation**: Configurable percentage weights totaling 100%:
+  $$\text{Target Price} = w_{\text{DCF}} P_{\text{DCF}} + w_{\text{Comps}} P_{\text{Comps}} + w_{\text{RIM}} P_{\text{RIM}} + w_{\text{DDM}} P_{\text{DDM}}$$
+
+### 2. Universal Ticker Search & Live Fetcher
+In addition to the pre-calibrated `PWON.JK` benchmark and property universe, analysts can type **any** ticker into the header bar or Screener card (e.g. `BBCA.JK`, `TLKM.JK`, `BMRI.JK`, `UNVR.JK`, `ICBP.JK`). The system queries `yfinance`, extracts audited balance sheets, income statements, cash flows, beta, shares, and current prices, normalizes currency units, and integrates the stock directly into the terminal.
+
+### 3. Full 10-Year Explicit Forecasts & Auto-Fade
+Rather than truncating the forecast at Year 5, the platform provides explicit controls for all 10 periods:
+- **Phase 1 (Years 1–5)**: High-growth operational roll-forward.
+- **Phase 2 (Years 6–10)**: Macroeconomic transition & fade.
+- **Auto-Fade Helper**: Automatically applies linear interpolation:
+  $$\Delta g = \frac{g_5 - g_{\text{terminal}}}{5}, \quad g_t = g_5 - \Delta g \times (t - 5) \quad \text{for } t \in [6, 10]$$
+- **Amateur Financier Warning**: Flags a Damodaran boundary error if an analyst attempts to run Year 10 growth above long-term Indonesian GDP ($5.0\%$) into terminal perpetuity.
+
+### 4. Integrated 10-Year 3-Statement Financial Model
+Full mathematical articulation across Income Statement, Balance Sheet, and Cash Flow Statement:
+- **Balance Sheet Check**: $\text{Assets} - (\text{Liabilities} + \text{Equity}) \equiv \text{IDR } 0.00$ across all 10 forecast years.
+- Dynamic Working Capital schedules (DSO = 15 days, DIO = 521 days for property inventories, DPO = 72 days).
+- PP&E continuity schedules ($\text{PP\&E}_t = \text{PP\&E}_{t-1} + \text{CapEx}_t - \text{Depr}_t$).
+
+### 5. Simulated Order Blotter & Execution Management
+- Institutional Execution Management System (EMS) ticket preview.
+- Order sizing in standard **Indonesia Stock Exchange (IDX) 100-share lots** (`1 lot = 100 shares`).
+- Limit price input, gross notional value calculation (IDR), and staged order session logging.
+
+### 6. Formula-Active 6-Sheet Microsoft Excel Export
+Generates institutional `.xlsx` workbooks via `openpyxl` with dynamic, uppercase Excel formulas:
+- **Sheet 1: `Executive Summary`**: Valuation matrix, KPI cards, and methodology football field.
+- **Sheet 2: `10Y Pro Forma DCF`**: Explicit FCFF schedules with dynamic Excel formulas (`=B1*(1+B2)`, `=SUM(B3:B10)`).
+- **Sheet 3: `3-Statement Model`**: Full 10-year IS, BS, and CFS articulation with live zero-balance check rows.
+- **Sheet 4: `Property Comps`**: Peer multiple benchmarks (EV/EBITDA, P/E, P/B).
+- **Sheet 5: `RIM & DDM`**: Economic profit schedules, dividend discount schedules, and terminal values.
+- **Sheet 6: `Audit & Sensitivity`**: 5x5 WACC vs $g$ sensitivity matrix and LaTeX proof summaries.
 
 ---
 
 ## 🏛 System Architecture
 
 ```
-[ yfinance Live Market Data / Audited IDX Filings ]
-                         ↓
-       [ FinancialDataLoader & Statement Normalizer ]
-                         ↓
-  ┌─────────────────────────────────────────────────────────┐
-  │      10-Year Pro Forma Financial Statement Editor       │
-  │  (Revenue Growth %, EBIT Margin %, Drivers & Levers)    │
-  └──────────────────────────┬──────────────────────────────┘
-                             ↓
-       ┌─────────────────────┼─────────────────────┐
-       ↓                     ↓                     ↓
-[ Multi-Stage DCF ]  [ Relative Comps ]   [ Residual Income (RIM) ]
-       │                     │                     │
-       └─────────────────────┼─────────────────────┘
-                             ↓
-      [ Multi-Approach Triangulation & Weighting Engine ]
-                             ↓
-             [ Margin of Safety Recommendation ]
-                    (BUY / HOLD / SELL)
-                             ↓
-       ┌─────────────────────┴─────────────────────┐
-       ↓                                           ↓
-[ Calculation Inspector ]           [ Formula-Active Excel Export ]
-  (Step-by-Step LaTeX)              (6-Sheet Integrated 3-Statement)
+[ yfinance Live Market API / IDX Audited Filings ]
+                     ↓
+[ FinancialDataLoader & Statement Normalizer (src/data/loader.py) ]
+                     ↓
+┌─────────────────────────────────────────────────────────────┐
+│          10-Year Pro Forma Financial Modeling Engine        │
+│          (src/models/pro_forma.py & three_statement.py)     │
+└──────────────────────────────┬──────────────────────────────┘
+                               ↓
+       ┌───────────────────────┼───────────────────────┐
+       ↓                       ↓                       ↓
+[ Multi-Stage DCF ]    [ Relative Comps ]      [ RIM & DDM Models ]
+(src/models/dcf.py)   (src/models/multiples.py) (src/models/rim, ddm.py)
+       │                       │                       │
+       └───────────────────────┼───────────────────────┘
+                               ↓
+              [ 4-Way Triangulation & Weighting ]
+                   (src/models/ensemble.py)
+                               ↓
+              [ Margin of Safety Recommendation ]
+                 (src/rules/recommendations.py)
+                               ↓
+              [ Automated Model Sanity Checks ]
+                 (src/rules/sanity_checks.py)
+                               ↓
+       ┌───────────────────────┴───────────────────────┐
+       ↓                                               ↓
+[ VALUEX React 18 Terminal ]            [ Active Excel Exporter (.xlsx) ]
+(Zero Node.js / Python Starlette)          (src/analytics/exporter.py)
 ```
 
 ---
 
-## 📂 Repository Structure
+## 📁 Repository Structure
 
-```text
-├── src/
-│   ├── analytics/
-│   │   ├── audit_trail.py       # Transparent LaTeX formula derivations
-│   │   ├── exporter.py          # 6-sheet formula-active Excel export engine (.xlsx)
-│   │   ├── sensitivity.py       # 2D WACC vs. g sensitivity stress-testing matrix
-│   │   └── visualizer.py        # Charting & fan chart rendering helpers
-│   ├── data/
-│   │   ├── country_data.py      # Bank Indonesia rates, property peer map & macro assumptions
-│   │   └── loader.py            # Live yfinance loader & audited PWON historical normalization
-│   ├── models/
-│   │   ├── dcf.py               # Enterprise DCF-FCFF discounting & TV calculations
-│   │   ├── ddm.py               # Multi-stage Dividend Discount Model (DDM)
-│   │   ├── ensemble.py          # Multi-approach triangulation & weighted fair value
-│   │   ├── multiples.py         # Peer multiples (EV/EBITDA, P/E, P/B) & statistical filters
-│   │   ├── parameters.py        # CAPM, Cost of Debt, and WACC hurdle rate calculations
-│   │   ├── pro_forma.py         # 10-year explicit forecast & macroeconomic fade engine
-│   │   ├── rim.py               # Residual Income Model (clean surplus equity framework)
-│   │   ├── scenarios.py         # Multi-scenario forecaster (Bear, Base, Bull)
-│   │   └── three_statement.py   # 10-year integrated 3-statement modeling engine (IS, BS, CFS)
-│   └── rules/
-│       ├── recommendations.py   # Margin-of-safety rules (BUY / HOLD / SELL)
-│       └── sanity_checks.py     # Real-time guardrails (g < WACC, GDP cap, EV reconciliation)
+```
+Project BA/
+├── run_app.bat                     # 1-Click Windows launcher (Starlette server @ localhost:8000)
+├── create_desktop_shortcut.bat     # Windows desktop shortcut generator
+├── server.py                       # High-performance asynchronous backend server (Starlette/Uvicorn)
+├── app.py                          # Companion Streamlit analytical interface
+├── requirements.txt                # Python package dependencies
+├── README.md                       # Comprehensive institutional project documentation
+├── USER_GUIDE.md                   # User guide & operational manual for VALUEX Terminal
+├── PLAN.md                         # Architectural design and execution roadmap
+├── AI_DISCLOSURE.md                # Academic AI disclosure and verification statement
+├── LICENSE                         # MIT License
 ├── static/
-│   ├── app.js                   # Interactive client logic, fan chart SVG, and DOM sync
-│   └── index.html               # Institutional dark fintech UI (Tailwind CSS, KaTeX, Lucide)
-├── tests/
-│   ├── test_dcf_and_exporter.py # Unit tests for DCF logic and openpyxl byte generation
-│   ├── test_ddm.py              # Unit tests for DDM and 4-way triangulation
-│   ├── test_pro_forma.py        # Unit tests for WACC and 10-year pro forma roll-forward
-│   ├── test_sanity_checks.py    # Unit tests for economic guardrails & error boundaries
-│   └── test_three_statement.py  # Unit tests for 3-statement articulation & zero balance check
-├── AI_DISCLOSURE.md             # Deliverable 1: AI pair programming disclosure & verification
-├── app.py                       # Companion Streamlit application
-├── create_desktop_shortcut.bat  # 1-click Windows desktop shortcut generator
-├── launcher.py                  # Headless port resolver and web browser trigger
-├── PLAN.md                      # Comprehensive project specification & exam roadmap
-├── requirements.txt             # Python dependency requirements
-├── run_app.bat                  # 1-click execution script for Windows
-├── server.py                    # High-performance asynchronous Starlette / Uvicorn backend
-└── USER_GUIDE.md                # Comprehensive valuation manual and user documentation
+│   ├── index.html                  # React 18 production shell (Tailwind CDN, Lucide, KaTeX, Error Boundary)
+│   ├── app_react.jsx               # VALUEX Terminal application (8 workflow views, 10Y sliders, Universal Search)
+│   ├── coverage_data.js            # Synchronous initial Indonesian property coverage (PWON, BSDE, CTRA, SMRA, ASII)
+│   ├── index_legacy.html           # Verified backup of prior frontend interface
+│   ├── app.js                      # Legacy vanilla JS controller
+│   └── draft.tsx                   # Original institutional design reference template
+├── src/
+│   ├── data/
+│   │   ├── loader.py               # Live market extractor & statement normalizer
+│   │   ├── coverage.py             # Coverage universe data (PWON benchmark + property peers)
+│   │   ├── country_data.py         # Indonesian macroeconomic parameters (tax rate, BI 7DRR, 10Y yield)
+│   │   └── normalizer.py           # Balance sheet & income statement standardization
+│   ├── models/
+│   │   ├── dcf.py                  # 10-year FCFF multi-stage DCF engine with dual terminal value
+│   │   ├── ddm.py                  # Multi-stage Dividend Discount Model with Gordon Growth TV
+│   │   ├── three_statement.py      # Integrated 10-year 3-statement financial model (zero-balance check)
+│   │   ├── multiples.py            # Relative valuation comps with peer filtering & median/mean aggregation
+│   │   ├── rim.py                  # Residual Income Model (clean surplus ROE - Ke)
+│   │   ├── ensemble.py             # 4-way triangulation aggregator
+│   │   ├── parameters.py           # CAPM & WACC capital structure model
+│   │   ├── pro_forma.py            # 10-year pro forma roll-forward & auto-fade generator
+│   │   └── scenarios.py            # Bear / Base / Bull scenario forecaster
+│   ├── rules/
+│   │   ├── sanity_checks.py        # Academic guardrails (g >= WACC, negative multiples, EV bridge check)
+│   │   └── recommendations.py      # Recommendation engine (BUY / HOLD / SELL)
+│   └── analytics/
+│       ├── exporter.py             # 6-sheet formula-active Excel (.xlsx) exporter
+│       ├── audit_trail.py          # LaTeX mathematical proof generator
+│       ├── sensitivity.py          # 2D WACC vs g sensitivity matrix
+│       └── visualizer.py           # Plotly visualization engine
+└── tests/
+    ├── test_dcf_and_exporter.py    # DCF discounting math and active formula Excel tests
+    ├── test_ddm.py                 # Multi-stage DDM, 4-way triangulation, and Excel export tests
+    ├── test_pro_forma.py           # 10-year pro forma roll-forward, WACC, and auto-fade tests
+    ├── test_sanity_checks.py       # Terminal growth, negative multiple, and EV bridge tests
+    └── test_three_statement.py     # 10-year 3-statement articulation and zero-balance tests
 ```
 
 ---
 
-## ⚡ Quick Start Guide
+## 🚀 Quick Start Guide
 
 ### Prerequisites
-- **Python 3.10+** (tested on Python 3.14.7).
-- Git installed on your system.
+- Python 3.10+ (tested on Python 3.14.7).
+- Standard web browser (Edge, Chrome, Firefox, Safari).
+- Zero external Node.js, npm, or JavaScript build steps required.
 
 ### 1-Click Launch (Windows)
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/<your-username>/<your-repo-name>.git
-   cd "Project BA"
-   ```
-2. Double-click **[`run_app.bat`](run_app.bat)**.
-3. The script will automatically verify the Python environment, install missing requirements, start the asynchronous backend server, and open your browser to `http://localhost:8000`.
-4. *(Optional)* Double-click **[`create_desktop_shortcut.bat`](create_desktop_shortcut.bat)** to create a 1-click icon on your desktop.
+Double-click [`run_app.bat`](file:///c:/Users/Public/Documents/Project%20BA/run_app.bat) in the project folder. It will:
+1. Detect or configure your local Python virtual environment (`.venv`).
+2. Start the asynchronous Starlette valuation server.
+3. Automatically launch your default browser to `http://localhost:8000`.
 
-### Command-Line Launch
+### Command-Line Execution
 ```powershell
-# 1. Create and activate a virtual environment
-python -m venv .venv
-.\.venv\Scripts\activate
+# Activate local virtual environment
+.\.venv\Scripts\Activate.ps1
 
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Launch the institutional fintech web platform (Port 8000)
+# Start the VALUEX Terminal server (Port 8000)
 python server.py
 
-# 4. (Optional) Launch the companion Streamlit app (Port 8501)
+# Or run the companion Streamlit interface (Port 8501)
 streamlit run app.py
 ```
 
-### Running Unit Tests
-Execute the automated test suite to verify financial algorithms and balance check proofs:
+### Running Automated Unit Tests
+To verify all financial engines, 3-statement balance checks, and Excel formula exports:
 ```powershell
-pytest -v
+.\.venv\Scripts\pytest.exe -v
 ```
-Expected output:
-```text
-tests/test_dcf_and_exporter.py::test_dcf_and_reconciliation PASSED
-tests/test_dcf_and_exporter.py::test_excel_formula_active_export PASSED
-tests/test_ddm.py::test_ddm_calculation_and_proofs PASSED
-tests/test_ddm.py::test_ensemble_with_ddm_triangulation PASSED
-tests/test_ddm.py::test_excel_export_includes_ddm_triangulation PASSED
-tests/test_pro_forma.py::test_wacc_calculation_accuracy PASSED
-tests/test_pro_forma.py::test_pro_forma_10_year_roll_forward PASSED
-tests/test_pro_forma.py::test_auto_fade_helper PASSED
-tests/test_sanity_checks.py::test_terminal_growth_fatal_when_ge_wacc PASSED
-tests/test_sanity_checks.py::test_terminal_growth_warning_when_gt_gdp PASSED
-tests/test_sanity_checks.py::test_terminal_growth_safe PASSED
-tests/test_sanity_checks.py::test_ev_to_equity_bridge_reconciliation PASSED
-tests/test_sanity_checks.py::test_negative_multiples_detected PASSED
-tests/test_three_statement.py::test_three_statement_engine_articulation_and_balance PASSED
-tests/test_three_statement.py::test_excel_export_six_sheets_and_formulas PASSED
+Expected output: **15 passed in 0.68s** (100% pass rate).
 
-============================= 15 passed in 0.72s =============================
+---
+
+## 🛡️ Git Branching & Safety Policy
+
+| Branch / Tag | Description | Commit |
+| :--- | :--- | :--- |
+| **`develop`** (Active) | Contains the institutional VALUEX Terminal, Universal Ticker Search, expanded live ribbon, and 10-year sliders. | `67dd6d9` |
+| **`main`** (Stable) | Untouched stable baseline containing the verified 4-way valuation models and Excel exporter. | `36a99e3` |
+| **`v1.0-checkpoint`** (Tag) | Fixed checkpoint tag anchored to `36a99e3` for instant rollback safety. | `36a99e3` |
+
+To switch back to the stable checkpoint at any time:
+```powershell
+git checkout main
+# or
+git checkout v1.0-checkpoint
 ```
 
 ---
 
-## 📐 Financial Modeling Methodology
+## 📄 License & Academic Disclosure
 
-### 1. Cost of Capital (CAPM & WACC)
-The hurdle rate is derived using the standard Capital Asset Pricing Model (CAPM) calibrated to Indonesian capital market parameters:
-$$K_e = R_f + \beta \times ERP$$
-$$K_{d,\text{after}} = K_{d,\text{pre}} \times (1 - t)$$
-$$WACC = \left(W_e \times K_e\right) + \left(W_d \times K_{d,\text{after}}\right)$$
-
-*Default Parameters (`PWON.JK` — PT Pakuwon Jati Tbk):*
-- **Risk-Free Rate ($R_f$):** `6.60%` (10-Year Indonesian Government Bond Yield)
-- **Equity Beta ($\beta$):** `0.75` (Indonesian Property & Real Estate Developer Beta)
-- **Equity Risk Premium ($ERP$):** `7.20%` (Damodaran Emerging Market ERP for Indonesia)
-- **Cost of Equity ($K_e$):** $6.60\% + (0.75 \times 7.20\%) = \mathbf{12.00\%}$
-- **Pre-Tax Cost of Debt ($K_{d,\text{pre}}$):** `6.50%` (Senior notes coupon & credit spread)
-- **After-Tax Cost of Debt ($K_{d,\text{after}}$):** $6.50\% \times (1 - 0.22) = \mathbf{5.07\%}$
-- **Target Capital Structure:** Debt Weight $W_d = 20.0\%$, Equity Weight $W_e = 80.0\%$
-- **Resulting Hurdle Rate (WACC):** $\mathbf{\approx 10.42\%}$
-
-### 2. Multi-Stage DCF-FCFF Engine
-Free Cash Flow to Firm (FCFF) is calculated for each explicit forecast period:
-$$\text{NOPAT}_t = \text{EBIT}_t \times (1 - t_t)$$
-$$FCFF_t = \text{NOPAT}_t + \text{D\&A}_t - \text{CapEx}_t - \Delta NWC_t$$
-
-Terminal Value at Year 10 is computed via the Gordon Growth perpetuity model:
-$$TV_{10} = \frac{FCFF_{10} \times (1 + g)}{WACC - g}$$
-
-Enterprise Value (EV) and Equity Value reconciliation:
-$$EV = \sum_{t=1}^{10} \frac{FCFF_t}{(1 + WACC)^t} + \frac{TV_{10}}{(1 + WACC)^{10}}$$
-$$\text{Equity Value} = EV + \text{Cash} - \text{Total Debt} - \text{Minority Interest}$$
-$$\text{Fair Value per Share} = \frac{\text{Equity Value}}{\text{Shares Outstanding}}$$
-
-### 3. Integrated 10-Year 3-Statement Model
-The financial engine produces full 10-year pro forma statements linking:
-1. **Net Income** from the Income Statement flows directly into **Operating Cash Flow (CFO)** and **Retained Earnings** on the Balance Sheet.
-2. **CapEx** from the PP&E Schedule flows into **Investing Cash Flow (CFI)** and updates **Net PP&E**.
-3. **Debt Drawdowns / Repayments** and **Dividends Paid** flow into **Financing Cash Flow (CFF)**.
-4. **Ending Cash** from the Cash Flow Statement articulates back into **Cash & Equivalents** on the Balance Sheet.
-5. Exact zero-balance validation:
-   $$\text{Balance Check} = \text{Total Assets} - (\text{Total Liabilities} + \text{Total Shareholders' Equity}) \equiv 0.00$$
-
-### 4. Property Sector Comps & Residual Income (RIM)
-- **Relative Valuation**:
-  $$\text{Target Price}_{\text{EV/EBITDA}} = \frac{(\text{Benchmark Multiple} \times \text{EBITDA}_{Y1}) + \text{Cash} - \text{Debt} - \text{MI}}{\text{Shares Outstanding}}$$
-- **Residual Income Model (RIM)**:
-  $$RI_t = \text{Net Income}_t - (K_e \times \text{Book Value}_{t-1})$$
-  $$\text{Equity Value}_{\text{RIM}} = \text{Book Value}_0 + \sum_{t=1}^{10} \frac{RI_t}{(1 + K_e)^t} + \text{Terminal Excess Return}$$
-
-### 5. Multi-Stage Dividend Discount Model (DDM)
-Values equity as the present value of explicit 10-year per-share cash dividends plus perpetual Gordon Growth terminal dividends discounted at the Cost of Equity ($K_e$):
-$$DPS_t = EPS_t \times \text{Payout Ratio}$$
-$$TV_{10} = \frac{DPS_{10} \times (1 + g)}{K_e - g}$$
-$$P_{\text{DDM}} = \sum_{t=1}^{10} \frac{DPS_t}{(1 + K_e)^t} + \frac{TV_{10}}{(1 + K_e)^{10}}$$
-
-### 6. Justified Triangulation & Margin of Safety
-The composite fair value target combines up to four valuation approaches based on academic criteria or discretionary analyst weights:
-$$\text{Target Price} = (w_{\text{DCF}} \times P_{\text{DCF}}) + (w_{\text{Comps}} \times P_{\text{Comps}}) + (w_{\text{RIM}} \times P_{\text{RIM}}) + (w_{\text{DDM}} \times P_{\text{DDM}})$$
-
-*Recommended Property Allocation:* DCF ($50\%$), Relative Comps ($25\%$), RIM ($15\%$), DDM ($10\%$).
-
-**Recommendation Badges:**
-- **STRONG BUY**: Implied Upside $\ge +25\%$ and Current Price $\le$ Bear Price.
-- **BUY**: Implied Upside $\ge +15\%$.
-- **HOLD**: Implied Upside between $-10\%$ and $+15\%$.
-- **SELL**: Implied Upside $< -10\%$.
-
----
-
-## 📊 Formula-Active 6-Sheet Excel Export
-
-The platform exports a 6-sheet openpyxl workbook containing **live Excel formulas** rather than hardcoded static outputs:
-
-| Sheet Name | Content & Features | Sample Live Formulas |
-|---|---|---|
-| **`Executive Dashboard`** | C-suite summary, recommendation badge, football field bounds. | `=SUMPRODUCT()`, enterprise bridge, upside % |
-| **`Income Statement`** | Audited 2025 actuals + 10-year pro forma projection. | `=B6*(1+C5)` (Revenue), `=C6-C7` (Gross Profit), `=C13-C14` (Net Income) |
-| **`Balance Sheet`** | Assets, Liabilities, Equity with dynamic linkages. | Cash: `='Cash Flow Statement'!C21`, RE: `='Balance Sheet'!B23+'Income Statement'!C17` |
-| **`Balance Check`** | **Active Zero-Balance Check Row (Row 28)** | `='Balance Sheet'!C12 - 'Balance Sheet'!C26` (= 0.00 in all years) |
-| **`Cash Flow Statement`** | Articulated CFO, CFI, CFF, Net Cash Change, Ending Cash. | Net Income: `='Income Statement'!C15`, Working Capital from BS deltas |
-| **`Schedules & DCF`** | Working capital schedules (DSO, DIO, DPO), PP&E, FCFF, TV. | FCFF derivation, Gordon Growth $TV_{10}$, PV discounting |
-| **`Assumptions & Notes`** | Strategic macroeconomic assumptions & annual thesis notes. | Macro hurdle rates and qualitative year-by-year rationales |
-
----
-
-## 🔍 Auditing & Academic Verification
-Designed specifically for MM6026 examination committees:
-1. **Zero Hallucination Guarantee**: Every figure in the Calculation Inspector matches the Python calculation engine and the exported Excel workbook.
-2. **Transparent LaTeX Proofs**: Full algebraic derivations with exact substituted figures available inside **Tab 5 (Calculation Inspector)**.
-3. **Comprehensive Documentation**:
-   - Detailed valuation manual: [`USER_GUIDE.md`](USER_GUIDE.md)
-   - Academic disclosure & prompt log: [`AI_DISCLOSURE.md`](AI_DISCLOSURE.md)
-   - Technical roadmap & specification: [`PLAN.md`](PLAN.md)
-
----
-
-## 📜 License & Academic Disclosure
-This project is developed for the **MM6026 Digital Business Valuation** course under the Highest-Score Implementation Tier. Code is released under the [MIT License](LICENSE). For full details on the artificial intelligence tools utilized during development, refer to [`AI_DISCLOSURE.md`](AI_DISCLOSURE.md).
+- **Course:** MM6026 Digital Business Valuation  
+- **License:** MIT License. See [`LICENSE`](file:///c:/Users/Public/Documents/Project%20BA/LICENSE) for terms.  
+- **Academic AI Disclosure:** All AI assistance utilized in constructing and verifying this platform complies with institutional academic standards. See [`AI_DISCLOSURE.md`](file:///c:/Users/Public/Documents/Project%20BA/AI_DISCLOSURE.md).
