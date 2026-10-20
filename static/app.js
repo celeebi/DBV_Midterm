@@ -188,6 +188,12 @@ function readDOMIntoState() {
 
   const chkRim = document.getElementById("chk-use-rim");
   if (chkRim) state.methodWeights.inc_rim = chkRim.checked;
+
+  const chkDdm = document.getElementById("chk-use-ddm");
+  if (chkDdm) state.methodWeights.inc_ddm = chkDdm.checked;
+
+  const wDdmEl = document.getElementById("w-ddm");
+  if (wDdmEl) state.methodWeights.w_ddm = (parseFloat(wDdmEl.value) || 10) / 100.0;
 }
 
 // =============================================================================
@@ -199,6 +205,7 @@ function renderUI(data) {
   const pDcf = data.dcf.dcf_price;
   const pComps = data.comps.comps_target_price;
   const pRim = data.rim.rim_target_price;
+  const pDdm = data.ddm ? data.ddm.ddm_price : null;
   const rec = data.recommendation;
   const wacc = data.wacc;
 
@@ -223,12 +230,15 @@ function renderUI(data) {
   document.getElementById("bench-dcf-price").innerText = `IDR ${pDcf.toLocaleString()}`;
   document.getElementById("bench-comps-price").innerText = `IDR ${pComps.toLocaleString()}`;
   document.getElementById("bench-rim-price").innerText = `IDR ${pRim.toLocaleString()}`;
+  if (pDdm && document.getElementById("bench-ddm-price")) {
+    document.getElementById("bench-ddm-price").innerText = `IDR ${pDdm.toLocaleString()}`;
+  }
   document.getElementById("ff-lbl-market").innerText = `IDR ${pMkt.toLocaleString()}`;
   document.getElementById("ff-lbl-target").innerText = `IDR ${pTarget.toLocaleString()}`;
   document.getElementById("synth-rating-badge").innerText = rec.badge;
   document.getElementById("synth-thesis").innerText = rec.thesis;
 
-  renderFootballField(pMkt, pTarget, pDcf, pComps, pRim, data.scenarios.bear.price, data.scenarios.bull.price);
+  renderFootballField(pMkt, pTarget, pDcf, pComps, pRim, pDdm, data.scenarios.bear.price, data.scenarios.bull.price);
 
   // 4. Tab 3: Fan Chart & Scenario Cards
   renderFanChart(data.company.historical, data.scenarios);
@@ -339,11 +349,13 @@ function resetProFormaBaseline() {
 // =============================================================================
 // FOOTBALL FIELD RENDERER
 // =============================================================================
-function renderFootballField(pMkt, pTarget, pDcf, pComps, pRim, pBear, pBull) {
+function renderFootballField(pMkt, pTarget, pDcf, pComps, pRim, pDdm, pBear, pBull) {
   const container = document.getElementById("football-field-bars");
   container.innerHTML = "";
 
-  const minScale = Math.min(pMkt, pBear, pDcf * 0.85) * 0.90;
+  const refPrices = [pMkt, pBear, pDcf * 0.85];
+  if (pDdm) refPrices.push(pDdm * 0.85);
+  const minScale = Math.min(...refPrices) * 0.90;
   const maxScale = Math.max(pMkt, pBull, pDcf * 1.15) * 1.10;
   const range = maxScale - minScale;
 
@@ -354,9 +366,14 @@ function renderFootballField(pMkt, pTarget, pDcf, pComps, pRim, pBear, pBull) {
   const items = [
     { title: "1. DCF (10Y Pro Forma FCFF)", low: pDcf * 0.85, high: pDcf * 1.15, color: "from-cyan-600/40 to-cyan-500/60", border: "border-cyan-400" },
     { title: "2. Relative Comps (EV/EBITDA)", low: pComps * 0.88, high: pComps * 1.12, color: "from-purple-600/40 to-purple-500/60", border: "border-purple-400" },
-    { title: "3. Residual Income Model (RIM)", low: pRim * 0.90, high: pRim * 1.10, color: "from-emerald-600/40 to-emerald-500/60", border: "border-emerald-400" },
-    { title: "4. Multi-Scenario Spread (Bear/Bull)", low: pBear, high: pBull, color: "from-blue-600/40 to-indigo-500/60", border: "border-blue-400" }
+    { title: "3. Residual Income Model (RIM)", low: pRim * 0.90, high: pRim * 1.10, color: "from-emerald-600/40 to-emerald-500/60", border: "border-emerald-400" }
   ];
+
+  if (pDdm) {
+    items.push({ title: "4. Dividend Discount Model (DDM)", low: pDdm * 0.88, high: pDdm * 1.12, color: "from-amber-600/40 to-amber-500/60", border: "border-amber-400" });
+  }
+
+  items.push({ title: "5. Multi-Scenario Spread (Bear/Bull)", low: pBear, high: pBull, color: "from-blue-600/40 to-indigo-500/60", border: "border-blue-400" });
 
   const mktPct = toPct(pMkt);
   const tgtPct = toPct(pTarget);
@@ -552,17 +569,22 @@ function adjustMethodSlider(changed) {
   let wDcf = parseInt(document.getElementById("w-dcf").value) || 0;
   let wComps = parseInt(document.getElementById("w-comps").value) || 0;
   let wRim = parseInt(document.getElementById("w-rim").value) || 0;
+  let wDdm = document.getElementById("w-ddm") ? (parseInt(document.getElementById("w-ddm").value) || 0) : 0;
 
-  let sum = wDcf + wComps + wRim;
+  let sum = wDcf + wComps + wRim + wDdm;
   if (sum === 0) sum = 1;
 
   document.getElementById("lbl-w-dcf").innerText = `${Math.round((wDcf / sum) * 100)}%`;
   document.getElementById("lbl-w-comps").innerText = `${Math.round((wComps / sum) * 100)}%`;
   document.getElementById("lbl-w-rim").innerText = `${Math.round((wRim / sum) * 100)}%`;
+  if (document.getElementById("lbl-w-ddm")) {
+    document.getElementById("lbl-w-ddm").innerText = `${Math.round((wDdm / sum) * 100)}%`;
+  }
 
   state.methodWeights.w_dcf = wDcf / sum;
   state.methodWeights.w_comps = wComps / sum;
   state.methodWeights.w_rim = wRim / sum;
+  state.methodWeights.w_ddm = wDdm / sum;
 
   triggerRecalculate();
 }
@@ -625,10 +647,11 @@ function switchTab(tabId) {
 function toggleWeightMode(val) {
   const box = document.getElementById("rule-justification-box");
   if (val === "rule") {
-    box.innerText = "Suggested for Industrials / Conglomerates: 60% DCF-FCFF, 25% Relative Comps, 15% Residual Income.";
-    document.getElementById("w-dcf").value = 60;
+    box.innerText = "Suggested for Property & Real Estate: 50% DCF-FCFF, 25% Relative Comps, 15% Residual Income, 10% Dividend Discount.";
+    document.getElementById("w-dcf").value = 50;
     document.getElementById("w-comps").value = 25;
     document.getElementById("w-rim").value = 15;
+    if (document.getElementById("w-ddm")) document.getElementById("w-ddm").value = 10;
     adjustMethodSlider("dcf");
   } else {
     box.innerText = "Manual Discretion Active: You can set custom weights to stress-test relative vs intrinsic emphasis.";

@@ -80,16 +80,16 @@ The platform separates **Data Ingestion**, **Forecast Assumptions**, **Valuation
 ### Tab 2: Valuation Workbench & Justified Triangulation
 - **Dual-Mode Approach Selection**:
   - *Rule Engine Suggested*: Proposes academic weights based on industry lifecycle and cash flow stability.
-  - *Manual Analyst Override*: Allows full discretionary weight allocation across DCF, Relative Valuation, and RIM.
+  - *Manual Analyst Override*: Allows full discretionary weight allocation across DCF, Relative Valuation, Residual Income (RIM), and Dividend Discount Model (DDM).
 - **Summary KPI Cards**: Current Market Price, Composite Fair Value Target, Implied Upside %, and Recommendation (BUY / HOLD / SELL).
-- **Valuation Football Field Chart**: Compares method spreads against the observed market price.
+- **Valuation Football Field Chart**: Compares method spreads against the observed market price across all four approaches and multi-scenario bounds.
 
 ### Tab 3: 10-Year Multi-Stage Fan Chart & Scenarios
 - **Forecasting Fan Chart**: Renders a smooth visual trajectory spanning 4 historical actual years + 5 explicit forecast years + 5 fade years.
 - **Bear / Base / Bull Comparison**: Scenario comparison matrix displaying Revenue CAGRs, Operating Margins, Hurdle Rates, and Target Prices.
 
 ### Tab 4: Relative Valuation Comps
-- Displays live/calibrated IDX peer multiples (`UNTR.JK`, `AUTO.JK`, `IMAS.JK`, `SMSM.JK`, `DRMA.JK`).
+- Displays live/calibrated IDX property peer multiples (`BSDE.JK`, `CTRA.JK`, `SMRA.JK`, `ASRI.JK`, `LPKR.JK`).
 - Implied prices from EV/EBITDA, P/E, and P/B.
 - Multiples statistic toggle (Median, 25th percentile, Harmonic Mean).
 
@@ -100,7 +100,8 @@ The platform separates **Data Ingestion**, **Forecast Assumptions**, **Valuation
   2. Free Cash Flow to Firm (FCFF) Roll-Forward Proof
   3. Terminal Value Gordon Growth Proof
   4. Enterprise-to-Equity Value Bridge Proof
-  5. Composite Target Triangulation Proof
+  5. Dividend Discount Model (DDM) Cash Flow & TV Proof
+  6. Composite Target Triangulation Proof
 
 ### Tab 6: 2D Sensitivity Grid & Formula-Active 3-Statement Excel Export
 - **2D Stress-Test Matrix**: Evaluates DCF target share prices across WACC ($\pm 1.0\%$) and Terminal Growth $g$ ($\pm 1.0\%$).

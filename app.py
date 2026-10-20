@@ -20,6 +20,7 @@ from src.models.pro_forma import ProFormaModel
 from src.models.dcf import DCFModel
 from src.models.multiples import RelativeValuationModel
 from src.models.rim import ResidualIncomeModel
+from src.models.ddm import DividendDiscountModel
 from src.models.scenarios import ScenarioForecaster
 from src.models.ensemble import ValuationEnsemble
 from src.analytics.audit_trail import ValuationAuditTrail
@@ -353,6 +354,18 @@ with tab_workbench:
     )
     rim_price = rim_res["rim_target_price"]
 
+    # 4. Dividend Discount Model (DDM)
+    payout_ratio = 0.30 if company.get("ticker") == "PWON.JK" else 0.45
+    ddm_res = DividendDiscountModel.calculate_ddm(
+        base_net_income=float(hist.get("net_income", [2.35])[-1]),
+        shares_outstanding=shares_b,
+        ke=wacc_calc["ke"],
+        growth_rates=st.session_state["pro_forma_growth"],
+        terminal_g=terminal_g,
+        payout_ratio=payout_ratio
+    )
+    ddm_price = ddm_res["ddm_price"]
+
     # Approach Selection Mode Toggle
     rule_guidance = ValuationRecommender.get_suggested_weights(company["sector"])
     sug_w = rule_guidance["suggested_weights"]
@@ -367,14 +380,16 @@ with tab_workbench:
 
     if weighting_mode == "Dual-Mode: Rule Engine Suggested":
         st.info(f"📋 **Academic Decision Rule:** {rule_guidance['justification']}")
-        w_dcf_init = int(sug_w["dcf"] * 100)
-        w_mult_init = int(sug_w["multiples"] * 100)
-        w_rim_init = int(sug_w["rim"] * 100)
+        w_dcf_init = int(sug_w.get("dcf", 0.50) * 100)
+        w_mult_init = int(sug_w.get("multiples", 0.25) * 100)
+        w_rim_init = int(sug_w.get("rim", 0.15) * 100)
+        w_ddm_init = 10
     else:
         st.markdown("<p style='font-size:12px; color:#94a3b8;'>Adjust weights below. Weights are automatically normalized to 100%.</p>", unsafe_allow_html=True)
-        w_dcf_init = 60
+        w_dcf_init = 50
         w_mult_init = 25
         w_rim_init = 15
+        w_ddm_init = 10
 
     col_w1, col_w2 = st.columns([5, 7])
     with col_w1:
@@ -395,17 +410,26 @@ with tab_workbench:
         slider_w_rim = st.slider("RIM Weight (%)", 0, 100, w_rim_init, disabled=not chk_use_rim)
         st.markdown(f"<span style='font-family:JetBrains Mono; color:#10b981; font-weight:700;'>IDR {rim_price:,.0f}</span>", unsafe_allow_html=True)
 
+        st.divider()
+
+        chk_use_ddm = st.checkbox("4. Dividend Discount Model (DDM)", value=True)
+        slider_w_ddm = st.slider("DDM Weight (%)", 0, 100, w_ddm_init, disabled=not chk_use_ddm)
+        st.markdown(f"<span style='font-family:JetBrains Mono; color:#f59e0b; font-weight:700;'>IDR {ddm_price:,.0f}</span>", unsafe_allow_html=True)
+
     # Triangulate Ensemble Target
     ensemble_res = ValuationEnsemble.calculate_composite_target(
         dcf_price=dcf_price,
         comps_price=comps_price,
         rim_price=rim_price,
+        ddm_price=ddm_price,
         weight_dcf=slider_w_dcf / 100.0,
         weight_comps=slider_w_comps / 100.0,
         weight_rim=slider_w_rim / 100.0,
+        weight_ddm=slider_w_ddm / 100.0,
         include_dcf=chk_use_dcf,
         include_comps=chk_use_comps,
-        include_rim=chk_use_rim
+        include_rim=chk_use_rim,
+        include_ddm=chk_use_ddm
     )
     composite_target = ensemble_res["composite_target"]
 
@@ -456,7 +480,8 @@ with tab_workbench:
             comps_price=comps_price,
             rim_price=rim_price,
             bear_price=p_bear,
-            bull_price=p_bull
+            bull_price=p_bull,
+            ddm_price=ddm_price
         )
         st.plotly_chart(fig_ff, use_container_width=True)
 
@@ -576,7 +601,8 @@ with tab_sensitivity:
         comps_result=comps_res,
         ensemble_result=ensemble_res,
         recommender_result=rec_res,
-        wacc_data=wacc_calc
+        wacc_data=wacc_calc,
+        ddm_result=ddm_res
     )
 
     st.download_button(

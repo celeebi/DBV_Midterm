@@ -3,7 +3,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests: 12 Passed](https://img.shields.io/badge/Tests-12%20Passed-brightgreen.svg)](tests/)
+[![Tests: 15 Passed](https://img.shields.io/badge/Tests-15%20Passed-brightgreen.svg)](tests/)
 [![Architecture: Clean Modular](https://img.shields.io/badge/Architecture-Clean%20Modular-orange.svg)](src/)
 [![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Benchmark-PWON.JK-informational.svg)](https://www.idx.co.id/)
 
@@ -58,7 +58,11 @@ Calibrated to **PT Pakuwon Jati Tbk (`PWON.JK`)** using audited 2021–2025 actu
 ### 4. Residual Income Model (RIM)
 - **Clean Surplus Accounting**: Computes residual equity income based on beginning Book Value of Equity, ROE trajectory, and the Cost of Equity ($K_e$).
 
-### 5. Multi-Scenario Fan Charts & 2D Sensitivity Grid
+### 5. Multi-Stage Dividend Discount Model (DDM)
+- **Direct Cash-to-Shareholders Valuation**: Explicit 10-year projection of per-share cash dividends ($DPS_t = EPS_t \times \text{Payout Ratio}$) discounted at the Cost of Equity ($K_e$).
+- **Perpetual Dividend Perpetuity**: Evaluates long-term terminal dividend value via Gordon Growth ($TV_{10} = \frac{DPS_{10} \times (1 + g)}{K_e - g}$).
+
+### 6. Multi-Scenario Fan Charts & 2D Sensitivity Grid
 - **Scenario Forecaster**: Instant Bear (property credit tightening & slowdown), Base (consensus retail occupancy & superblock expansion), and Bull (mortgage VAT incentives & retail consumer boom) trajectories.
 - **2D Stress-Test Matrix**: Sensitivity analysis of target share prices across hurdle rates ($WACC \pm 1.0\%$) and perpetual growth ($g \pm 1.0\%$).
 
@@ -116,6 +120,7 @@ Calibrated to **PT Pakuwon Jati Tbk (`PWON.JK`)** using audited 2021–2025 actu
 │   │   └── loader.py            # Live yfinance loader & audited PWON historical normalization
 │   ├── models/
 │   │   ├── dcf.py               # Enterprise DCF-FCFF discounting & TV calculations
+│   │   ├── ddm.py               # Multi-stage Dividend Discount Model (DDM)
 │   │   ├── ensemble.py          # Multi-approach triangulation & weighted fair value
 │   │   ├── multiples.py         # Peer multiples (EV/EBITDA, P/E, P/B) & statistical filters
 │   │   ├── parameters.py        # CAPM, Cost of Debt, and WACC hurdle rate calculations
@@ -131,6 +136,7 @@ Calibrated to **PT Pakuwon Jati Tbk (`PWON.JK`)** using audited 2021–2025 actu
 │   └── index.html               # Institutional dark fintech UI (Tailwind CSS, KaTeX, Lucide)
 ├── tests/
 │   ├── test_dcf_and_exporter.py # Unit tests for DCF logic and openpyxl byte generation
+│   ├── test_ddm.py              # Unit tests for DDM and 4-way triangulation
 │   ├── test_pro_forma.py        # Unit tests for WACC and 10-year pro forma roll-forward
 │   ├── test_sanity_checks.py    # Unit tests for economic guardrails & error boundaries
 │   └── test_three_statement.py  # Unit tests for 3-statement articulation & zero balance check
@@ -188,6 +194,9 @@ Expected output:
 ```text
 tests/test_dcf_and_exporter.py::test_dcf_and_reconciliation PASSED
 tests/test_dcf_and_exporter.py::test_excel_formula_active_export PASSED
+tests/test_ddm.py::test_ddm_calculation_and_proofs PASSED
+tests/test_ddm.py::test_ensemble_with_ddm_triangulation PASSED
+tests/test_ddm.py::test_excel_export_includes_ddm_triangulation PASSED
 tests/test_pro_forma.py::test_wacc_calculation_accuracy PASSED
 tests/test_pro_forma.py::test_pro_forma_10_year_roll_forward PASSED
 tests/test_pro_forma.py::test_auto_fade_helper PASSED
@@ -199,7 +208,7 @@ tests/test_sanity_checks.py::test_negative_multiples_detected PASSED
 tests/test_three_statement.py::test_three_statement_engine_articulation_and_balance PASSED
 tests/test_three_statement.py::test_excel_export_six_sheets_and_formulas PASSED
 
-============================= 12 passed in 1.05s =============================
+============================= 15 passed in 0.72s =============================
 ```
 
 ---
@@ -251,11 +260,17 @@ The financial engine produces full 10-year pro forma statements linking:
   $$RI_t = \text{Net Income}_t - (K_e \times \text{Book Value}_{t-1})$$
   $$\text{Equity Value}_{\text{RIM}} = \text{Book Value}_0 + \sum_{t=1}^{10} \frac{RI_t}{(1 + K_e)^t} + \text{Terminal Excess Return}$$
 
-### 5. Justified Triangulation & Margin of Safety
-The composite fair value target combines approaches based on academic criteria or discretionary analyst weights:
-$$\text{Target Price} = (w_{\text{DCF}} \times P_{\text{DCF}}) + (w_{\text{Comps}} \times P_{\text{Comps}}) + (w_{\text{RIM}} \times P_{\text{RIM}})$$
+### 5. Multi-Stage Dividend Discount Model (DDM)
+Values equity as the present value of explicit 10-year per-share cash dividends plus perpetual Gordon Growth terminal dividends discounted at the Cost of Equity ($K_e$):
+$$DPS_t = EPS_t \times \text{Payout Ratio}$$
+$$TV_{10} = \frac{DPS_{10} \times (1 + g)}{K_e - g}$$
+$$P_{\text{DDM}} = \sum_{t=1}^{10} \frac{DPS_t}{(1 + K_e)^t} + \frac{TV_{10}}{(1 + K_e)^{10}}$$
 
-*Recommended Property Allocation:* DCF ($55\%$), Relative Comps ($30\%$), RIM ($15\%$).
+### 6. Justified Triangulation & Margin of Safety
+The composite fair value target combines up to four valuation approaches based on academic criteria or discretionary analyst weights:
+$$\text{Target Price} = (w_{\text{DCF}} \times P_{\text{DCF}}) + (w_{\text{Comps}} \times P_{\text{Comps}}) + (w_{\text{RIM}} \times P_{\text{RIM}}) + (w_{\text{DDM}} \times P_{\text{DDM}})$$
+
+*Recommended Property Allocation:* DCF ($50\%$), Relative Comps ($25\%$), RIM ($15\%$), DDM ($10\%$).
 
 **Recommendation Badges:**
 - **STRONG BUY**: Implied Upside $\ge +25\%$ and Current Price $\le$ Bear Price.

@@ -26,6 +26,7 @@ from src.models.pro_forma import ProFormaModel
 from src.models.dcf import DCFModel
 from src.models.multiples import RelativeValuationModel
 from src.models.rim import ResidualIncomeModel
+from src.models.ddm import DividendDiscountModel
 from src.models.scenarios import ScenarioForecaster
 from src.models.ensemble import ValuationEnsemble
 from src.analytics.audit_trail import ValuationAuditTrail
@@ -147,28 +148,45 @@ async def recalculate(request):
             shares_outstanding=shares_b
         )
 
-        # 6. Ensemble Triangulation
+        # 6. DDM (Dividend Discount Model)
+        ddm_params = payload.get("ddm_params", {})
+        payout_ratio = float(ddm_params.get("payout_ratio", 30.0 if ticker == "PWON.JK" else 45.0)) / 100.0
+        ddm_res = DividendDiscountModel.calculate_ddm(
+            base_net_income=float(hist.get("net_income", [2.35])[-1]),
+            shares_outstanding=shares_b,
+            ke=wacc_res["ke"],
+            growth_rates=growth_rates,
+            terminal_g=terminal_g,
+            payout_ratio=payout_ratio
+        )
+
+        # 7. Ensemble Triangulation
         weights = payload.get("method_weights", {})
-        w_dcf = float(weights.get("w_dcf", 0.60))
+        w_dcf = float(weights.get("w_dcf", 0.50))
         w_comps = float(weights.get("w_comps", 0.25))
         w_rim = float(weights.get("w_rim", 0.15))
+        w_ddm = float(weights.get("w_ddm", 0.10))
         inc_dcf = bool(weights.get("inc_dcf", True))
         inc_comps = bool(weights.get("inc_comps", True))
         inc_rim = bool(weights.get("inc_rim", True))
+        inc_ddm = bool(weights.get("inc_ddm", True))
 
         ensemble_res = ValuationEnsemble.calculate_composite_target(
             dcf_price=dcf_res["dcf_price"],
             comps_price=comps_res["comps_target_price"],
             rim_price=rim_res["rim_target_price"],
+            ddm_price=ddm_res["ddm_price"],
             weight_dcf=w_dcf,
             weight_comps=w_comps,
             weight_rim=w_rim,
+            weight_ddm=w_ddm,
             include_dcf=inc_dcf,
             include_comps=inc_comps,
-            include_rim=inc_rim
+            include_rim=inc_rim,
+            include_ddm=inc_ddm
         )
 
-        # 7. Scenarios
+        # 8. Scenarios
         scenarios_res = ScenarioForecaster.run_scenarios(
             base_revenue=base_revenue,
             base_growth=growth_rates,
@@ -181,7 +199,7 @@ async def recalculate(request):
             shares_outstanding=shares_b
         )
 
-        # 8. Recommendation
+        # 9. Recommendation
         recommender_res = ValuationRecommender.evaluate_recommendation(
             current_price=market_price,
             central_target=ensemble_res["composite_target"],
@@ -189,7 +207,7 @@ async def recalculate(request):
             bull_target=scenarios_res["bull"]["price"]
         )
 
-        # 9. Sanity Checks
+        # 10. Sanity Checks
         sanity_checks = ModelSanityChecker.run_all_checks(
             g=terminal_g,
             wacc=live_wacc,
@@ -201,15 +219,16 @@ async def recalculate(request):
             peer_multiples={"EV/EBITDA": comps_res["benchmark_ev_ebitda"], "P/E": comps_res["benchmark_pe"]}
         )
 
-        # 10. Audit Proofs
+        # 11. Audit Proofs
         audit_trail = ValuationAuditTrail.generate_full_audit_trail(
             wacc_data=wacc_res,
             dcf_data=dcf_res,
             comps_data=comps_res,
-            ensemble_data=ensemble_res
+            ensemble_data=ensemble_res,
+            ddm_data=ddm_res
         )
 
-        # 11. Sensitivity Matrix
+        # 12. Sensitivity Matrix
         sens_df = SensitivityMatrix.calculate_wacc_vs_g_matrix(
             base_wacc=live_wacc,
             base_terminal_g=terminal_g,
@@ -222,6 +241,17 @@ async def recalculate(request):
         )
 
         # Build response JSON
+        ddm_out = {
+            "ddm_price": ddm_res["ddm_price"],
+            "base_eps": ddm_res["base_eps"],
+            "base_dps": ddm_res["base_dps"],
+            "total_pv_dividends": ddm_res["total_pv_dividends"],
+            "terminal_value": ddm_res["terminal_value"],
+            "pv_terminal_value": ddm_res["pv_terminal_value"],
+            "payout_ratio": ddm_res["payout_ratio"],
+            "proofs": ddm_res["proofs"],
+            "schedule": ddm_res["schedule"].to_dict(orient="records")
+        }
         return JSONResponse({
             "status": "success",
             "company": company,
@@ -239,6 +269,7 @@ async def recalculate(request):
                 "peers": comps_res["peers_table"].to_dict(orient="records")
             },
             "rim": rim_res,
+            "ddm": ddm_out,
             "ensemble": ensemble_res,
             "scenarios": {
                 "bear": {"price": scenarios_res["bear"]["price"], "schedule": scenarios_res["bear"]["schedule"].to_dict(orient="records")},
@@ -310,8 +341,21 @@ async def export_excel(request):
             shares_outstanding=shares_b, cash=cash, debt=debt, minority_interest=mi
         )
 
+        payout_ratio = 0.30 if ticker == "PWON.JK" else 0.45
+        ddm_res = DividendDiscountModel.calculate_ddm(
+            base_net_income=float(hist.get("net_income", [2.35])[-1]),
+            shares_outstanding=shares_b,
+            ke=live_wacc["ke"],
+            growth_rates=pf_res["schedule"]["growth_pct"].tolist(),
+            terminal_g=float(payload.get("terminal_g", 1.5)) / 100.0,
+            payout_ratio=payout_ratio
+        )
+
         ensemble_res = ValuationEnsemble.calculate_composite_target(
-            dcf_price=dcf_res["dcf_price"], comps_price=comps_res["comps_target_price"], rim_price=5900.0
+            dcf_price=dcf_res["dcf_price"],
+            comps_price=comps_res["comps_target_price"],
+            rim_price=dcf_res["dcf_price"] * 0.92,
+            ddm_price=ddm_res["ddm_price"]
         )
 
         rec_res = ValuationRecommender.evaluate_recommendation(
@@ -328,7 +372,8 @@ async def export_excel(request):
             comps_result=comps_res,
             ensemble_result=ensemble_res,
             recommender_result=rec_res,
-            wacc_data=live_wacc
+            wacc_data=live_wacc,
+            ddm_result=ddm_res
         )
 
         filename = f"{ticker}_Valuation_Model_MM6026.xlsx"

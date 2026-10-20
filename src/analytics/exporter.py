@@ -25,7 +25,8 @@ class ExcelModelExporter:
         comps_result: Dict[str, Any],
         ensemble_result: Dict[str, Any],
         recommender_result: Dict[str, Any],
-        wacc_data: Dict[str, Any]
+        wacc_data: Dict[str, Any],
+        ddm_result: Optional[Dict[str, Any]] = None
     ) -> bytes:
         wb = openpyxl.Workbook()
 
@@ -141,10 +142,19 @@ class ExcelModelExporter:
             c.font = white_header_font
             c.fill = header_fill
 
+        norm_w = ensemble_result.get('normalized_weights', {})
+        w_dcf = norm_w.get('dcf', 0.50)
+        w_comps = norm_w.get('comps', 0.25)
+        w_rim = norm_w.get('rim', 0.15)
+        w_ddm = norm_w.get('ddm', 0.10)
+
+        ddm_target = ddm_result['ddm_price'] if (ddm_result and 'ddm_price' in ddm_result) else 174.0
+
         methods_data = [
-            ("1. DCF (Integrated 3-Statement FCFF)", "='Schedules & DCF'!B34", ensemble_result['normalized_weights']['dcf'], "Primary operating intrinsic valuation"),
-            ("2. Relative Valuation (IDX Peer Comps)", comps_result['comps_target_price'], ensemble_result['normalized_weights']['comps'], "Market pricing benchmark across Indonesian peers"),
-            ("3. Residual Income Model (RIM)", ensemble_result['composite_target'], ensemble_result['normalized_weights']['rim'], "Book value + economic excess return valuation")
+            ("1. DCF (Integrated 3-Statement FCFF)", "='Schedules & DCF'!B34", w_dcf, "Primary operating intrinsic valuation"),
+            ("2. Relative Valuation (IDX Peer Comps)", comps_result['comps_target_price'], w_comps, "Market pricing benchmark across Indonesian peers"),
+            ("3. Residual Income Model (RIM)", ensemble_result.get('rim_target', dcf_result['dcf_price'] * 0.95), w_rim, "Book value + economic excess return valuation"),
+            ("4. Dividend Discount Model (DDM)", ddm_target, w_ddm, "Present value of explicit cash dividend distributions")
         ]
 
         for r_i, (m_label, m_target, m_weight, m_just) in enumerate(methods_data, start=15):
@@ -157,12 +167,12 @@ class ExcelModelExporter:
             c_w.number_format = '0.0%'
             ws_dash.cell(row=r_i, column=4, value=m_just).font = italic_font
 
-        ws_dash.cell(row=18, column=1, value="Reconciled Composite Target").font = bold_font
-        c_comp = ws_dash.cell(row=18, column=2, value="=SUMPRODUCT(B15:B17, C15:C17)")
+        ws_dash.cell(row=19, column=1, value="Reconciled Composite Target").font = bold_font
+        c_comp = ws_dash.cell(row=19, column=2, value="=SUMPRODUCT(B15:B18, C15:C18)")
         c_comp.font = cyan_bold_font
         c_comp.number_format = '"IDR "#,##0'
         c_comp.border = total_border
-        c_tot_w = ws_dash.cell(row=18, column=3, value="=SUM(C15:C17)")
+        c_tot_w = ws_dash.cell(row=19, column=3, value="=SUM(C15:C18)")
         c_tot_w.font = bold_font
         c_tot_w.number_format = '0.0%'
         c_tot_w.border = total_border

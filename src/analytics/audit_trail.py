@@ -4,7 +4,7 @@ Produces formatted LaTeX equations, corporate finance theory explanations,
 and exact substituted mathematical derivations for examination auditing.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 
 class ValuationAuditTrail:
@@ -15,7 +15,8 @@ class ValuationAuditTrail:
         wacc_data: Dict[str, Any],
         dcf_data: Dict[str, Any],
         comps_data: Dict[str, Any],
-        ensemble_data: Dict[str, Any]
+        ensemble_data: Dict[str, Any],
+        ddm_data: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
         """
         Builds audit trail cards with plain-language theory, LaTeX formula,
@@ -71,17 +72,35 @@ class ValuationAuditTrail:
             ]
         })
 
-        # 5. Composite Target Triangulation Card
+        # 5. Dividend Discount Model (DDM) Card (if available)
+        if ddm_data:
+            audit_cards.append({
+                "title": "5. Dividend Discount Model (DDM) Proof",
+                "theory": "Direct equity valuation discounting explicit per-share cash dividend distributions at the Cost of Equity (Ke), capturing cash returned directly to shareholders plus terminal dividend perpetuity.",
+                "latex_formula": r"P_{\text{DDM}} = \sum_{t=1}^{10} \frac{DPS_t}{(1 + K_e)^t} + \frac{DPS_{10} \times (1 + g)}{(K_e - g) \times (1 + K_e)^{10}}",
+                "substituted_proof": ddm_data["proofs"]["total"],
+                "component_proofs": [
+                    ddm_data["proofs"]["dps"],
+                    ddm_data["proofs"]["tv"]
+                ]
+            })
+
+        # 6. Composite Target Triangulation Card
+        triangulation_num = 6 if ddm_data else 5
+        comp_proofs = [
+            f"DCF-FCFF Weight: {ensemble_data['normalized_weights'].get('dcf', 0.0)*100:.1f}%",
+            f"Relative Multiples Weight: {ensemble_data['normalized_weights'].get('comps', 0.0)*100:.1f}%",
+            f"Residual Income Weight: {ensemble_data['normalized_weights'].get('rim', 0.0)*100:.1f}%"
+        ]
+        if "ddm" in ensemble_data['normalized_weights']:
+            comp_proofs.append(f"Dividend Discount (DDM) Weight: {ensemble_data['normalized_weights']['ddm']*100:.1f}%")
+
         audit_cards.append({
-            "title": "5. Multi-Approach Target Triangulation Proof",
+            "title": f"{triangulation_num}. Multi-Approach Target Triangulation Proof",
             "theory": "Blends intrinsic fundamental valuations with market-based peer multiples using justified weights reflecting industry maturity and cash flow visibility.",
-            "latex_formula": r"\text{Target Price} = (w_{\text{DCF}} \times P_{\text{DCF}}) + (w_{\text{Comps}} \times P_{\text{Comps}}) + (w_{\text{RIM}} \times P_{\text{RIM}})",
+            "latex_formula": r"\text{Target Price} = \sum_{i=1}^{k} \left( w_i \times P_i \right)",
             "substituted_proof": ensemble_data["proof"],
-            "component_proofs": [
-                f"DCF-FCFF Weight: {ensemble_data['normalized_weights']['dcf']*100:.1f}%",
-                f"Relative Multiples Weight: {ensemble_data['normalized_weights']['comps']*100:.1f}%",
-                f"Residual Income Weight: {ensemble_data['normalized_weights']['rim']*100:.1f}%"
-            ]
+            "component_proofs": comp_proofs
         })
 
         return audit_cards

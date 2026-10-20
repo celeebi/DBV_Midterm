@@ -21,7 +21,8 @@ class ValuationVisualizer:
         comps_price: float,
         rim_price: float,
         bear_price: float,
-        bull_price: float
+        bull_price: float,
+        ddm_price: float = None
     ) -> go.Figure:
         """
         Builds the Valuation Football Field Spread chart.
@@ -29,23 +30,30 @@ class ValuationVisualizer:
         methods = [
             "1. DCF (10Y Pro Forma FCFF)",
             "2. Relative Comps (EV/EBITDA)",
-            "3. Residual Income Model (RIM)",
-            "4. Multi-Scenario Spread (Bear/Bull)"
+            "3. Residual Income Model (RIM)"
         ]
 
         lows = [
             round(dcf_price * 0.85, 0),
             round(comps_price * 0.88, 0),
-            round(rim_price * 0.90, 0),
-            bear_price
+            round(rim_price * 0.90, 0)
         ]
 
         highs = [
             round(dcf_price * 1.15, 0),
             round(comps_price * 1.12, 0),
-            round(rim_price * 1.10, 0),
-            bull_price
+            round(rim_price * 1.10, 0)
         ]
+
+        if ddm_price is not None and ddm_price > 0:
+            methods.append("4. Dividend Discount (DDM)")
+            lows.append(round(ddm_price * 0.88, 0))
+            highs.append(round(ddm_price * 1.12, 0))
+
+        scenario_num = 5 if (ddm_price is not None and ddm_price > 0) else 4
+        methods.append(f"{scenario_num}. Multi-Scenario Spread (Bear/Bull)")
+        lows.append(bear_price)
+        highs.append(bull_price)
 
         bases = [low for low in lows]
         spans = [high - low for high, low in zip(highs, lows)]
