@@ -1,0 +1,9 @@
+# MM6026 Digital Business Valuation Platform Dependencies
+streamlit>=1.30.0
+plotly>=5.18.0
+yfinance>=0.2.35
+pandas>=2.0.0
+numpy>=1.25.0
+openpyxl>=3.1.2
+pytest>=8.0.0
+scipy>=1.11.0
