@@ -3,7 +3,7 @@
 **Course:** MM6026 Digital Business Valuation  
 **Implementation Standard:** Highest-Score Platform Tier (Institutional Fintech Web Application)  
 **Valuation Date:** October 20, 2026  
-**Primary Ticker Benchmark:** `ASII.JK` (PT Astra International Tbk)  
+**Primary Ticker Benchmark:** `PWON.JK` (PT Pakuwon Jati Tbk)  
 
 ---
 

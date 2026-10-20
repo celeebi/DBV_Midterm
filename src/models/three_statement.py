@@ -15,47 +15,47 @@ import numpy as np
 class ThreeStatementModel:
     """Builds an integrated 10-year 3-statement financial model."""
 
-    # Default calibrated baseline for ASII.JK (Audited 2025 Actuals in IDR Trillion)
+    # Default calibrated baseline for PWON.JK (Audited 2025 Actuals in IDR Trillion)
     BASE_2025_ACTUALS: Dict[str, float] = {
         # Income Statement
-        "revenue": 316.4,
-        "cogs": 245.2,
-        "gross_profit": 71.2,
-        "sga": 26.9,
-        "ebit": 44.3,
-        "interest_expense": 4.1,
-        "interest_income": 2.3,
-        "ebt": 42.5,
-        "tax": 9.35,
-        "net_income": 33.15,
+        "revenue": 7.11,
+        "cogs": 3.17,
+        "gross_profit": 3.94,
+        "sga": 1.00,
+        "ebit": 2.94,
+        "interest_expense": 0.33,
+        "interest_income": 0.60,
+        "ebt": 2.81,
+        "tax": 0.46,
+        "net_income": 2.35,
         # Balance Sheet - Assets
-        "cash": 64.9,
-        "ar": 48.2,
-        "inventory": 32.4,
-        "other_current_assets": 15.2,
-        "net_ppe": 105.8,
-        "other_non_current_assets": 180.5,
-        "total_assets": 447.0,
+        "cash": 5.19,
+        "ar": 0.29,
+        "inventory": 4.53,
+        "other_current_assets": 1.13,
+        "net_ppe": 3.06,
+        "other_non_current_assets": 22.27,
+        "total_assets": 36.47,
         # Balance Sheet - Liabilities
-        "ap": 38.6,
-        "short_term_debt": 24.1,
-        "other_current_liabilities": 22.3,
-        "long_term_debt": 34.1,
-        "total_debt": 58.2,
-        "other_non_current_liabilities": 19.3,
-        "total_liabilities": 138.4,
+        "ap": 0.63,
+        "short_term_debt": 0.01,
+        "other_current_liabilities": 2.52,
+        "long_term_debt": 5.57,
+        "total_debt": 5.58,
+        "other_non_current_liabilities": 1.11,
+        "total_liabilities": 9.84,
         # Balance Sheet - Equity
-        "share_capital": 52.0,
-        "retained_earnings": 189.6,
-        "minority_interest": 67.0,
-        "total_equity": 308.6,
+        "share_capital": 1.57,
+        "retained_earnings": 20.91,
+        "minority_interest": 4.15,
+        "total_equity": 26.63,
         # Operating Drivers
-        "dso_days": 55.6,
-        "dio_days": 48.2,
-        "dpo_days": 57.4,
-        "depr_rate_ppe": 0.134,
-        "effective_tax_rate": 0.22,
-        "dividend_payout_ratio": 0.45
+        "dso_days": 15.0,
+        "dio_days": 521.0,
+        "dpo_days": 72.0,
+        "depr_rate_ppe": 0.140,
+        "effective_tax_rate": 0.164,
+        "dividend_payout_ratio": 0.30
     }
 
     @staticmethod
@@ -64,14 +64,14 @@ class ThreeStatementModel:
         growth_rates: Optional[List[float]] = None,
         margins: Optional[List[float]] = None,
         tax_rate: float = 0.22,
-        dividend_payout: float = 0.45,
-        interest_rate_debt: float = 0.058,
-        interest_rate_cash: float = 0.035,
-        dso_days: float = 55.0,
-        dio_days: float = 48.0,
-        dpo_days: float = 57.0,
-        capex_pct: float = 0.055,
-        depr_pct_ppe: float = 0.125,
+        dividend_payout: float = 0.30,
+        interest_rate_debt: float = 0.065,
+        interest_rate_cash: float = 0.040,
+        dso_days: float = 15.0,
+        dio_days: float = 521.0,
+        dpo_days: float = 72.0,
+        capex_pct: float = 0.080,
+        depr_pct_ppe: float = 0.140,
         start_year: int = 2026
     ) -> Dict[str, Any]:
         """
@@ -79,8 +79,8 @@ class ThreeStatementModel:
         Balance Sheet Check: Assets - (Liabilities + Equity) == 0 in every year.
         """
         act = base_actuals if base_actuals is not None else ThreeStatementModel.BASE_2025_ACTUALS.copy()
-        g_list = growth_rates if growth_rates is not None else [6.0, 3.0, 2.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5]
-        m_list = margins if margins is not None else [14.0, 13.5, 13.5, 14.0, 14.0, 13.9, 13.8, 13.8, 13.8, 13.8]
+        g_list = growth_rates if growth_rates is not None else [7.0, 6.5, 5.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5]
+        m_list = margins if margins is not None else [41.0, 41.0, 40.5, 40.5, 40.0, 39.5, 39.0, 38.5, 38.0, 38.0]
 
         # Prior period balances (2025 actuals)
         prev_rev = act["revenue"]
@@ -117,8 +117,8 @@ class ThreeStatementModel:
             rev = prev_rev * (1.0 + g)
             ebit = rev * ebit_m
             
-            # Gross profit assumes ~22.5% gross margin; SG&A is difference
-            cogs = rev * (1.0 - 0.225)
+            # Gross profit assumes ~55.4% gross margin for premier retail leasing & property; SG&A is difference
+            cogs = rev * (1.0 - 0.554)
             gross_profit = rev - cogs
             sga = gross_profit - ebit
 

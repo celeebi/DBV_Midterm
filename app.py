@@ -78,15 +78,15 @@ st.markdown("""
 # ==============================================================================
 with st.sidebar:
     st.markdown("### 🏢 Valuation Target")
-    ticker_input = st.text_input("IDX Ticker Symbol", value="ASII.JK", help="Enter any valid IDX stock ticker ending with .JK").upper().strip()
+    ticker_input = st.text_input("IDX Ticker Symbol", value="PWON.JK", help="Enter any valid IDX stock ticker ending with .JK").upper().strip()
     
     # Quick preset buttons for common benchmark tickers
     st.markdown("<p style='font-size:11px; color:#94a3b8; margin-bottom:4px;'>Quick Benchmarks:</p>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
-    if c1.button("ASII"): ticker_input = "ASII.JK"
-    if c2.button("UNTR"): ticker_input = "UNTR.JK"
-    if c3.button("TLKM"): ticker_input = "TLKM.JK"
-    if c4.button("ICBP"): ticker_input = "ICBP.JK"
+    if c1.button("PWON"): ticker_input = "PWON.JK"
+    if c2.button("BSDE"): ticker_input = "BSDE.JK"
+    if c3.button("CTRA"): ticker_input = "CTRA.JK"
+    if c4.button("ASII"): ticker_input = "ASII.JK"
 
     st.divider()
 
@@ -113,14 +113,14 @@ try:
     company = load_company(ticker_input)
 except Exception as e:
     st.error(f"Failed to load data for {ticker_input}: {str(e)}")
-    company = FinancialDataLoader.fetch_company_data("ASII.JK")
+    company = FinancialDataLoader.fetch_company_data("PWON.JK")
 
 # Extract historical actuals
 hist = company["historical"]
 base_revenue = float(hist["revenue"][-1])
-cash_balance = float(hist.get("cash_and_equivalents", 64.9))
-debt_balance = float(hist.get("total_debt", 58.2))
-mi_balance = float(hist.get("minority_interest", 10.5))
+cash_balance = float(hist.get("cash_and_equivalents", 5.19))
+debt_balance = float(hist.get("total_debt", 5.58))
+mi_balance = float(hist.get("minority_interest", 4.15))
 shares_b = float(company["shares_outstanding"])
 market_price = float(company["current_price"])
 
@@ -208,7 +208,7 @@ with tab_pro_forma:
                 help="Sustainable perpetuity growth rate after Year 10. Must be < WACC and <= Indonesian long-term GDP (4.0%)."
             )
             terminal_g = input_terminal_g_pct / 100.0
-            exit_multiple = st.number_input("Exit EV/EBITDA Multiple Cross-Check", min_value=0.0, max_value=50.0, value=4.5, step=0.1)
+            exit_multiple = st.number_input("Exit EV/EBITDA Multiple Cross-Check", min_value=0.0, max_value=50.0, value=6.0, step=0.1)
 
         with col_l2:
             st.markdown("**2. WACC & CAPM Parameter Engine**")
@@ -219,21 +219,21 @@ with tab_pro_forma:
             try:
                 beta_val = float(raw_beta)
                 if pd.isna(beta_val) or np.isnan(beta_val):
-                    beta_val = 0.85
+                    beta_val = 0.75
             except (TypeError, ValueError):
-                beta_val = 0.85
+                beta_val = 0.75
             beta_val = max(-1.0, min(4.0, beta_val))
 
             inp_beta = st.number_input("Equity Beta (β)", min_value=-1.0, max_value=4.0, value=round(beta_val, 2), step=0.05)
             inp_erp_pct = st.number_input("Equity Risk Premium ($ERP$ %)", min_value=0.0, max_value=25.0, value=7.20, step=0.10)
-            inp_kd_pct = st.number_input("Pre-tax Cost of Debt ($K_d$ %)", min_value=0.0, max_value=30.0, value=5.80, step=0.10)
-            inp_wd_pct = st.number_input("Target Debt Ratio ($W_d$ %)", min_value=0.0, max_value=100.0, value=21.5, step=0.5)
+            inp_kd_pct = st.number_input("Pre-tax Cost of Debt ($K_d$ %)", min_value=0.0, max_value=30.0, value=6.50, step=0.10)
+            inp_wd_pct = st.number_input("Target Debt Ratio ($W_d$ %)", min_value=0.0, max_value=100.0, value=20.0, step=0.5)
 
         with col_l3:
             st.markdown("**3. Reinvestment, Working Capital & Taxes**")
-            inp_capex_pct = st.number_input("Maintenance CapEx (% Rev)", min_value=0.0, max_value=50.0, value=5.5, step=0.1) / 100.0
+            inp_capex_pct = st.number_input("Maintenance CapEx (% Rev)", min_value=0.0, max_value=50.0, value=8.0, step=0.1) / 100.0
             inp_expansion_capex = st.number_input("Lump-sum Expansion CapEx in Y2 (Rp T)", min_value=0.0, max_value=200.0, value=0.0, step=1.0)
-            inp_nwc_pct = st.number_input(r"$\Delta NWC$ Intensity (% $\Delta$Rev)", min_value=-20.0, max_value=50.0, value=8.0, step=0.5) / 100.0
+            inp_nwc_pct = st.number_input(r"$\Delta NWC$ Intensity (% $\Delta$Rev)", min_value=-20.0, max_value=50.0, value=5.0, step=0.5) / 100.0
             inp_tax_rate_pct = st.number_input("Statutory Corporate Tax Rate (%)", min_value=0.0, max_value=60.0, value=22.0, step=0.5)
             chk_tax_holiday = st.checkbox("Apply EV Pioneer Tax Holiday (10% in Y1–Y3)", value=False)
 

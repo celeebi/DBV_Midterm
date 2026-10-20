@@ -100,8 +100,8 @@
           </span>
         </div>
         <div class="flex items-baseline space-x-2">
-          <h1 id="hdr-company-name" class="text-xl md:text-2xl font-extrabold text-white">PT Astra International Tbk</h1>
-          <span id="hdr-ticker-badge" class="font-mono text-cyan-400 font-bold text-sm bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">ASII.JK</span>
+          <h1 id="hdr-company-name" class="text-xl md:text-2xl font-extrabold text-white">PT Pakuwon Jati Tbk</h1>
+          <span id="hdr-ticker-badge" class="font-mono text-cyan-400 font-bold text-sm bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">PWON.JK</span>
         </div>
       </div>
     </div>
@@ -109,7 +109,7 @@
     <!-- Ticker Switcher & Quick Pills -->
     <div class="flex items-center space-x-2 w-full lg:w-auto">
       <div class="relative flex-1 lg:w-48">
-        <input type="text" id="inp-ticker" value="ASII.JK" placeholder="Search Ticker..." class="w-full bg-[#0a0f1d] border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+        <input type="text" id="inp-ticker" value="PWON.JK" placeholder="Search Ticker..." class="w-full bg-[#0a0f1d] border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
       </div>
       <button onclick="loadTicker(document.getElementById('inp-ticker').value)" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-cyan-600/20">
         Load
@@ -117,10 +117,10 @@
 
       <!-- Quick Ticker Pills -->
       <div class="hidden sm:flex items-center space-x-1 pl-2 border-l border-slate-800 text-[11px] font-mono">
+        <button onclick="loadTicker('PWON.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">PWON</button>
+        <button onclick="loadTicker('BSDE.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">BSDE</button>
+        <button onclick="loadTicker('CTRA.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">CTRA</button>
         <button onclick="loadTicker('ASII.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">ASII</button>
-        <button onclick="loadTicker('UNTR.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">UNTR</button>
-        <button onclick="loadTicker('TLKM.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">TLKM</button>
-        <button onclick="loadTicker('ICBP.JK')" class="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg">ICBP</button>
       </div>
 
       <button onclick="triggerExcelDownload()" class="ml-2 px-3 py-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20">
@@ -271,7 +271,7 @@
           <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
             <span class="text-slate-400 text-[11px] font-sans">Exit EV/EBITDA Multiple:</span>
             <div class="flex items-center space-x-1">
-              <input type="number" id="inp-exit-mult" value="4.5" step="0.1" min="2.0" max="15.0" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-purple-300 font-bold text-right">
+              <input type="number" id="inp-exit-mult" value="6.0" step="0.1" min="2.0" max="15.0" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-purple-300 font-bold text-right">
               <span class="text-purple-300 font-bold">x</span>
             </div>
           </div>
@@ -281,7 +281,7 @@
         <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
           <div class="flex justify-between items-center text-slate-300 font-sans font-bold">
             <span>2. WACC & CAPM Engine</span>
-            <span id="disp-computed-wacc" class="text-[10px] text-cyan-300 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">WACC: 9.52%</span>
+            <span id="disp-computed-wacc" class="text-[10px] text-cyan-300 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">WACC: 10.42%</span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-[11px]">
             <div>
@@ -290,7 +290,7 @@
             </div>
             <div>
               <span class="text-slate-400 font-sans">Equity Beta ($\beta$):</span>
-              <input type="number" id="inp-beta" value="0.85" step="0.05" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
+              <input type="number" id="inp-beta" value="0.75" step="0.05" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
             </div>
             <div>
               <span class="text-slate-400 font-sans">Eq. Risk Prem ($ERP$ %):</span>
@@ -298,12 +298,12 @@
             </div>
             <div>
               <span class="text-slate-400 font-sans">Pre-tax Debt ($K_d$ %):</span>
-              <input type="number" id="inp-kd" value="5.80" step="0.10" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
+              <input type="number" id="inp-kd" value="6.50" step="0.10" oninput="triggerRecalculate()" class="w-full mt-0.5 bg-[#070b14] border border-slate-700 rounded px-2 py-0.5 text-slate-200 text-right">
             </div>
           </div>
           <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px]">
             <span class="text-slate-400 font-sans">Target Debt Weight ($W_d$ %):</span>
-            <input type="number" id="inp-wd" value="21.5" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-cyan-500/40 rounded px-2 py-0.5 text-cyan-300 font-bold text-right">
+            <input type="number" id="inp-wd" value="20.0" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-cyan-500/40 rounded px-2 py-0.5 text-cyan-300 font-bold text-right">
           </div>
         </div>
 
@@ -316,9 +316,9 @@
           <div class="space-y-1">
             <div class="flex justify-between items-center">
               <span class="text-slate-400 text-[11px] font-sans">Maintenance CapEx (% Rev):</span>
-              <input type="number" id="inp-capex-pct" value="5.5" step="0.1" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-emerald-500/50 rounded px-2 py-0.5 text-emerald-300 font-bold text-right">
+              <input type="number" id="inp-capex-pct" value="8.0" step="0.1" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-emerald-500/50 rounded px-2 py-0.5 text-emerald-300 font-bold text-right">
             </div>
-            <input type="range" id="slider-capex-pct" min="1.0" max="15.0" step="0.1" value="5.5" oninput="document.getElementById('inp-capex-pct').value = this.value; triggerRecalculate();" class="w-full">
+            <input type="range" id="slider-capex-pct" min="1.0" max="15.0" step="0.1" value="8.0" oninput="document.getElementById('inp-capex-pct').value = this.value; triggerRecalculate();" class="w-full">
           </div>
           <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
             <span class="text-slate-400 text-[11px] font-sans">Lump-Sum Expansion (Y2 Rp T):</span>
@@ -334,7 +334,7 @@
           </div>
           <div class="flex justify-between items-center">
             <span class="text-slate-400 text-[11px] font-sans">ΔNWC Intensity (% ΔRev):</span>
-            <input type="number" id="inp-nwc-pct" value="8.0" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-blue-500/50 rounded px-2 py-0.5 text-blue-300 font-bold text-right">
+            <input type="number" id="inp-nwc-pct" value="5.0" step="0.5" oninput="triggerRecalculate()" class="w-16 bg-[#070b14] border border-blue-500/50 rounded px-2 py-0.5 text-blue-300 font-bold text-right">
           </div>
           <div class="text-[10px] text-slate-500 font-sans">Accounts for cash absorption in trade receivables & inventory per Rp 1 of incremental revenue.</div>
         </div>

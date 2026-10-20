@@ -12,13 +12,13 @@ class ResidualIncomeModel:
 
     @staticmethod
     def calculate_rim(
-        book_value_equity: float = 241.6,  # Rp T
-        base_net_income: float = 31.2,     # Rp T
-        ke: float = 0.1088,                # Cost of Equity
-        growth_rate: float = 0.040,        # Earnings growth
-        retention_ratio: float = 0.60,     # Ploughed back into equity
+        book_value_equity: float = 22.47,  # Rp T (PWON default)
+        base_net_income: float = 2.35,     # Rp T (PWON default)
+        ke: float = 0.1200,                # Cost of Equity
+        growth_rate: float = 0.050,        # Earnings growth
+        retention_ratio: float = 0.70,     # Ploughed back into equity
         horizon_years: int = 10,
-        shares_outstanding: float = 40.48, # Billions
+        shares_outstanding: float = 48.16, # Billions
         terminal_persistence: float = 0.60 # Fade factor in residual income
     ) -> Dict[str, Any]:
         """

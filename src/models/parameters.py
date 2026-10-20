@@ -12,11 +12,11 @@ class CapitalStructureModel:
     @staticmethod
     def calculate_wacc(
         rf: float = 0.0660,
-        beta: float = 0.85,
+        beta: float = 0.75,
         erp: float = 0.0720,
-        kd_pre: float = 0.0580,
+        kd_pre: float = 0.0650,
         tax_rate: float = 0.22,
-        wd: float = 0.215
+        wd: float = 0.200
     ) -> Dict[str, Any]:
         """
         Calculates WACC and returns full parameter decomposition:

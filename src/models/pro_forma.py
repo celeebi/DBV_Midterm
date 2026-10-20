@@ -12,34 +12,34 @@ import numpy as np
 class ProFormaModel:
     """Generates 10-year multi-stage pro forma statements and FCFF schedules."""
 
-    DEFAULT_GROWTH_RATES = [6.0, 3.0, 2.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5]
-    DEFAULT_MARGINS = [14.0, 13.5, 13.5, 14.0, 14.0, 13.9, 13.8, 13.8, 13.8, 13.8]
+    DEFAULT_GROWTH_RATES = [7.0, 6.5, 5.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5]
+    DEFAULT_MARGINS = [41.0, 41.0, 40.5, 40.5, 40.0, 39.5, 39.0, 38.5, 38.0, 38.0]
     DEFAULT_NOTES = [
-        "Consensus auto recovery and heavy equipment volume steady",
-        "Conservative 3.0% growth due to EV competition and price discounting",
-        "Macro consolidation phase; capital discipline and inventory optimization",
-        "New EV/hybrid model rollout and mining equipment replacement cycle",
-        "Phase 1 maturation; operating margin stabilizes near 14.0%",
+        "Superblock traffic rebound & new retail leasing in Pakuwon Mall Bekasi",
+        "Retail rental reversion + expansion in hospitality and convention centers",
+        "Steady residential condominium handover and high recurring mall revenue",
+        "Phased rollout of township landbank in Grand Pakuwon Surabaya & East Java",
+        "Explicit Phase 1 maturation; recurring leasing margin stabilizes near 40.0%",
         "Transition Fade Year 1: High growth fades toward macroeconomic equilibrium",
-        "Transition Fade Year 2: Automotive electrification penetration deepens",
-        "Transition Fade Year 3: Margins stabilize at industry steady-state",
-        "Transition Fade Year 4: Reinvestment equals steady maintenance replacement",
-        "Terminal Year 10: Equilibrium growth (g = 1.5%) reached for Gordon Growth Model"
+        "Transition Fade Year 2: Mature shopping centers maintain steady footfall",
+        "Transition Fade Year 3: Reinvestment aligns with regular mall refurbishment",
+        "Transition Fade Year 4: Operating margins stabilize at industry steady-state",
+        "Terminal Year 10: Long-term equilibrium growth (g = 1.5%) for Gordon Growth"
     ]
 
     @staticmethod
     def generate_pro_forma(
-        base_revenue: float = 316.4,
+        base_revenue: float = 7.11,
         growth_rates: Optional[List[float]] = None,
         margins: Optional[List[float]] = None,
-        wacc: float = 0.0952,
+        wacc: float = 0.102,
         terminal_g: float = 0.015,
         tax_rate: float = 0.22,
         has_tax_holiday: bool = False,
-        capex_pct: float = 0.055,
+        capex_pct: float = 0.080,
         expansion_capex_y2: float = 0.0,
-        nwc_pct: float = 0.080,
-        depr_pct: float = 0.045,
+        nwc_pct: float = 0.050,
+        depr_pct: float = 0.065,
         notes: Optional[List[str]] = None,
         start_year: int = 2026
     ) -> Dict[str, Any]:

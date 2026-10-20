@@ -5,11 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests: 12 Passed](https://img.shields.io/badge/Tests-12%20Passed-brightgreen.svg)](tests/)
 [![Architecture: Clean Modular](https://img.shields.io/badge/Architecture-Clean%20Modular-orange.svg)](src/)
-[![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Benchmark-ASII.JK-informational.svg)](https://www.idx.co.id/)
+[![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Benchmark-PWON.JK-informational.svg)](https://www.idx.co.id/)
 
 An institutional-grade, multi-stage equity valuation and 3-statement financial modeling platform tailored for Indonesian corporations listed on the Indonesia Stock Exchange (**IDX**). 
 
-Calibrated to **PT Astra International Tbk (`ASII.JK`)** using audited 2021–2025 actuals, the system integrates live market data ingestion via `yfinance`, dynamic 10-year pro forma statement projections, multi-model approach triangulation (DCF, Relative Valuation, and RIM), automated LaTeX mathematical proofs, and an institutional **6-sheet formula-active Microsoft Excel export (`.xlsx`)** with exact zero-balance checks ($A = L + E$).
+Calibrated to **PT Pakuwon Jati Tbk (`PWON.JK`)** using audited 2021–2025 actuals, the system integrates live market data ingestion via `yfinance`, dynamic 10-year pro forma statement projections, multi-model approach triangulation (DCF, Relative Valuation, and RIM), automated LaTeX mathematical proofs, and an institutional **6-sheet formula-active Microsoft Excel export (`.xlsx`)** with exact zero-balance checks ($A = L + E$).
 
 ---
 
@@ -26,7 +26,7 @@ Calibrated to **PT Astra International Tbk (`ASII.JK`)** using audited 2021–20
   - [1. Cost of Capital (CAPM & WACC)](#1-cost-of-capital-capm--wacc)
   - [2. Multi-Stage DCF-FCFF Engine](#2-multi-stage-dcf-fcff-engine)
   - [3. Integrated 10-Year 3-Statement Model](#3-integrated-10-year-3-statement-model)
-  - [4. Multiples & Residual Income (RIM)](#4-multiples--residual-income-rim)
+  - [4. Property Sector Comps & Residual Income (RIM)](#4-property-sector-comps--residual-income-rim)
   - [5. Justified Triangulation & Margin of Safety](#5-justified-triangulation--margin-of-safety)
 - [Formula-Active 6-Sheet Excel Export](#-formula-active-6-sheet-excel-export)
 - [Auditing & Academic Verification](#-auditing--academic-verification)
@@ -44,17 +44,22 @@ Calibrated to **PT Astra International Tbk (`ASII.JK`)** using audited 2021–20
 ### 2. Integrated 3-Statement Financial Modeling Engine
 - **Full Statement Articulation**: Mathematically coupled Income Statement, Balance Sheet, and Cash Flow Statement across all 10 forecast years.
 - **Dynamic Balance Check**: Actively monitors that $\text{Assets} - (\text{Liabilities} + \text{Equity}) \equiv 0.00$ in every single period with zero hallucination.
-- **Working Capital & PP&E Schedules**: Working capital driven by Days Sales Outstanding (DSO), Days Inventory Outstanding (DIO), and Days Payable Outstanding (DPO).
+- **Working Capital & PP&E Schedules**: Working capital driven by Days Sales Outstanding (DSO = 15 days), Days Inventory Outstanding (DIO = 521 days for property inventories), and Days Payable Outstanding (DPO = 72 days).
 
 ### 3. Relative Valuation (Comps) & Outlier Filtering
-- **Automotive & Conglomerate Peer Group**: Automated peer benchmarking across `UNTR.JK`, `AUTO.JK`, `IMAS.JK`, `SMSM.JK`, and `DRMA.JK`.
+- **IDX Property & Real Estate Peer Group**: Automated peer benchmarking across Indonesian real estate leaders:
+  - `BSDE.JK` (PT Bumi Serpong Damai Tbk)
+  - `CTRA.JK` (PT Ciputra Development Tbk)
+  - `SMRA.JK` (PT Summarecon Agung Tbk)
+  - `ASRI.JK` (PT Alam Sutera Realty Tbk)
+  - `LPKR.JK` (PT Lippo Karawaci Tbk)
 - **Flexible Multiple Aggregation**: Switch between Median, Harmonic Mean, and 25th percentile multiples, with automatic interquartile outlier filtering.
 
 ### 4. Residual Income Model (RIM)
 - **Clean Surplus Accounting**: Computes residual equity income based on beginning Book Value of Equity, ROE trajectory, and the Cost of Equity ($K_e$).
 
 ### 5. Multi-Scenario Fan Charts & 2D Sensitivity Grid
-- **Scenario Forecaster**: Instant Bear (pessimistic auto slump), Base (management consensus), and Bull (EV adoption boom) trajectories.
+- **Scenario Forecaster**: Instant Bear (property credit tightening & slowdown), Base (consensus retail occupancy & superblock expansion), and Bull (mortgage VAT incentives & retail consumer boom) trajectories.
 - **2D Stress-Test Matrix**: Sensitivity analysis of target share prices across hurdle rates ($WACC \pm 1.0\%$) and perpetual growth ($g \pm 1.0\%$).
 
 ### 6. Calculation Inspector (Transparent LaTeX Audit Trail)
@@ -107,8 +112,8 @@ Calibrated to **PT Astra International Tbk (`ASII.JK`)** using audited 2021–20
 │   │   ├── sensitivity.py       # 2D WACC vs. g sensitivity stress-testing matrix
 │   │   └── visualizer.py        # Charting & fan chart rendering helpers
 │   ├── data/
-│   │   ├── country_data.py      # Bank Indonesia rates & Indonesia macro assumptions
-│   │   └── loader.py            # Live yfinance loader & audited historical normalization
+│   │   ├── country_data.py      # Bank Indonesia rates, property peer map & macro assumptions
+│   │   └── loader.py            # Live yfinance loader & audited PWON historical normalization
 │   ├── models/
 │   │   ├── dcf.py               # Enterprise DCF-FCFF discounting & TV calculations
 │   │   ├── ensemble.py          # Multi-approach triangulation & weighted fair value
@@ -194,7 +199,7 @@ tests/test_sanity_checks.py::test_negative_multiples_detected PASSED
 tests/test_three_statement.py::test_three_statement_engine_articulation_and_balance PASSED
 tests/test_three_statement.py::test_excel_export_six_sheets_and_formulas PASSED
 
-============================= 12 passed in 1.29s =============================
+============================= 12 passed in 1.05s =============================
 ```
 
 ---
@@ -207,13 +212,15 @@ $$K_e = R_f + \beta \times ERP$$
 $$K_{d,\text{after}} = K_{d,\text{pre}} \times (1 - t)$$
 $$WACC = \left(W_e \times K_e\right) + \left(W_d \times K_{d,\text{after}}\right)$$
 
-*Default Parameters (`ASII.JK`):*
-- Risk-Free Rate ($R_f$): `6.60%` (10-Year Indonesian Government Bond Yield)
-- Equity Beta ($\beta$): `0.85` (2-year weekly Bloomberg/IDX regression)
-- Equity Risk Premium ($ERP$): `7.20%` (Damodaran Emerging Market ERP for Indonesia)
-- Pre-Tax Cost of Debt ($K_{d,\text{pre}}$): `5.80%` (Corporate bond yield spread)
-- Statutory Corporate Tax ($t$): `22.0%` (UU HPP)
-- Resulting Hurdle Rate: **$\approx 9.52\%$**
+*Default Parameters (`PWON.JK` — PT Pakuwon Jati Tbk):*
+- **Risk-Free Rate ($R_f$):** `6.60%` (10-Year Indonesian Government Bond Yield)
+- **Equity Beta ($\beta$):** `0.75` (Indonesian Property & Real Estate Developer Beta)
+- **Equity Risk Premium ($ERP$):** `7.20%` (Damodaran Emerging Market ERP for Indonesia)
+- **Cost of Equity ($K_e$):** $6.60\% + (0.75 \times 7.20\%) = \mathbf{12.00\%}$
+- **Pre-Tax Cost of Debt ($K_{d,\text{pre}}$):** `6.50%` (Senior notes coupon & credit spread)
+- **After-Tax Cost of Debt ($K_{d,\text{after}}$):** $6.50\% \times (1 - 0.22) = \mathbf{5.07\%}$
+- **Target Capital Structure:** Debt Weight $W_d = 20.0\%$, Equity Weight $W_e = 80.0\%$
+- **Resulting Hurdle Rate (WACC):** $\mathbf{\approx 10.42\%}$
 
 ### 2. Multi-Stage DCF-FCFF Engine
 Free Cash Flow to Firm (FCFF) is calculated for each explicit forecast period:
@@ -237,7 +244,7 @@ The financial engine produces full 10-year pro forma statements linking:
 5. Exact zero-balance validation:
    $$\text{Balance Check} = \text{Total Assets} - (\text{Total Liabilities} + \text{Total Shareholders' Equity}) \equiv 0.00$$
 
-### 4. Multiples & Residual Income (RIM)
+### 4. Property Sector Comps & Residual Income (RIM)
 - **Relative Valuation**:
   $$\text{Target Price}_{\text{EV/EBITDA}} = \frac{(\text{Benchmark Multiple} \times \text{EBITDA}_{Y1}) + \text{Cash} - \text{Debt} - \text{MI}}{\text{Shares Outstanding}}$$
 - **Residual Income Model (RIM)**:
@@ -247,6 +254,8 @@ The financial engine produces full 10-year pro forma statements linking:
 ### 5. Justified Triangulation & Margin of Safety
 The composite fair value target combines approaches based on academic criteria or discretionary analyst weights:
 $$\text{Target Price} = (w_{\text{DCF}} \times P_{\text{DCF}}) + (w_{\text{Comps}} \times P_{\text{Comps}}) + (w_{\text{RIM}} \times P_{\text{RIM}})$$
+
+*Recommended Property Allocation:* DCF ($55\%$), Relative Comps ($30\%$), RIM ($15\%$).
 
 **Recommendation Badges:**
 - **STRONG BUY**: Implied Upside $\ge +25\%$ and Current Price $\le$ Bear Price.

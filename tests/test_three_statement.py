@@ -1,6 +1,6 @@
 """
 Comprehensive unit tests for the 10-year integrated 3-statement financial modeling engine
-and formula-active 6-sheet Excel export.
+and formula-active 6-sheet Excel export calibrated to PWON.JK.
 """
 
 import io
@@ -17,13 +17,8 @@ from src.models.parameters import CapitalStructureModel
 
 
 def test_three_statement_engine_articulation_and_balance():
-    """Validates that Assets = Liabilities + Equity (balance_check == 0.0) across all 10 years."""
-    res = ThreeStatementModel.generate_three_statements(
-        growth_rates=[6.0, 3.0, 2.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5],
-        margins=[14.0, 13.5, 13.5, 14.0, 14.0, 13.9, 13.8, 13.8, 13.8, 13.8],
-        tax_rate=0.22,
-        dividend_payout=0.45
-    )
+    """Validates that Assets = Liabilities + Equity (balance_check == 0.0) across all 10 years for PWON."""
+    res = ThreeStatementModel.generate_three_statements()
 
     bs = res["balance_sheet"]
     cfs = res["cash_flow_statement"]
@@ -65,19 +60,19 @@ def test_three_statement_engine_articulation_and_balance():
 def test_excel_export_six_sheets_and_formulas():
     """Validates that the exported workbook has all 6 sheets and contains live Excel formulas."""
     company = {
-        "name": "PT Astra International Tbk",
-        "ticker": "ASII.JK",
-        "current_price": 5250.0,
-        "historical": {"revenue": [233.5, 301.4, 316.5, 312.8, 316.4]}
+        "name": "PT Pakuwon Jati Tbk",
+        "ticker": "PWON.JK",
+        "current_price": 270.0,
+        "historical": {"revenue": [4.71, 5.99, 6.20, 6.67, 7.11]}
     }
-    pf = ProFormaModel.generate_pro_forma(base_revenue=316.4, terminal_g=0.015, wacc=0.0952)
-    dcf = DCFModel.calculate_dcf(pf, cash=64.9, debt=58.2, minority_interest=10.5, shares_outstanding=40.48)
+    pf = ProFormaModel.generate_pro_forma(base_revenue=7.11, terminal_g=0.015, wacc=0.102)
+    dcf = DCFModel.calculate_dcf(pf, cash=5.19, debt=5.58, minority_interest=4.15, shares_outstanding=48.16)
     comps = RelativeValuationModel.calculate_comps()
     ensemble = ValuationEnsemble.calculate_composite_target(
-        dcf_price=dcf["dcf_price"], comps_price=comps["comps_target_price"], rim_price=5900.0
+        dcf_price=dcf["dcf_price"], comps_price=comps["comps_target_price"], rim_price=450.0
     )
     rec = ValuationRecommender.evaluate_recommendation(
-        current_price=5250.0, central_target=ensemble["composite_target"], bear_target=4800.0, bull_target=7500.0
+        current_price=270.0, central_target=ensemble["composite_target"], bear_target=250.0, bull_target=650.0
     )
     wacc_data = CapitalStructureModel.calculate_wacc()
 

@@ -4,36 +4,36 @@
  */
 
 let state = {
-  ticker: "ASII.JK",
+  ticker: "PWON.JK",
   company: null,
-  growthRates: [6.0, 3.0, 2.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5],
-  margins: [14.0, 13.5, 13.5, 14.0, 14.0, 13.9, 13.8, 13.8, 13.8, 13.8],
+  growthRates: [7.0, 6.5, 5.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5],
+  margins: [41.0, 41.0, 40.5, 40.5, 40.0, 39.5, 39.0, 38.5, 38.0, 38.0],
   notes: [
-    "Consensus auto recovery and heavy equipment volume steady",
-    "Conservative 3.0% growth due to EV competition and price discounting",
-    "Macro consolidation phase; capital discipline and inventory optimization",
-    "New EV/hybrid model rollout and mining equipment replacement cycle",
-    "Phase 1 maturation; operating margin stabilizes near 14.0%",
+    "Superblock traffic rebound & new retail leasing in Pakuwon Mall Bekasi",
+    "Retail rental reversion + expansion in hospitality and convention centers",
+    "Steady residential condominium handover and high recurring mall revenue",
+    "Phased rollout of township landbank in Grand Pakuwon Surabaya & East Java",
+    "Explicit Phase 1 maturation; recurring leasing margin stabilizes near 40.0%",
     "Transition Fade Year 1: High growth fades toward macroeconomic equilibrium",
-    "Transition Fade Year 2: Automotive electrification penetration deepens",
-    "Transition Fade Year 3: Margins stabilize at industry steady-state",
-    "Transition Fade Year 4: Reinvestment equals steady maintenance replacement",
-    "Terminal Year 10: Equilibrium growth (g = 1.5%) reached for Gordon Growth Model"
+    "Transition Fade Year 2: Mature shopping centers maintain steady footfall",
+    "Transition Fade Year 3: Reinvestment aligns with regular mall refurbishment",
+    "Transition Fade Year 4: Operating margins stabilize at industry steady-state",
+    "Terminal Year 10: Long-term equilibrium growth (g = 1.5%) for Gordon Growth"
   ],
   terminalG: 1.5,
-  exitMultiple: 4.5,
+  exitMultiple: 6.0,
   waccParams: {
     rf: 6.60,
-    beta: 0.85,
+    beta: 0.75,
     erp: 7.20,
-    kd_pre: 5.80,
-    wd: 21.5,
+    kd_pre: 6.50,
+    wd: 20.0,
     tax_rate: 22.0
   },
   reinvestmentParams: {
-    capex_pct: 5.5,
+    capex_pct: 8.0,
     expansion_capex: 0.0,
-    nwc_pct: 8.0,
+    nwc_pct: 5.0,
     has_tax_holiday: false
   },
   compsParams: {
@@ -41,8 +41,8 @@ let state = {
     filter_outliers: true
   },
   methodWeights: {
-    w_dcf: 0.60,
-    w_comps: 0.25,
+    w_dcf: 0.55,
+    w_comps: 0.30,
     w_rim: 0.15,
     inc_dcf: true,
     inc_comps: true,
@@ -331,8 +331,8 @@ function applyAutoFadeHelper() {
 }
 
 function resetProFormaBaseline() {
-  state.growthRates = [6.0, 3.0, 2.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5];
-  state.margins = [14.0, 13.5, 13.5, 14.0, 14.0, 13.9, 13.8, 13.8, 13.8, 13.8];
+  state.growthRates = [7.0, 6.5, 5.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5];
+  state.margins = [41.0, 41.0, 40.5, 40.5, 40.0, 39.5, 39.0, 38.5, 38.0, 38.0];
   triggerRecalculate();
 }
 
@@ -639,14 +639,14 @@ function resetAdvancedToAcademicDefaults() {
   document.getElementById("inp-terminal-g").value = "1.5";
   document.getElementById("slider-terminal-g").value = "1.5";
   document.getElementById("inp-rf").value = "6.60";
-  document.getElementById("inp-beta").value = "0.85";
+  document.getElementById("inp-beta").value = "0.75";
   document.getElementById("inp-erp").value = "7.20";
-  document.getElementById("inp-kd").value = "5.80";
-  document.getElementById("inp-wd").value = "21.5";
+  document.getElementById("inp-kd").value = "6.50";
+  document.getElementById("inp-wd").value = "20.0";
   document.getElementById("inp-tax-rate").value = "22.0";
-  document.getElementById("inp-capex-pct").value = "5.5";
+  document.getElementById("inp-capex-pct").value = "8.0";
   document.getElementById("inp-expansion-capex").value = "0.0";
-  document.getElementById("inp-nwc-pct").value = "8.0";
+  document.getElementById("inp-nwc-pct").value = "5.0";
   document.getElementById("chk-tax-holiday").checked = false;
   triggerRecalculate();
 }

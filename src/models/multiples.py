@@ -12,25 +12,25 @@ import pandas as pd
 class RelativeValuationModel:
     """Computes peer multiples and implies company share price."""
 
-    # Pre-configured baseline peer multiples for IDX Automotive / Conglomerates
+    # Pre-configured baseline peer multiples for IDX Property & Real Estate Development
     DEFAULT_IDX_PEERS: List[Dict[str, Any]] = [
-        {"name": "United Tractors", "ticker": "UNTR.JK", "ev_ebitda": 2.9, "pe": 4.8, "pb": 0.95, "roe": 21.8},
-        {"name": "Astra Otoparts", "ticker": "AUTO.JK", "ev_ebitda": 3.8, "pe": 5.4, "pb": 0.72, "roe": 14.1},
-        {"name": "Indomobil Sukses", "ticker": "IMAS.JK", "ev_ebitda": 6.5, "pe": 14.2, "pb": 0.65, "roe": 4.8},
-        {"name": "Selamat Sempurna", "ticker": "SMSM.JK", "ev_ebitda": 7.8, "pe": 11.2, "pb": 2.80, "roe": 24.5},
-        {"name": "Dharma Polimetal", "ticker": "DRMA.JK", "ev_ebitda": 5.2, "pe": 8.1, "pb": 1.65, "roe": 18.2}
+        {"name": "Bumi Serpong Damai", "ticker": "BSDE.JK", "ev_ebitda": 6.97, "pe": 5.33, "pb": 0.22, "roe": 4.1},
+        {"name": "Ciputra Development", "ticker": "CTRA.JK", "ev_ebitda": 3.04, "pe": 4.01, "pb": 0.41, "roe": 10.2},
+        {"name": "Summarecon Agung", "ticker": "SMRA.JK", "ev_ebitda": 6.67, "pe": 6.77, "pb": 0.34, "roe": 5.0},
+        {"name": "Alam Sutera Realty", "ticker": "ASRI.JK", "ev_ebitda": 6.20, "pe": 6.70, "pb": 0.17, "roe": 2.5},
+        {"name": "Lippo Karawaci", "ticker": "LPKR.JK", "ev_ebitda": 5.80, "pe": 7.50, "pb": 0.35, "roe": 4.7}
     ]
 
     @staticmethod
     def calculate_comps(
         peers_data: Optional[List[Dict[str, Any]]] = None,
-        target_ebitda: float = 58.5,  # Rp T
-        target_net_income: float = 31.2,  # Rp T
-        target_equity: float = 241.6,  # Rp T
-        shares_outstanding: float = 40.48,  # Billions
-        cash: float = 64.9,
-        debt: float = 58.2,
-        minority_interest: float = 10.5,
+        target_ebitda: float = 3.45,  # Rp T
+        target_net_income: float = 2.35,  # Rp T
+        target_equity: float = 22.47,  # Rp T
+        shares_outstanding: float = 48.16,  # Billions
+        cash: float = 5.19,
+        debt: float = 5.58,
+        minority_interest: float = 4.15,
         stat_method: str = "median",  # 'median', '25th', 'harmonic_mean'
         filter_outliers: bool = True
     ) -> Dict[str, Any]:

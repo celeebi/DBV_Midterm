@@ -18,6 +18,12 @@ INDONESIA_MACRO: Dict[str, Any] = {
 
 # Pre-mapped IDX Sectors and Comparable Universe
 DEFAULT_PEERS_MAP: Dict[str, List[str]] = {
+    # Property & Real Estate (Primary Benchmark Universe)
+    "PWON.JK": ["BSDE.JK", "CTRA.JK", "SMRA.JK", "ASRI.JK", "LPKR.JK"],
+    "BSDE.JK": ["PWON.JK", "CTRA.JK", "SMRA.JK", "ASRI.JK"],
+    "CTRA.JK": ["PWON.JK", "BSDE.JK", "SMRA.JK", "ASRI.JK"],
+    "SMRA.JK": ["PWON.JK", "BSDE.JK", "CTRA.JK", "ASRI.JK"],
+    "ASRI.JK": ["PWON.JK", "BSDE.JK", "CTRA.JK", "SMRA.JK"],
     # Automotive / Conglomerates
     "ASII.JK": ["UNTR.JK", "AUTO.JK", "IMAS.JK"],
     "UNTR.JK": ["ASII.JK", "HEXA.JK", "DOID.JK"],
@@ -37,6 +43,18 @@ DEFAULT_PEERS_MAP: Dict[str, List[str]] = {
 
 # Industry valuation guidance rules
 INDUSTRY_RULES: Dict[str, Dict[str, Any]] = {
+    "Real Estate": {
+        "primary_approach": "DCF-FCFF",
+        "recommended_weights": {"dcf": 0.55, "multiples": 0.30, "rim": 0.15},
+        "key_multiples": ["EV/EBITDA", "P/B", "P/E"],
+        "justification": "Asset-heavy property developers with prime investment retail malls benefit from steady recurring rental cash flow (DCF anchor), while EV/EBITDA and P/B reflect landbank valuation and market sentiment."
+    },
+    "Property & Real Estate": {
+        "primary_approach": "DCF-FCFF",
+        "recommended_weights": {"dcf": 0.55, "multiples": 0.30, "rim": 0.15},
+        "key_multiples": ["EV/EBITDA", "P/B", "P/E"],
+        "justification": "Asset-heavy property developers with prime investment retail malls benefit from steady recurring rental cash flow (DCF anchor), while EV/EBITDA and P/B reflect landbank valuation and market sentiment."
+    },
     "Conglomerates / Industrials": {
         "primary_approach": "DCF-FCFF",
         "recommended_weights": {"dcf": 0.60, "multiples": 0.25, "rim": 0.15},

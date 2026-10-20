@@ -48,7 +48,7 @@ async def index(request):
 
 async def get_company(request):
     """Fetches normalized audited financials and market metrics for a ticker."""
-    ticker = request.query_params.get("ticker", "ASII.JK").strip().upper()
+    ticker = request.query_params.get("ticker", "PWON.JK").strip().upper()
     try:
         data = FinancialDataLoader.fetch_company_data(ticker)
         return JSONResponse({"status": "success", "data": data})
@@ -63,23 +63,23 @@ async def recalculate(request):
     """
     try:
         payload = await request.json()
-        ticker = payload.get("ticker", "ASII.JK")
+        ticker = payload.get("ticker", "PWON.JK")
         company = FinancialDataLoader.fetch_company_data(ticker)
         hist = company["historical"]
         base_revenue = float(hist["revenue"][-1])
-        cash = float(hist.get("cash_and_equivalents", 64.9))
-        debt = float(hist.get("total_debt", 58.2))
-        mi = float(hist.get("minority_interest", 10.5))
+        cash = float(hist.get("cash_and_equivalents", 5.19))
+        debt = float(hist.get("total_debt", 5.58))
+        mi = float(hist.get("minority_interest", 4.15))
         shares_b = float(company["shares_outstanding"])
         market_price = float(company["current_price"])
 
         # 1. WACC Parameters
         w_params = payload.get("wacc_params", {})
         rf = float(w_params.get("rf", 6.60)) / 100.0
-        beta = float(w_params.get("beta", company.get("beta", 0.85)))
+        beta = float(w_params.get("beta", company.get("beta", 0.75)))
         erp = float(w_params.get("erp", 7.20)) / 100.0
-        kd_pre = float(w_params.get("kd_pre", 5.80)) / 100.0
-        wd = float(w_params.get("wd", 21.5)) / 100.0
+        kd_pre = float(w_params.get("kd_pre", 6.50)) / 100.0
+        wd = float(w_params.get("wd", 20.0)) / 100.0
         tax_rate = float(w_params.get("tax_rate", 22.0)) / 100.0
 
         wacc_res = CapitalStructureModel.calculate_wacc(
@@ -92,11 +92,11 @@ async def recalculate(request):
         margins = payload.get("margins", ProFormaModel.DEFAULT_MARGINS)
         notes = payload.get("notes", ProFormaModel.DEFAULT_NOTES)
         terminal_g = float(payload.get("terminal_g", 1.5)) / 100.0
-        capex_pct = float(payload.get("capex_pct", 5.5)) / 100.0
+        capex_pct = float(payload.get("capex_pct", 8.0)) / 100.0
         expansion_capex = float(payload.get("expansion_capex", 0.0))
-        nwc_pct = float(payload.get("nwc_pct", 8.0)) / 100.0
+        nwc_pct = float(payload.get("nwc_pct", 5.0)) / 100.0
         has_tax_holiday = bool(payload.get("has_tax_holiday", False))
-        exit_multiple = float(payload.get("exit_multiple", 4.5))
+        exit_multiple = float(payload.get("exit_multiple", 6.0))
 
         pf_res = ProFormaModel.generate_pro_forma(
             base_revenue=base_revenue,
@@ -129,8 +129,8 @@ async def recalculate(request):
         
         comps_res = RelativeValuationModel.calculate_comps(
             target_ebitda=float(pf_res["schedule"].iloc[0]["ebit"] + pf_res["schedule"].iloc[0]["depr"]),
-            target_net_income=float(hist.get("net_income", [31.2])[-1]),
-            target_equity=float(hist.get("total_equity", [241.6])[-1]),
+            target_net_income=float(hist.get("net_income", [2.35])[-1]),
+            target_equity=float(hist.get("total_equity", [22.47])[-1]),
             shares_outstanding=shares_b,
             cash=cash,
             debt=debt,
@@ -141,8 +141,8 @@ async def recalculate(request):
 
         # 5. RIM
         rim_res = ResidualIncomeModel.calculate_rim(
-            book_value_equity=float(hist.get("total_equity", [241.6])[-1]),
-            base_net_income=float(hist.get("net_income", [31.2])[-1]),
+            book_value_equity=float(hist.get("total_equity", [22.47])[-1]),
+            base_net_income=float(hist.get("net_income", [2.35])[-1]),
             ke=wacc_res["ke"],
             shares_outstanding=shares_b
         )
@@ -265,23 +265,23 @@ async def export_excel(request):
     """Streams the formula-active Excel workbook (.xlsx) directly to the browser."""
     try:
         payload = await request.json()
-        ticker = payload.get("ticker", "ASII.JK")
+        ticker = payload.get("ticker", "PWON.JK")
         company = FinancialDataLoader.fetch_company_data(ticker)
         hist = company["historical"]
         base_revenue = float(hist["revenue"][-1])
-        cash = float(hist.get("cash_and_equivalents", 64.9))
-        debt = float(hist.get("total_debt", 58.2))
-        mi = float(hist.get("minority_interest", 10.5))
+        cash = float(hist.get("cash_and_equivalents", 5.19))
+        debt = float(hist.get("total_debt", 5.58))
+        mi = float(hist.get("minority_interest", 4.15))
         shares_b = float(company["shares_outstanding"])
 
         w_params = payload.get("wacc_params", {})
         live_wacc = CapitalStructureModel.calculate_wacc(
             rf=float(w_params.get("rf", 6.60)) / 100.0,
-            beta=float(w_params.get("beta", 0.85)),
+            beta=float(w_params.get("beta", company.get("beta", 0.75))),
             erp=float(w_params.get("erp", 7.20)) / 100.0,
-            kd_pre=float(w_params.get("kd_pre", 5.80)) / 100.0,
+            kd_pre=float(w_params.get("kd_pre", 6.50)) / 100.0,
             tax_rate=float(w_params.get("tax_rate", 22.0)) / 100.0,
-            wd=float(w_params.get("wd", 21.5)) / 100.0
+            wd=float(w_params.get("wd", 20.0)) / 100.0
         )
 
         pf_res = ProFormaModel.generate_pro_forma(
@@ -292,8 +292,8 @@ async def export_excel(request):
             terminal_g=float(payload.get("terminal_g", 1.5)) / 100.0,
             tax_rate=live_wacc["tax_rate"],
             has_tax_holiday=bool(payload.get("has_tax_holiday", False)),
-            capex_pct=float(payload.get("capex_pct", 5.5)) / 100.0,
-            nwc_pct=float(payload.get("nwc_pct", 8.0)) / 100.0,
+            capex_pct=float(payload.get("capex_pct", 8.0)) / 100.0,
+            nwc_pct=float(payload.get("nwc_pct", 5.0)) / 100.0,
             notes=payload.get("notes", ProFormaModel.DEFAULT_NOTES)
         )
 
