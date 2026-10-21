@@ -71,3 +71,72 @@ def test_standalone_api_endpoints():
     assert w_data["data"]["ke"] > 0
     assert w_data["data"]["wacc"] > 0
     assert "Total ERP" in w_data["data"]["proofs"]["erp"]
+
+
+def test_api_recalculate_with_custom_growth_and_margins():
+    """Verify /api/recalculate dynamically updates 10-year pro forma and 3-statement models."""
+    custom_growth = [18.0, 15.0, 12.0, 9.0, 7.0, 5.9, 4.8, 3.7, 2.6, 1.5]
+    custom_margins = [45.0] * 10
+    payload = {
+        "ticker": "PWON.JK",
+        "growth_rates": custom_growth,
+        "margins": custom_margins,
+        "terminal_g": 1.5,
+        "capex_pct": 9.0,
+        "nwc_pct": 6.0,
+        "wacc_params": {
+            "beta": 0.85,
+            "rf": 6.60,
+            "mature_erp": 5.00,
+            "crp": 2.16,
+            "kd_pre": 6.50,
+            "wd": 25.0,
+            "tax_rate": 22.0
+        }
+    }
+    res = client.post("/api/recalculate", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+
+    # Verify Pro Forma schedule matches custom growth rates
+    pf_sched = data["pro_forma_schedule"]
+    assert len(pf_sched) == 10
+    assert pf_sched[0]["growth_pct"] == 18.0
+    assert pf_sched[0]["margin_pct"] == 45.0
+    assert pf_sched[0]["revenue"] == round(7.11 * 1.18, 2)
+
+    # Verify 3-statement model Income Statement matches custom growth
+    is_rows = data["three_statement"]["income_statement"]
+    assert len(is_rows) == 10
+    assert round(is_rows[0]["growth_pct"], 1) == 18.0
+    assert round(is_rows[0]["revenue"], 2) == round(7.11 * 1.18, 2)
+    assert data["three_statement"]["is_balanced"] is True
+
+
+def test_api_export_excel_with_custom_assumptions_parity():
+    """Verify /api/export-excel accepts custom assumptions payload and generates .xlsx."""
+    custom_growth = [18.0, 15.0, 12.0, 9.0, 7.0, 5.9, 4.8, 3.7, 2.6, 1.5]
+    custom_margins = [45.0] * 10
+    payload = {
+        "ticker": "PWON.JK",
+        "growth_rates": custom_growth,
+        "margins": custom_margins,
+        "terminal_g": 1.5,
+        "capex_pct": 9.0,
+        "nwc_pct": 6.0,
+        "wacc_params": {
+            "beta": 0.85,
+            "rf": 6.60,
+            "mature_erp": 5.00,
+            "crp": 2.16,
+            "kd_pre": 6.50,
+            "wd": 25.0,
+            "tax_rate": 22.0
+        }
+    }
+    res = client.post("/api/export-excel", json=payload)
+    assert res.status_code == 200
+    assert "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" in res.headers["content-type"]
+    assert len(res.content) > 10000  # Valid Excel binary payload
+

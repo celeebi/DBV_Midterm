@@ -259,7 +259,8 @@ async def recalculate(request):
             growth_rates=growth_rates,
             margins=margins,
             tax_rate=tax_rate,
-            dividend_payout=payout_ratio
+            dividend_payout=payout_ratio,
+            capex_pct=capex_pct
         )
         bs_df = three_stmt_res["balance_sheet"]
         is_balanced = bool((bs_df["balance_check"].abs() < 0.01).all())
@@ -386,10 +387,15 @@ async def export_excel(request):
         shares_b = float(company["shares_outstanding"])
 
         w_params = payload.get("wacc_params", {})
+        mature_erp = float(w_params.get("mature_erp", 5.00)) / 100.0
+        crp = float(w_params.get("crp", 2.16)) / 100.0
+        erp_val = float(w_params["erp"]) / 100.0 if "erp" in w_params and w_params["erp"] is not None else None
         live_wacc = CapitalStructureModel.calculate_wacc(
             rf=float(w_params.get("rf", 6.60)) / 100.0,
             beta=float(w_params.get("beta", company.get("beta", 0.75))),
-            erp=float(w_params.get("erp", 7.20)) / 100.0,
+            erp=erp_val,
+            mature_erp=mature_erp,
+            crp=crp,
             kd_pre=float(w_params.get("kd_pre", 6.50)) / 100.0,
             tax_rate=float(w_params.get("tax_rate", 22.0)) / 100.0,
             wd=float(w_params.get("wd", 20.0)) / 100.0

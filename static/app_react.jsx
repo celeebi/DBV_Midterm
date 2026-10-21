@@ -1012,27 +1012,45 @@ function App() {
       const tG = customAssumptions.terminalGrowth ?? 1.5;
       const step = (g5 - tG) / 5.0;
       payload.growth_rates = [
-        customAssumptions.revGrowthY1 ?? 12.0,
-        customAssumptions.revGrowthY2 ?? 14.0,
-        customAssumptions.revGrowthY3 ?? 10.0,
-        customAssumptions.revGrowthY4 ?? 8.0,
-        customAssumptions.revGrowthY5 ?? 7.0,
-        customAssumptions.revGrowthY6 ?? +(g5 - step).toFixed(1),
-        customAssumptions.revGrowthY7 ?? +(g5 - step * 2).toFixed(1),
-        customAssumptions.revGrowthY8 ?? +(g5 - step * 3).toFixed(1),
-        customAssumptions.revGrowthY9 ?? +(g5 - step * 4).toFixed(1),
-        customAssumptions.revGrowthY10 ?? +tG.toFixed(1),
+        Number(customAssumptions.revGrowthY1 ?? 12.0),
+        Number(customAssumptions.revGrowthY2 ?? 14.0),
+        Number(customAssumptions.revGrowthY3 ?? 10.0),
+        Number(customAssumptions.revGrowthY4 ?? 8.0),
+        Number(customAssumptions.revGrowthY5 ?? 7.0),
+        Number(customAssumptions.revGrowthY6 ?? +(g5 - step).toFixed(1)),
+        Number(customAssumptions.revGrowthY7 ?? +(g5 - step * 2).toFixed(1)),
+        Number(customAssumptions.revGrowthY8 ?? +(g5 - step * 3).toFixed(1)),
+        Number(customAssumptions.revGrowthY9 ?? +(g5 - step * 4).toFixed(1)),
+        Number(customAssumptions.revGrowthY10 ?? +tG.toFixed(1)),
       ];
-      payload.terminal_g = tG;
-      payload.exit_multiple = customAssumptions.exitEbitdaMultiple || 6.0;
+      payload.terminal_g = Number(tG);
+      payload.exit_multiple = Number(customAssumptions.exitEbitdaMultiple || 6.0);
+      payload.capex_pct = Number(customAssumptions.capexPercentRev ?? 8.0);
+      payload.nwc_pct = Number(customAssumptions.nwcPercentRevChange ?? 5.0);
+      payload.has_tax_holiday = Boolean(customAssumptions.taxHoliday);
+      const marginVal = Number(customAssumptions.ebitdaMargin ?? 41.0);
+      payload.margins = [marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal];
+      
+      const matErp = Number(customAssumptions.matureErp ?? 5.00);
+      const crpVal = Number(customAssumptions.crp ?? 2.16);
       payload.wacc_params = {
-        beta: customAssumptions.beta ?? (coverageCompanies.find(c => c.ticker === ticker)?.beta || 0.75),
-        rf: customAssumptions.rf ?? 6.60,
-        mature_erp: customAssumptions.matureErp ?? 5.00,
-        crp: customAssumptions.crp ?? 2.16,
-        kd_pre: customAssumptions.kdPre ?? 6.50,
-        wd: customAssumptions.wd ?? 20.0,
-        tax_rate: customAssumptions.taxRate ?? 22.0
+        beta: Number(customAssumptions.beta ?? (coverageCompanies.find(c => c.ticker === ticker)?.beta || 0.75)),
+        rf: Number(customAssumptions.rf ?? 6.60),
+        mature_erp: matErp,
+        crp: crpVal,
+        erp: Number(matErp + crpVal),
+        kd_pre: Number(customAssumptions.kdPre ?? 6.50),
+        wd: Number(customAssumptions.wd ?? 20.0),
+        tax_rate: Number(customAssumptions.taxRate ?? 22.0)
+      };
+      if (customAssumptions.useManualWacc && customAssumptions.waccOverride) {
+        payload.wacc_override = Number(customAssumptions.waccOverride);
+      }
+      payload.method_weights = {
+        w_dcf: Number(customAssumptions.dcfWeight ?? 50) / 100,
+        w_comps: Number(customAssumptions.compsWeight ?? 25) / 100,
+        w_rim: Number(customAssumptions.rimWeight ?? 15) / 100,
+        w_ddm: Number(customAssumptions.ddmWeight ?? 10) / 100
       };
     }
     fetch('/api/recalculate', {
@@ -1268,15 +1286,64 @@ function App() {
     }
   };
 
-  // Direct Live Excel Download Handler
+  // Explicit Manual Refresh Calculation Trigger
+  const handleRefreshCalculation = () => {
+    const currentAssumptions = customAssumptionsMap[activeCompany.id] || activeCompany.assumptions || activeCompany.defaultAssumptions;
+    refreshBackendValuation(activeCompany.ticker, currentAssumptions);
+    triggerToast(`⚡ Recalculated 10-year pro forma schedules & 3 financial statements for ${activeCompany.ticker}.`);
+  };
+
+  // Direct Live Excel Download Handler with Full Custom Assumptions Parity
   const handleDownloadExcel = () => {
     setIsExportingExcel(true);
     triggerToast(`Generating formula-active 6-sheet Excel workbook for ${activeCompany.ticker}...`);
     
+    const assumptions = customAssumptionsMap[activeCompany.id] || activeCompany.assumptions || {};
+    const g5 = assumptions.revGrowthY5 ?? 7.0;
+    const tG = assumptions.terminalGrowth ?? 1.5;
+    const step = (g5 - tG) / 5.0;
+    const growth_rates = [
+      Number(assumptions.revGrowthY1 ?? 12.0),
+      Number(assumptions.revGrowthY2 ?? 14.0),
+      Number(assumptions.revGrowthY3 ?? 10.0),
+      Number(assumptions.revGrowthY4 ?? 8.0),
+      Number(assumptions.revGrowthY5 ?? 7.0),
+      Number(assumptions.revGrowthY6 ?? +(g5 - step).toFixed(1)),
+      Number(assumptions.revGrowthY7 ?? +(g5 - step * 2).toFixed(1)),
+      Number(assumptions.revGrowthY8 ?? +(g5 - step * 3).toFixed(1)),
+      Number(assumptions.revGrowthY9 ?? +(g5 - step * 4).toFixed(1)),
+      Number(assumptions.revGrowthY10 ?? +tG.toFixed(1)),
+    ];
+    const marginVal = Number(assumptions.ebitdaMargin ?? 41.0);
+    const margins = [marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal, marginVal];
+
+    const matErp = Number(assumptions.matureErp ?? 5.00);
+    const crpVal = Number(assumptions.crp ?? 2.16);
+
+    const payload = {
+      ticker: activeCompany.ticker || 'PWON.JK',
+      growth_rates,
+      margins,
+      terminal_g: Number(tG),
+      capex_pct: Number(assumptions.capexPercentRev ?? 8.0),
+      nwc_pct: Number(assumptions.nwcPercentRevChange ?? 5.0),
+      has_tax_holiday: Boolean(assumptions.taxHoliday),
+      wacc_params: {
+        beta: Number(assumptions.beta ?? (activeCompany.beta || 0.75)),
+        rf: Number(assumptions.rf ?? 6.60),
+        mature_erp: matErp,
+        crp: crpVal,
+        erp: Number(matErp + crpVal),
+        kd_pre: Number(assumptions.kdPre ?? 6.50),
+        tax_rate: Number(assumptions.taxRate ?? 22.0),
+        wd: Number(assumptions.wd ?? 20.0)
+      }
+    };
+
     fetch('/api/export-excel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ticker: activeCompany.ticker || 'PWON.JK' })
+      body: JSON.stringify(payload)
     })
       .then(res => {
         if (!res.ok) throw new Error('Excel generation failed');
@@ -1780,6 +1847,8 @@ function App() {
             <ValuationWorkspace
               company={activeCompany}
               backendData={backendData}
+              isLoadingBackend={isLoadingBackend}
+              onRefreshCalculation={handleRefreshCalculation}
               onUpdateAssumption={(key, val, label) => updateAssumption(activeCompany.id, key, val, label)}
               onResetAssumptions={() => resetAssumptions(activeCompany.id)}
               onToggleWatchlist={() => toggleWatchlist(activeCompany.id)}
@@ -1793,6 +1862,8 @@ function App() {
             <ThreeStatementWorkspace
               company={activeCompany}
               backendData={backendData}
+              isLoadingBackend={isLoadingBackend}
+              onRefreshCalculation={handleRefreshCalculation}
               onDownloadExcel={handleDownloadExcel}
             />
           )}
@@ -1800,6 +1871,8 @@ function App() {
           {activeNav === 'modeler' && (
             <ValuationModelEditor
               company={activeCompany}
+              isLoadingBackend={isLoadingBackend}
+              onRefreshCalculation={handleRefreshCalculation}
               onUpdateAssumption={(key, val, label) => updateAssumption(activeCompany.id, key, val, label)}
               onUpdateMultipleAssumptions={(updates, label) => updateMultipleAssumptions(activeCompany.id, updates, label)}
               onResetAssumptions={() => resetAssumptions(activeCompany.id)}
@@ -2869,7 +2942,7 @@ function VisualAnalyticsTab({ company, backendData }) {
 }
 
 // 3. VALUATION WORKSPACE (DCF, COMPS, RIM, DDM, FOOTBALL FIELD)
-function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetAssumptions, onToggleWatchlist, onNavigate, onOpenInspector, onDownloadExcel }) {
+function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshCalculation, onUpdateAssumption, onResetAssumptions, onToggleWatchlist, onNavigate, onOpenInspector, onDownloadExcel }) {
   const [activeTab, setActiveTab] = useState('dcf');
   const [footballView, setFootballView] = useState('bars');
   const v = company.valuation || {};
@@ -2909,6 +2982,15 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={onRefreshCalculation}
+              disabled={isLoadingBackend}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xs text-xs font-medium flex items-center space-x-1.5 shadow-2xs cursor-pointer transition"
+              title="Recalculate 10-Year Pro Forma & Statements with current assumptions"
+            >
+              <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={13} className={isLoadingBackend ? "animate-spin" : "text-amber-300"} />
+              <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Calculation"}</span>
+            </button>
             <button
               onClick={onToggleWatchlist}
               className={`px-3 py-1.5 border rounded-xs text-xs font-medium flex items-center space-x-1.5 ${
@@ -3145,18 +3227,29 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
         {/* TAB 1: DCF */}
         {activeTab === 'dcf' && (
           <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
                   Explicit 10-Year Unlevered Free Cash Flow (FCFF) Schedule
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Forecast horizon 2026E–2035E with growth fading to terminal perpetuity rate (g = 1.50%).
+                  Forecast horizon 2026E–2035E with growth fading to terminal perpetuity rate (g = {(a.terminalGrowth ?? 1.5).toFixed(2)}%).
                 </p>
               </div>
-              <div className="text-right font-mono">
-                <span className="text-[10px] text-slate-500 block uppercase">DCF Fair Value</span>
-                <span className="text-base font-bold text-blue-700">IDR {v.dcfSharePrice} / sh</span>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onRefreshCalculation}
+                  disabled={isLoadingBackend}
+                  className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 rounded-xs text-[11px] font-semibold flex items-center space-x-1 cursor-pointer transition shadow-2xs"
+                  title="Recalculate Pro Forma and DCF from backend"
+                >
+                  <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={12} className={isLoadingBackend ? "animate-spin" : "text-amber-500"} />
+                  <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Forecast"}</span>
+                </button>
+                <div className="text-right font-mono">
+                  <span className="text-[10px] text-slate-500 block uppercase">DCF Fair Value</span>
+                  <span className="text-base font-bold text-blue-700">IDR {v.dcfSharePrice} / sh</span>
+                </div>
               </div>
             </div>
 
@@ -3508,7 +3601,7 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
 }
 
 // 4. DEDICATED 3-STATEMENT FINANCIAL MODEL WORKSPACE
-function ThreeStatementWorkspace({ company, backendData, onDownloadExcel }) {
+function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRefreshCalculation, onDownloadExcel }) {
   const [activeStmt, setActiveStmt] = useState('bs');
   const threeStmt = backendData?.three_statement || {};
   const isBalanced = threeStmt.is_balanced !== undefined ? threeStmt.is_balanced : true;
@@ -3534,7 +3627,16 @@ function ThreeStatementWorkspace({ company, backendData, onDownloadExcel }) {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={onRefreshCalculation}
+            disabled={isLoadingBackend}
+            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xs text-xs font-semibold flex items-center space-x-1.5 shadow-2xs cursor-pointer transition"
+            title="Recalculate 10-Year 3-Statement financial model with current custom assumptions"
+          >
+            <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={13} className={isLoadingBackend ? "animate-spin" : "text-amber-300"} />
+            <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Calculation"}</span>
+          </button>
           <div className={`px-3 py-1.5 rounded-xs border text-xs font-mono font-bold flex items-center space-x-1.5 ${
             isBalanced ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'
           }`}>
@@ -3709,7 +3811,7 @@ function ThreeStatementWorkspace({ company, backendData, onDownloadExcel }) {
 }
 
 // 5. VALUATION MODEL ASSUMPTIONS & PARAMETER EDITOR
-function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAssumptions, onResetAssumptions, onApplyAutoFade, onNavigate }) {
+function ValuationModelEditor({ company, isLoadingBackend, onRefreshCalculation, onUpdateAssumption, onUpdateMultipleAssumptions, onResetAssumptions, onApplyAutoFade, onNavigate }) {
   const a = company.assumptions || {};
   const v = company.valuation || {};
 
@@ -3754,7 +3856,16 @@ function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAss
             Institutional convention: Blue sliders update growth trajectories, operating margins, and cost of capital live.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={onRefreshCalculation}
+            disabled={isLoadingBackend}
+            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-semibold rounded-xs shadow-2xs flex items-center space-x-1.5 cursor-pointer transition"
+            title="Recalculate 10-Year Pro Forma Schedule and 3 Financial Statements with current custom assumptions"
+          >
+            <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={13} className={isLoadingBackend ? "animate-spin" : "text-amber-300"} />
+            <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Calculation"}</span>
+          </button>
           <button
             onClick={onResetAssumptions}
             className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-xs flex items-center space-x-1.5"
@@ -3769,6 +3880,24 @@ function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAss
             Return to Valuation
           </button>
         </div>
+      </div>
+
+      {/* Informational Sync Banner */}
+      <div className="bg-blue-50/80 border border-blue-200 rounded-xs p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-blue-900">
+        <div className="flex items-center space-x-2">
+          <Icon name="Info" size={16} className="text-blue-600 shrink-0" />
+          <span>
+            Adjusting sliders updates valuation target models immediately. Click <strong>⚡ Refresh Calculation</strong> to propagate new revenue growth, margin, and WACC assumptions across the full 10-Year Pro Forma Schedule and Integrated 3-Statement Model.
+          </span>
+        </div>
+        <button
+          onClick={onRefreshCalculation}
+          disabled={isLoadingBackend}
+          className="px-3 py-1 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 text-white rounded-xs text-[11px] font-bold font-mono shrink-0 flex items-center space-x-1 cursor-pointer transition shadow-2xs"
+        >
+          <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={11} className={isLoadingBackend ? "animate-spin" : "text-amber-300"} />
+          <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Calculation"}</span>
+        </button>
       </div>
 
       <div className="bg-[#0A1120] text-white p-4 rounded-xs grid grid-cols-2 sm:grid-cols-5 gap-4 font-mono">
@@ -3920,6 +4049,17 @@ function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAss
               </button>
             </div>
           )}
+
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              onClick={onRefreshCalculation}
+              disabled={isLoadingBackend}
+              className="w-full py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-800 font-bold rounded-xs text-[11px] font-mono flex items-center justify-center space-x-1.5 cursor-pointer transition shadow-2xs"
+            >
+              <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={12} className={isLoadingBackend ? "animate-spin" : "text-amber-500"} />
+              <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Calculation with Growth Curve"}</span>
+            </button>
+          </div>
         </div>
 
         {/* Column 2: Margins */}
@@ -3956,6 +4096,17 @@ function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAss
               </div>
             </div>
           ))}
+
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              onClick={onRefreshCalculation}
+              disabled={isLoadingBackend}
+              className="w-full py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-800 font-bold rounded-xs text-[11px] font-mono flex items-center justify-center space-x-1.5 cursor-pointer transition shadow-2xs"
+            >
+              <Icon name={isLoadingBackend ? "Loader2" : "Zap"} size={12} className={isLoadingBackend ? "animate-spin" : "text-amber-500"} />
+              <span>{isLoadingBackend ? "Recalculating..." : "⚡ Refresh Calculation with Margins"}</span>
+            </button>
+          </div>
         </div>
 
         {/* Column 3: Cost of Capital & Fundamental CAPM Modeler */}
