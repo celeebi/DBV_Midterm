@@ -71,6 +71,7 @@ class ThreeStatementModel:
         dio_days: float = 521.0,
         dpo_days: float = 72.0,
         capex_pct: float = 0.080,
+        nwc_pct: Optional[float] = None,
         depr_pct_ppe: float = 0.140,
         start_year: int = 2026
     ) -> Dict[str, Any]:
@@ -158,19 +159,29 @@ class ThreeStatementModel:
             # -------------------------------------------------------------
             # 2. WORKING CAPITAL & CAPITAL EXPENDITURE SCHEDULES
             # -------------------------------------------------------------
-            ar = (rev * dso_days) / 365.0
-            inv = (cogs * dio_days) / 365.0
-            ap = (cogs * dpo_days) / 365.0
+            delta_rev = rev - prev_rev
+            if nwc_pct is not None and delta_rev > 0:
+                target_delta_nwc = delta_rev * nwc_pct
+                ar = prev_ar + target_delta_nwc * 0.20
+                inv = prev_inv + target_delta_nwc * 0.90
+                ap = prev_ap + target_delta_nwc * 0.10
+            else:
+                ar = (rev * dso_days) / 365.0
+                inv = (cogs * dio_days) / 365.0
+                ap = (cogs * dpo_days) / 365.0
+
             other_ca = prev_other_ca * (1.0 + g * 0.5)
             other_cl = prev_other_cl * (1.0 + g * 0.5)
-            other_nca = prev_other_nca
-            other_ncl = prev_other_ncl
+            other_nca = prev_other_nca * (1.0 + g * 0.25)
+            other_ncl = prev_other_ncl * (1.0 + g * 0.10)
 
             delta_ar = ar - prev_ar
             delta_inv = inv - prev_inv
             delta_ap = ap - prev_ap
             delta_other_ca = other_ca - prev_other_ca
             delta_other_cl = other_cl - prev_other_cl
+            delta_other_nca = other_nca - prev_other_nca
+            delta_other_ncl = other_ncl - prev_other_ncl
 
             # PP&E Roll-forward
             depr = prev_ppe * depr_pct_ppe
@@ -189,9 +200,9 @@ class ThreeStatementModel:
             # Cash Flow from Operating Activities (CFO)
             cfo = net_income + depr - delta_ar - delta_inv + delta_ap - delta_other_ca + delta_other_cl
             # Cash Flow from Investing Activities (CFI)
-            cfi = -capex
+            cfi = -(capex + delta_other_nca)
             # Cash Flow from Financing Activities (CFF)
-            cff = delta_debt - dividends
+            cff = delta_debt - dividends + delta_other_ncl
             # Net change in cash
             net_change_cash = cfo + cfi + cff
             ending_cash = prev_cash + net_change_cash
@@ -207,9 +218,11 @@ class ThreeStatementModel:
                 "delta_other_wc": round(-delta_other_ca + delta_other_cl, 2),
                 "cfo": round(cfo, 2),
                 "capex": round(-capex, 2),
+                "investment_prop_capex": round(-delta_other_nca, 2),
                 "cfi": round(cfi, 2),
                 "delta_debt": round(delta_debt, 2),
                 "dividends_paid": round(-dividends, 2),
+                "delta_other_ncl": round(delta_other_ncl, 2),
                 "cff": round(cff, 2),
                 "net_change_cash": round(net_change_cash, 2),
                 "beginning_cash": round(prev_cash, 2),
@@ -251,6 +264,7 @@ class ThreeStatementModel:
                 "other_current_liabilities": round(other_cl, 2),
                 "total_current_liabilities": round(total_current_liabilities, 2),
                 "long_term_debt": round(lt_debt, 2),
+                "total_debt": round(tot_debt, 2),
                 "other_non_current_liabilities": round(other_ncl, 2),
                 "total_liabilities": round(total_liabilities, 2),
                 # Equity
@@ -259,6 +273,7 @@ class ThreeStatementModel:
                 "minority_interest": round(minority_interest, 2),
                 "total_equity": round(total_equity, 2),
                 "total_liabilities_equity": round(total_liabilities_equity, 2),
+                "total_liab_and_equity": round(total_liabilities_equity, 2),
                 "balance_check": round(balance_check, 4)
             })
 

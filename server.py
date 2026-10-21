@@ -255,12 +255,58 @@ async def recalculate(request):
         )
 
         # 13. Integrated 3-Statement Model
+        if ticker == "PWON.JK":
+            company_actuals = ThreeStatementModel.BASE_2025_ACTUALS.copy()
+        else:
+            scale = base_revenue / 7.11 if base_revenue > 0 else 1.0
+            equity = float(hist.get("total_equity", [22.47])[-1])
+            ebit_val = float(hist.get("ebit", [base_revenue * 0.35])[-1])
+            net_inc = float(hist.get("net_income", [2.35])[-1])
+            company_actuals = {
+                "revenue": base_revenue,
+                "cogs": base_revenue * 0.446,
+                "gross_profit": base_revenue * 0.554,
+                "sga": max(0.0, (base_revenue * 0.554) - ebit_val),
+                "ebit": ebit_val,
+                "interest_expense": debt * 0.065,
+                "interest_income": cash * 0.040,
+                "ebt": ebit_val - (debt * 0.065 - cash * 0.040),
+                "tax": max(0.0, (ebit_val - (debt * 0.065 - cash * 0.040)) * tax_rate),
+                "net_income": net_inc,
+                "cash": cash,
+                "ar": round((base_revenue * 15.0) / 365.0, 2),
+                "inventory": round((base_revenue * 0.446 * 200.0) / 365.0, 2),
+                "other_current_assets": round(1.13 * scale, 2),
+                "net_ppe": round(3.06 * scale, 2),
+                "other_non_current_assets": round(22.27 * scale, 2),
+                "total_assets": round(cash + (base_revenue * 15.0) / 365.0 + ((base_revenue * 0.446 * 200.0) / 365.0) + (1.13 + 3.06 + 22.27) * scale, 2),
+                "ap": round((base_revenue * 0.446 * 72.0) / 365.0, 2),
+                "short_term_debt": round(debt * 0.05, 2),
+                "other_current_liabilities": round(2.52 * scale, 2),
+                "long_term_debt": round(debt * 0.95, 2),
+                "total_debt": debt,
+                "other_non_current_liabilities": round(1.11 * scale, 2),
+                "total_liabilities": round(debt + (base_revenue * 0.446 * 72.0) / 365.0 + (2.52 + 1.11) * scale, 2),
+                "share_capital": round(1.57 * scale, 2),
+                "retained_earnings": round(max(0.0, equity - (1.57 * scale) - mi), 2),
+                "minority_interest": mi,
+                "total_equity": equity,
+                "dso_days": 15.0,
+                "dio_days": 200.0,
+                "dpo_days": 72.0,
+                "depr_rate_ppe": 0.140,
+                "effective_tax_rate": tax_rate,
+                "dividend_payout_ratio": payout_ratio
+            }
+
         three_stmt_res = ThreeStatementModel.generate_three_statements(
+            base_actuals=company_actuals,
             growth_rates=growth_rates,
             margins=margins,
             tax_rate=tax_rate,
             dividend_payout=payout_ratio,
-            capex_pct=capex_pct
+            capex_pct=capex_pct,
+            nwc_pct=nwc_pct
         )
         bs_df = three_stmt_res["balance_sheet"]
         is_balanced = bool((bs_df["balance_check"].abs() < 0.01).all())

@@ -3677,56 +3677,142 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
             <table className="w-full text-left border-collapse text-xs font-mono">
               <thead>
                 <tr className="border-b border-slate-300 bg-slate-100 text-[10px] uppercase text-slate-600">
-                  <th className="py-2.5 px-3 sticky left-0 bg-slate-100 z-10 font-sans w-64">Balance Sheet Item (IDR Trillion)</th>
+                  <th className="py-2.5 px-3 sticky left-0 bg-slate-100 z-10 font-sans w-72">Balance Sheet Item (IDR Trillion)</th>
                   {bsRows.map((r, idx) => (
                     <th key={idx} className="py-2.5 px-3 text-right whitespace-nowrap">{r.year}E</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                <tr>
-                  <td className="py-2 px-3 sticky left-0 bg-white z-10 font-sans font-medium text-slate-900">Cash & Equivalents</td>
-                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right">{r.cash?.toFixed(2)}</td>)}
+                {/* 1. Current Assets */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={bsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    I. CURRENT ASSETS
+                  </td>
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Accounts Receivable</td>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans font-medium text-slate-900 pl-6">Cash & Cash Equivalents</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right font-medium text-blue-900">{r.cash?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Accounts Receivable</td>
                   {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.ar?.toFixed(2)}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Property Inventory</td>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Property Inventories (Real Estate)</td>
                   {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.inventory?.toFixed(2)}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Net PP&E & Mall Assets</td>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Other Current Assets & Prepayments</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.other_current_assets?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-50 font-bold text-slate-900 border-t border-slate-200">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-50 z-10 font-sans">Total Current Assets</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-blue-800">{r.total_current_assets?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* 2. Non-Current Assets */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={bsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    II. NON-CURRENT ASSETS
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Net PP&E & Operating Assets</td>
                   {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.net_ppe?.toFixed(2)}</td>)}
                 </tr>
-                <tr className="bg-slate-100/70 font-bold text-slate-900 border-t-2 border-slate-300">
-                  <td className="py-2 px-3 sticky left-0 bg-slate-100/70 z-10 font-sans">TOTAL ASSETS</td>
-                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-blue-900">{r.total_assets?.toFixed(2)}</td>)}
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Investment Properties & Landbank</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.other_non_current_assets?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                  <td className="py-2.5 px-3 sticky left-0 bg-slate-100 z-10 font-sans text-slate-900">TOTAL ASSETS</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-2.5 px-3 text-right text-blue-900 font-bold">{r.total_assets?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* 3. Current Liabilities */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={bsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    III. CURRENT LIABILITIES
+                  </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Total Debt (ST + LT)</td>
-                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right">{r.total_debt?.toFixed(2)}</td>)}
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Accounts Payable</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.ap?.toFixed(2)}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Total Liabilities</td>
-                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.total_liabilities?.toFixed(2)}</td>)}
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Short-Term Borrowings & Facilities</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.short_term_debt?.toFixed(2)}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Total Shareholder Equity</td>
-                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.total_equity?.toFixed(2)}</td>)}
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Other Current Liabilities</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.other_current_liabilities?.toFixed(2)}</td>)}
                 </tr>
-                <tr className="bg-slate-100/70 font-bold text-slate-900 border-t-2 border-slate-300">
-                  <td className="py-2 px-3 sticky left-0 bg-slate-100/70 z-10 font-sans">TOTAL LIABILITIES & EQUITY</td>
-                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-blue-900">{r.total_liab_and_equity?.toFixed(2)}</td>)}
+                <tr className="bg-slate-50 font-bold text-slate-900 border-t border-slate-200">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-50 z-10 font-sans">Total Current Liabilities</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right">{r.total_current_liabilities?.toFixed(2)}</td>)}
                 </tr>
+
+                {/* 4. Non-Current Liabilities */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={bsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    IV. NON-CURRENT LIABILITIES
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Long-Term Bank Debt & Senior Notes</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.long_term_debt?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Other Non-Current Liabilities</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.other_non_current_liabilities?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-50/70 font-medium text-slate-800">
+                  <td className="py-1.5 px-3 sticky left-0 bg-slate-50/70 z-10 font-sans pl-6">Total Debt (ST + LT Borrowings)</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right font-medium">{(r.total_debt ?? (r.short_term_debt + r.long_term_debt))?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-100 font-bold text-slate-900 border-t border-slate-300">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-100 z-10 font-sans">TOTAL LIABILITIES</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-slate-900">{r.total_liabilities?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* 5. Shareholders' Equity */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={bsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    V. SHAREHOLDERS' EQUITY
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Share Capital</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.share_capital?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Retained Earnings (Cumulated)</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right font-medium text-blue-900">{r.retained_earnings?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700 pl-6">Non-Controlling / Minority Interest</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right">{r.minority_interest?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-100 font-bold text-slate-900 border-t border-slate-300">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-100 z-10 font-sans">TOTAL SHAREHOLDERS' EQUITY</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-slate-900">{r.total_equity?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* Total Liabilities & Equity */}
+                <tr className="bg-slate-100/90 font-bold text-slate-900 border-t-2 border-slate-400">
+                  <td className="py-2.5 px-3 sticky left-0 bg-slate-100/90 z-10 font-sans">TOTAL LIABILITIES & EQUITY</td>
+                  {bsRows.map((r, idx) => <td key={idx} className="py-2.5 px-3 text-right text-blue-900 font-bold">{(r.total_liabilities_equity ?? r.total_liab_and_equity)?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* Balance Check */}
                 <tr className="bg-emerald-50 text-emerald-900 font-bold border-t-2 border-emerald-300">
                   <td className="py-2.5 px-3 sticky left-0 bg-emerald-50 z-10 font-sans flex items-center space-x-1.5">
                     <Icon name="CheckCircle2" size={13} className="text-emerald-600" />
-                    <span>ZERO-BALANCE CHECK (Assets - Liab&Eq)</span>
+                    <span>ZERO-BALANCE CHECK (Assets ≡ Liab + Equity)</span>
                   </td>
                   {bsRows.map((r, idx) => (
-                    <td key={idx} className="py-2.5 px-3 text-right text-emerald-700">
+                    <td key={idx} className="py-2.5 px-3 text-right text-emerald-700 font-bold">
                       {Math.abs(r.balance_check || 0).toFixed(2)}
                     </td>
                   ))}
@@ -3780,26 +3866,96 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
             <table className="w-full text-left border-collapse text-xs font-mono">
               <thead>
                 <tr className="border-b border-slate-300 bg-slate-100 text-[10px] uppercase text-slate-600">
-                  <th className="py-2.5 px-3 sticky left-0 bg-slate-100 z-10 font-sans w-64">Cash Flow Statement (IDR Trillion)</th>
+                  <th className="py-2.5 px-3 sticky left-0 bg-slate-100 z-10 font-sans w-72">Cash Flow Statement Item (IDR Trillion)</th>
                   {cfsRows.map((r, idx) => <th key={idx} className="py-2.5 px-3 text-right whitespace-nowrap">{r.year}E</th>)}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                <tr className="bg-slate-50 font-bold">
-                  <td className="py-2 px-3 sticky left-0 bg-slate-50 z-10 font-sans">Cash from Operations (CFO)</td>
-                  {cfsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-blue-900">{r.cfo?.toFixed(2)}</td>)}
+                {/* 1. Operating Activities */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={cfsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    I. CASH FLOWS FROM OPERATING ACTIVITIES (CFO)
+                  </td>
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Cash from Investing (CFI)</td>
-                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-600">({r.cfi?.toFixed(2)})</td>)}
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans font-medium text-slate-800 pl-6">Net Income (Post-Tax)</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right font-medium text-slate-900">{r.net_income?.toFixed(2)}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Cash from Financing (CFF)</td>
-                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-600">({r.cff?.toFixed(2)})</td>)}
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(+) Depreciation & Amortization</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{r.depr?.toFixed(2)}</td>)}
                 </tr>
-                <tr className="bg-blue-50/60 font-bold text-slate-900 border-t-2 border-slate-300">
-                  <td className="py-2.5 px-3 sticky left-0 bg-blue-50/60 z-10 font-sans">ENDING CASH BALANCE</td>
-                  {cfsRows.map((r, idx) => <td key={idx} className="py-2.5 px-3 text-right text-blue-900">{r.ending_cash?.toFixed(2)}</td>)}
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(-/+) Change in Accounts Receivable</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className={`py-1.5 px-3 text-right ${r.delta_ar < 0 ? 'text-rose-600' : 'text-slate-700'}`}>{r.delta_ar?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(-/+) Change in Property Inventories</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className={`py-1.5 px-3 text-right ${r.delta_inv < 0 ? 'text-rose-600' : 'text-slate-700'}`}>{r.delta_inv?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(+/-) Change in Accounts Payable</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{r.delta_ap?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(-/+) Change in Other Working Capital</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{r.delta_other_wc?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-blue-50/70 font-bold text-slate-900 border-t border-blue-200">
+                  <td className="py-2 px-3 sticky left-0 bg-blue-50/70 z-10 font-sans text-blue-900">NET CASH FROM OPERATIONS (CFO)</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right text-blue-900 font-bold">{r.cfo?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* 2. Investing Activities */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={cfsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    II. CASH FLOWS FROM INVESTING ACTIVITIES (CFI)
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(-) Capital Expenditures (PP&E & Equipment)</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-rose-700">{r.capex?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(-) Investment Properties & Landbank Expansion</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-rose-700">{(r.investment_prop_capex ?? 0)?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-50 font-bold text-slate-900 border-t border-slate-200">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-50 z-10 font-sans">NET CASH USED IN INVESTING (CFI)</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right font-bold text-rose-800">{r.cfi?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* 3. Financing Activities */}
+                <tr className="bg-slate-100/70 font-bold text-slate-800 text-[11px]">
+                  <td colSpan={cfsRows.length + 1} className="py-1.5 px-3 sticky left-0 bg-slate-100/70">
+                    III. CASH FLOWS FROM FINANCING ACTIVITIES (CFF)
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(+/-) Net Change in Debt Borrowings</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{r.delta_debt?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">(-) Cash Dividends Paid</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-rose-700">{r.dividends_paid?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-slate-50 font-bold text-slate-900 border-t border-slate-200">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-50 z-10 font-sans">NET CASH FROM FINANCING (CFF)</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-2 px-3 text-right font-bold text-slate-800">{r.cff?.toFixed(2)}</td>)}
+                </tr>
+
+                {/* 4. Cash Reconciliation */}
+                <tr className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                  <td className="py-2 px-3 sticky left-0 bg-slate-100 z-10 font-sans">NET CHANGE IN CASH & EQUIVALENTS</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className={`py-2 px-3 text-right font-bold ${r.net_change_cash >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{r.net_change_cash?.toFixed(2)}</td>)}
+                </tr>
+                <tr>
+                  <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-600 pl-6">Cash & Equivalents at Beginning of Period</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{r.beginning_cash?.toFixed(2)}</td>)}
+                </tr>
+                <tr className="bg-blue-600 text-white font-bold border-t-2 border-blue-700">
+                  <td className="py-2.5 px-3 sticky left-0 bg-blue-600 z-10 font-sans">CASH & EQUIVALENTS AT END OF PERIOD (Balance Sheet Cash)</td>
+                  {cfsRows.map((r, idx) => <td key={idx} className="py-2.5 px-3 text-right text-white font-bold">{r.ending_cash?.toFixed(2)}</td>)}
                 </tr>
               </tbody>
             </table>
