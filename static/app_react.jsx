@@ -5431,9 +5431,48 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
               <Icon name="GraduationCap" size={13} className="text-blue-400" />
               <span>Author & Academic</span>
             </h4>
+            <div className="text-[11px] text-slate-300 mb-2">
+              <span className="font-bold text-white text-xs">Ahmad Farhan</span> <span className="text-blue-400 font-mono text-[11px]">(Abas)</span>
+              <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                Engineering Physics (ITS) • MBA Finance Candidate (SBM ITB)
+              </p>
+            </div>
             <p className="text-[11px] text-slate-400 leading-relaxed mb-2.5">
               Master of Business Administration (MBA) • <strong className="text-slate-200">MM6026</strong> Digital Business Valuation. School of Business and Management (SBM ITB).
             </p>
+
+            {/* Social & Direct Profile Pills */}
+            <div className="flex items-center space-x-2 mb-3">
+              <a
+                href="https://www.linkedin.com/in/afenterprisefarhan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-1 bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-blue-300 hover:text-white border border-[#0077B5]/40 rounded-xs text-[10px] font-mono flex items-center space-x-1 transition cursor-pointer"
+                title="LinkedIn Profile"
+              >
+                <Icon name="Linkedin" size={11} />
+                <span>LinkedIn</span>
+              </a>
+              <a
+                href="https://github.com/celeebi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-xs text-[10px] font-mono flex items-center space-x-1 transition cursor-pointer"
+                title="GitHub Profile (@celeebi)"
+              >
+                <Icon name="Github" size={11} />
+                <span>GitHub</span>
+              </a>
+              <button
+                onClick={() => onNavigate('about')}
+                className="px-2 py-1 bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 hover:text-white border border-blue-800/50 rounded-xs text-[10px] font-mono flex items-center space-x-1 transition cursor-pointer"
+                title="View Full Author Bio"
+              >
+                <Icon name="User" size={11} />
+                <span>Bio</span>
+              </button>
+            </div>
+
             <div className="text-[11px] text-slate-400 space-y-1.5 font-mono">
               <div>Campus: SBM ITB, Bandung, ID</div>
               <div>
@@ -5627,6 +5666,91 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
               <span className="text-slate-500">Author Personal Email:</span>
               <a href="mailto:afenterprisefarhan@gmail.com" className="font-bold text-slate-900 hover:underline">afenterprisefarhan@gmail.com</a>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* About the Author & Developer */}
+      <div className="bg-gradient-to-br from-[#0A1120] via-slate-900 to-[#0e172a] text-white rounded-xs p-6 sm:p-7 border border-slate-800 shadow-md space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-13 h-13 rounded-full bg-blue-600 text-white font-mono font-bold text-lg flex items-center justify-center border-2 border-blue-400/50 shadow-md ring-4 ring-blue-500/10 shrink-0">
+              AF
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-bold text-white tracking-tight">Ahmad Farhan</h2>
+                <span className="text-xs text-blue-400 font-mono font-medium">(Abas)</span>
+              </div>
+              <p className="text-xs text-slate-300 font-mono mt-0.5">
+                Engineering Physics (ITS) • MBA Candidate, Finance (SBM ITB)
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-mono bg-blue-950/80 text-blue-300 border border-blue-800/80 px-2.5 py-1 rounded-xs font-semibold tracking-wide">
+              QUANTITATIVE FINANCE
+            </span>
+            <span className="text-[10px] font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 px-2.5 py-1 rounded-xs font-semibold tracking-wide">
+              SYSTEM ARCHITECT
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-3.5 text-xs text-slate-300 leading-relaxed">
+          <p>
+            Hi, I’m <strong className="text-white font-semibold">Ahmad Farhan</strong> (often called <em>Abas</em>). With a background in <strong className="text-slate-100 font-semibold">Engineering Physics from Institut Teknologi Sepuluh Nopember (ITS)</strong> and currently pursuing an <strong className="text-slate-100 font-semibold">MBA with a concentration in Finance at SBM ITB</strong>, I operate at the intersection of quantitative rigor and financial analysis.
+          </p>
+          <p>
+            I built this web application to simplify and streamline core business valuation frameworks—translating complex financial modeling, discounted cash flows, and intrinsic valuation theories into an intuitive, accessible tool for students, analysts, and practitioners alike.
+          </p>
+          <div className="bg-slate-950/70 border border-slate-800/80 p-3.5 rounded-xs text-[11px] text-slate-300 flex items-start space-x-2.5">
+            <Icon name="Activity" size={16} className="text-amber-400 shrink-0 mt-0.5" />
+            <span>
+              When I’m not building models or analyzing statements, you can usually find me on the <strong className="text-white font-medium">badminton court</strong> or digging into <strong className="text-white font-medium">behavioral economics</strong> and <strong className="text-white font-medium">complex systems</strong>.
+            </span>
+          </div>
+        </div>
+
+        {/* Connect & Feedback Channels */}
+        <div className="pt-2 border-t border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
+            <Icon name="Globe" size={13} className="text-blue-400" />
+            <span>Connect & Feedback:</span>
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="https://www.linkedin.com/in/afenterprisefarhan"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-blue-300 hover:text-white border border-[#0077B5]/50 rounded-xs text-xs font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Icon name="Linkedin" size={13} />
+              <span>LinkedIn</span>
+            </a>
+            <a
+              href="https://github.com/celeebi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 rounded-xs text-xs font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Icon name="Github" size={13} />
+              <span>GitHub (@celeebi)</span>
+            </a>
+            <a
+              href="mailto:afenterprisefarhan@gmail.com"
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 rounded-xs text-xs font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Icon name="Mail" size={13} />
+              <span>afenterprisefarhan@gmail.com</span>
+            </a>
+            <a
+              href="mailto:29125329@mahasiswa.itb.ac.id"
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 border border-slate-700 rounded-xs text-xs font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Icon name="GraduationCap" size={13} />
+              <span>29125329@mahasiswa.itb.ac.id</span>
+            </a>
           </div>
         </div>
       </div>
@@ -5877,22 +6001,22 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
 
         {/* Right Column (5 cols): Campus Coordinates & FAQ */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Author & Academic Coordinates */}
+          {/* Author Profile & Academic Coordinates */}
           <div className="bg-[#0A1120] text-white rounded-xs p-5 border border-slate-800 shadow-2xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center space-x-3">
-                <AcademicLogo
-                  src="/static/img/university_logo.png"
-                  alt="University Logo"
-                  label="SBM ITB"
-                  height={32}
-                />
-                <AcademicLogo
-                  src="/static/img/course_logo.png"
-                  alt="Course Logo"
-                  label="MM6026"
-                  height={32}
-                />
+                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-mono font-bold text-sm flex items-center justify-center border border-blue-400/50 shadow-sm shrink-0">
+                  AF
+                </div>
+                <div>
+                  <div className="flex items-center space-x-1.5">
+                    <h3 className="font-bold text-sm text-white">Ahmad Farhan</h3>
+                    <span className="text-xs text-blue-400 font-mono">(Abas)</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300 font-mono">
+                    Engineering Physics (ITS) • MBA SBM ITB
+                  </p>
+                </div>
               </div>
               <span className="text-[10px] font-mono bg-blue-900/60 text-blue-300 border border-blue-700/50 px-2 py-0.5 rounded-xs font-semibold">
                 MBA CANDIDATE
@@ -5900,7 +6024,33 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
             </div>
 
             <div className="space-y-3 text-xs text-slate-300">
-              <div className="flex items-start space-x-2.5">
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Operating at the intersection of quantitative rigor and financial modeling. Active in badminton, behavioral economics, and complex systems.
+              </p>
+
+              {/* Direct Connect Pills */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                <a
+                  href="https://www.linkedin.com/in/afenterprisefarhan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 bg-[#0077B5]/20 hover:bg-[#0077B5]/30 text-blue-300 hover:text-white border border-[#0077B5]/40 rounded-xs text-[11px] font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+                >
+                  <Icon name="Linkedin" size={12} />
+                  <span>LinkedIn Profile</span>
+                </a>
+                <a
+                  href="https://github.com/celeebi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 rounded-xs text-[11px] font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+                >
+                  <Icon name="Github" size={12} />
+                  <span>GitHub (@celeebi)</span>
+                </a>
+              </div>
+
+              <div className="flex items-start space-x-2.5 pt-2 border-t border-slate-800/80">
                 <Icon name="GraduationCap" size={16} className="text-blue-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-white block">Academic Program</span>
