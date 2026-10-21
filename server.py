@@ -28,11 +28,16 @@ from src.models.dcf import DCFModel
 from src.models.multiples import RelativeValuationModel
 from src.models.rim import ResidualIncomeModel
 from src.models.ddm import DividendDiscountModel
+from src.models.rnav import RNAVModel
+from src.models.monte_carlo import MonteCarloEngine
+from src.models.eva import EVAModel
 from src.models.scenarios import ScenarioForecaster
 from src.models.ensemble import ValuationEnsemble
 from src.models.three_statement import ThreeStatementModel
 from src.analytics.audit_trail import ValuationAuditTrail
 from src.analytics.sensitivity import SensitivityMatrix
+from src.analytics.tornado import TornadoEngine
+from src.analytics.dupont import DuPontEngine
 from src.analytics.exporter import ExcelModelExporter
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -269,6 +274,51 @@ async def recalculate(request):
             "proofs": ddm_res["proofs"],
             "schedule": ddm_res["schedule"].to_dict(orient="records")
         }
+
+        # 14. Advanced Institutional Valuation & Risk Analytics (Option A)
+        m0 = margins[0] if margins else 0.50
+        rnav_res = RNAVModel.calculate_rnav(
+            shares_outstanding=shares_b,
+            cash_and_equivalents=cash * 1000.0,
+            total_debt=debt * 1000.0,
+            other_liabilities=mi * 1000.0
+        )
+        monte_carlo_res = MonteCarloEngine.run_simulation(
+            base_revenue=base_revenue * 1000.0,
+            shares_outstanding=shares_b,
+            net_debt=(debt - cash) * 1000.0,
+            mean_wacc=live_wacc,
+            mean_terminal_g=terminal_g,
+            mean_ebitda_margin=m0,
+            current_market_price=float(company.get("current_price", 270.0)),
+            num_simulations=int(payload.get("monte_carlo_runs", 10000))
+        )
+        eva_res = EVAModel.calculate_eva(
+            base_revenue=base_revenue * 1000.0,
+            ebitda_margin=m0,
+            wacc=live_wacc,
+            shares_outstanding=shares_b,
+            net_debt=(debt - cash) * 1000.0,
+            current_market_price=float(company.get("current_price", 270.0))
+        )
+        tornado_res = TornadoEngine.calculate_tornado(
+            base_revenue=base_revenue * 1000.0,
+            base_wacc=live_wacc,
+            base_terminal_g=terminal_g,
+            base_ebitda_margin=m0,
+            shares_outstanding=shares_b,
+            net_debt=(debt - cash) * 1000.0
+        )
+        dupont_res = DuPontEngine.calculate_5stage(
+            revenue=base_revenue * 1000.0,
+            ebit=(base_revenue * m0 * 0.90) * 1000.0,
+            ebt=(base_revenue * 0.38) * 1000.0,
+            net_income=float(hist.get("net_income", [2.35])[-1]) * 1000.0,
+            total_assets=float(hist.get("total_assets", [33.8])[-1]) * 1000.0,
+            total_equity=float(hist.get("total_equity", [22.8])[-1]) * 1000.0,
+            ticker=ticker
+        )
+
         return JSONResponse({
             "status": "success",
             "company": company,
@@ -293,6 +343,11 @@ async def recalculate(request):
             },
             "rim": rim_res,
             "ddm": ddm_out,
+            "rnav": rnav_res,
+            "monte_carlo": monte_carlo_res,
+            "eva": eva_res,
+            "tornado": tornado_res,
+            "dupont": dupont_res,
             "ensemble": ensemble_res,
             "scenarios": {
                 "bear": {"price": scenarios_res["bear"]["price"], "schedule": scenarios_res["bear"]["schedule"].to_dict(orient="records")},
@@ -409,12 +464,85 @@ async def export_excel(request):
         return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 
+async def get_rnav(request):
+    """Calculates Revalued Net Asset Value (RNAV) for property equities."""
+    try:
+        if request.method == "POST":
+            payload = await request.json()
+        else:
+            payload = dict(request.query_params)
+        res = RNAVModel.calculate_rnav(
+            investment_properties_noi=float(payload.get("noi", 2450.0)),
+            cap_rate=float(payload.get("cap_rate", 0.08)),
+            land_bank_hectares=float(payload.get("hectares", 285.0)),
+            target_nav_discount=float(payload.get("discount", 0.25))
+        )
+        return JSONResponse({"status": "success", "data": res})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+async def get_monte_carlo(request):
+    """Executes 10,000-run Monte Carlo DCF simulation with probabilistic confidence intervals."""
+    try:
+        if request.method == "POST":
+            payload = await request.json()
+        else:
+            payload = dict(request.query_params)
+        runs = int(payload.get("num_simulations", 10000))
+        res = MonteCarloEngine.run_simulation(num_simulations=runs)
+        return JSONResponse({"status": "success", "data": res})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+async def get_eva(request):
+    """Calculates Stern Stewart Economic Value Added (EVA) and Market Value Added (MVA)."""
+    try:
+        if request.method == "POST":
+            payload = await request.json()
+        else:
+            payload = dict(request.query_params)
+        res = EVAModel.calculate_eva()
+        return JSONResponse({"status": "success", "data": res})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+async def get_tornado(request):
+    """Calculates two-sided valuation sensitivities sorted by swing in Tornado diagram format."""
+    try:
+        if request.method == "POST":
+            payload = await request.json()
+        else:
+            payload = dict(request.query_params)
+        res = TornadoEngine.calculate_tornado()
+        return JSONResponse({"status": "success", "data": res})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+async def get_dupont(request):
+    """Decomposes ROE into 5 institutional stages with property peer benchmarking."""
+    try:
+        ticker = request.query_params.get("ticker", "PWON.JK")
+        res = DuPontEngine.calculate_5stage(ticker=ticker)
+        return JSONResponse({"status": "success", "data": res})
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
 routes = [
     Route("/", endpoint=index, methods=["GET"]),
     Route("/api/coverage", endpoint=get_coverage, methods=["GET"]),
     Route("/api/company", endpoint=get_company, methods=["GET"]),
     Route("/api/recalculate", endpoint=recalculate, methods=["POST"]),
     Route("/api/export-excel", endpoint=export_excel, methods=["POST"]),
+    Route("/api/rnav", endpoint=get_rnav, methods=["GET", "POST"]),
+    Route("/api/monte-carlo", endpoint=get_monte_carlo, methods=["GET", "POST"]),
+    Route("/api/eva", endpoint=get_eva, methods=["GET", "POST"]),
+    Route("/api/tornado", endpoint=get_tornado, methods=["GET", "POST"]),
+    Route("/api/dupont", endpoint=get_dupont, methods=["GET"]),
 ]
 
 app = Starlette(routes=routes)
