@@ -5494,7 +5494,7 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
                 <a href="mailto:afenterprisefarhan@gmail.com" className="text-blue-400 hover:underline">afenterprisefarhan@gmail.com</a>
               </div>
               <div className="pt-1 text-[10px] text-slate-500">
-                Release: <span className="text-slate-400">develop_further (v1.2.0)</span>
+                Release: <span className="text-slate-400">latest (v1.2.0)</span>
               </div>
             </div>
           </div>
