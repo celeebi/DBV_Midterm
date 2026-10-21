@@ -90,13 +90,15 @@ async def recalculate(request):
         w_params = payload.get("wacc_params", {})
         rf = float(w_params.get("rf", 6.60)) / 100.0
         beta = float(w_params.get("beta", company.get("beta", 0.75)))
-        erp = float(w_params.get("erp", 7.20)) / 100.0
+        mature_erp = float(w_params.get("mature_erp", 5.00)) / 100.0
+        crp = float(w_params.get("crp", 2.16)) / 100.0
+        erp_val = float(w_params["erp"]) / 100.0 if "erp" in w_params and w_params["erp"] is not None else None
         kd_pre = float(w_params.get("kd_pre", 6.50)) / 100.0
         wd = float(w_params.get("wd", 20.0)) / 100.0
         tax_rate = float(w_params.get("tax_rate", 22.0)) / 100.0
 
         wacc_res = CapitalStructureModel.calculate_wacc(
-            rf=rf, beta=beta, erp=erp, kd_pre=kd_pre, tax_rate=tax_rate, wd=wd
+            rf=rf, beta=beta, erp=erp_val, mature_erp=mature_erp, crp=crp, kd_pre=kd_pre, tax_rate=tax_rate, wd=wd
         )
         live_wacc = wacc_res["wacc"]
 
@@ -532,6 +534,36 @@ async def get_dupont(request):
         return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 
+async def get_wacc(request):
+    """Calculates granular fundamental CAPM WACC and returns step-by-step LaTeX proofs."""
+    try:
+        params = {}
+        if request.method == "POST":
+            params = await request.json()
+        else:
+            params = dict(request.query_params)
+        
+        rf = float(params.get("rf", 6.60)) / 100.0
+        beta = float(params.get("beta", 0.75))
+        mature_erp = float(params.get("mature_erp", 5.00)) / 100.0
+        crp = float(params.get("crp", 2.16)) / 100.0
+        erp_val = float(params["erp"]) / 100.0 if "erp" in params and params["erp"] is not None else None
+        kd_pre = float(params.get("kd_pre", 6.50)) / 100.0
+        wd = float(params.get("wd", 20.0)) / 100.0
+        tax_rate = float(params.get("tax_rate", 22.0)) / 100.0
+
+        res = CapitalStructureModel.calculate_wacc(
+            rf=rf, beta=beta, erp=erp_val, mature_erp=mature_erp, crp=crp, kd_pre=kd_pre, tax_rate=tax_rate, wd=wd
+        )
+        return JSONResponse({
+            "status": "success",
+            "data": res,
+            "provenance": INDONESIA_MACRO.get("provenance", {})
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
 routes = [
     Route("/", endpoint=index, methods=["GET"]),
     Route("/api/coverage", endpoint=get_coverage, methods=["GET"]),
@@ -543,6 +575,7 @@ routes = [
     Route("/api/eva", endpoint=get_eva, methods=["GET", "POST"]),
     Route("/api/tornado", endpoint=get_tornado, methods=["GET", "POST"]),
     Route("/api/dupont", endpoint=get_dupont, methods=["GET"]),
+    Route("/api/wacc", endpoint=get_wacc, methods=["GET", "POST"]),
 ]
 
 app = Starlette(routes=routes)

@@ -54,7 +54,7 @@ python server.py
 ```
 
 ### Automated Test Verification
-Run pytest to verify all 31 corporate finance tests across 10 test suites:
+Run pytest to verify all 32 corporate finance tests across 10 test suites:
 ```powershell
 .\.venv\Scripts\pytest.exe -v
 ```
@@ -139,6 +139,19 @@ While the platform is calibrated to **`PWON.JK`** (PT Pakuwon Jati Tbk) as its p
   - **⚡ Auto-Fade Helper (Y6–Y10)** button
   - **Macro Convergence Warning** banner
 - **Operating Margins & Reinvestment**: EBITDA margin, statutory tax rate (22%), CapEx % of revenue, D&A %, and NWC intensity.
+- **Section 3: Cost of Capital & Fundamental CAPM Modeler**:
+  - Real-time reactive cards for **Hurdle WACC** and **Cost of Equity ($K_e$)**.
+  - Sliders and numeric inputs for:
+    - **Equity Beta ($\beta$)**: Scraped live from Yahoo Finance with property sector fallbacks.
+    - **Risk-Free Rate ($R_f$)**: Bank Indonesia / Ministry of Finance 10Y Sovereign Bond Yield (INDOGB 10Y: 6.60%).
+    - **Mature Market ERP**: Damodaran mature market equity baseline (5.00%).
+    - **Country Risk Premium (CRP)**: Damodaran Baa2 sovereign default spread / equity volatility premium (2.16%).
+    - **Pre-Tax Cost of Debt ($K_d$)**: Effective commercial borrowing rate (6.50%).
+    - **Debt Weight ($W_d$)**: Capital structure gearing from balance sheet.
+    - **Statutory Corporate Tax Rate ($t$)**: UU HPP statutory rate (22.0%).
+    - **Terminal Growth Rate ($g$)** and **Exit Multiple ($x$)**.
+  - **Interactive Hoverable Data Provenance Notes (`[ⓘ]`)**: Rich tooltips explaining source citations, scraping methodologies, and valuation sensitivities.
+  - **"Reset CAPM"** button restoring scraped/calibrated defaults in 1 click.
 - **Section 4: Model Weight Composition & Real-Time Donut**:
   - Individual sliders for DCF, Comps, RIM, and DDM weights with **full `0%` support**.
   - Live SVG Donut chart displaying percentage allocations in real time.
@@ -230,6 +243,30 @@ Ranks valuation input drivers by their two-sided impact on Target Price:
 Deconstructs Return on Equity into five distinct operational and financial levers:
 $$\text{ROE} = \underbrace{\frac{\text{Net Income}}{\text{EBT}}}_{\text{Tax Burden}} \times \underbrace{\frac{\text{EBT}}{\text{EBIT}}}_{\text{Interest Burden}} \times \underbrace{\frac{\text{EBIT}}{\text{Revenue}}}_{\text{Operating Margin}} \times \underbrace{\frac{\text{Revenue}}{\text{Assets}}}_{\text{Asset Turnover}} \times \underbrace{\frac{\text{Assets}}{\text{Equity}}}_{\text{Financial Leverage}}$$
 The terminal displays the subject company's five ratios alongside Indonesian property sector peer benchmarks, highlighting whether high ROE stems from superior operating profitability or excessive financial leverage.
+
+### F. Fundamental CAPM Modeler & Live Data Provenance Reference
+The Cost of Capital engine computes hurdle rates from primary macroeconomic and company data:
+1. **Total Equity Risk Premium**:
+   $$\text{ERP}_{\text{total}} = \text{Mature Market ERP} + \text{Country Risk Premium (CRP)}$$
+   Default: $5.00\% + 2.16\% = 7.16\% \sim 7.20\%$.
+2. **Cost of Equity (CAPM)**:
+   $$K_e = R_f + \beta \times \text{ERP}_{\text{total}}$$
+3. **After-Tax Cost of Debt**:
+   $$K_{d,\text{after}} = K_d \times (1 - t)$$
+4. **Blended Hurdle WACC**:
+   $$\text{WACC} = (W_e \times K_e) + (W_d \times K_{d,\text{after}})$$
+
+| Parameter | Default Value | Primary Data Source | Scraping / Calculation Methodology | Valuation Impact |
+| :--- | :--- | :--- | :--- | :--- |
+| **Equity Beta ($\beta$)** | 0.75 (PWON) | Yahoo Finance Live API | 5-year monthly regression against IHSG ($N=60$). | Scales equity risk premium; increases $K_e$. |
+| **Risk-Free Rate ($R_f$)** | 6.60% | Bank Indonesia / DJPPR | Secondary market YTM on 10Y Indonesian Sovereign Bond (`INDOGB 10Y`). | Baseline hurdle rate for all cash flows. |
+| **Mature Market ERP** | 5.00% | Prof. Aswath Damodaran | Implied equity premium over US Treasuries in developed markets. | Core equity risk foundation. |
+| **Country Risk Premium (CRP)** | 2.16% | Prof. Aswath Damodaran | Moody's Baa2 spread ($1.50\%$) $\times$ relative equity/bond volatility ($1.44\text{x}$). | Emerging market macro risk compensation. |
+| **Cost of Debt ($K_d$)** | 6.50% | Audited Financial Notes | Effective weighted borrowing interest rate on facilities and bonds. | Pre-tax debt funding cost. |
+| **Debt Weight ($W_d$)** | 20.0% | Audited Balance Sheet | Market gearing: $\text{Debt} / (\text{Debt} + \text{Market Cap})$. | Capital structure weighting. |
+| **Corporate Tax Rate ($t$)** | 22.0% | UU HPP No. 7/2021 | Indonesian statutory corporate tax rate under UU HPP. | Determines interest tax shield ($1 - t$). |
+| **Terminal Growth ($g$)** | 1.50% | Damodaran / GDP Cap | Steady-state nominal perpetuity growth rate (capped at 4.0%). | Terminal Gordon Growth perpetuity. |
+| **Exit Multiple ($x$)** | 6.5x | Property Peer Comps | Median EV/EBITDA of Indonesian property comps universe. | Terminal multiple valuation cross-check. |
 
 ---
 

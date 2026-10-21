@@ -369,6 +369,203 @@ const BREAKING_WIRE_HEADLINES = [
   { id: 6, ticker: 'ASII.JK', sentiment: 'BULLISH', time: 'LIVE WIRE', headline: 'ASII: Generates IDR 22.5T free cash flow; pristine net cash balance sheet supports 7.2% dividend yield anchor.' }
 ];
 
+// Parameter Data Provenance & Academic Metadata Registry
+const PARAM_PROVENANCE = {
+  beta: {
+    title: "Equity Beta (β)",
+    badge: "LIVE YAHOO API",
+    badgeColor: "bg-blue-900 text-blue-200 border-blue-500",
+    source: "Yahoo Finance Live API",
+    citation: "5-Year Monthly Regression against Jakarta Composite Index (IHSG)",
+    methodology: "Calculated as Cov(R_stock, R_ihsg) / Var(R_ihsg) over 60 monthly periods. Measures systemic sensitivity and financial/operating leverage.",
+    impact: "Scales the Equity Risk Premium. Raising beta increases Cost of Equity (Ke) and lowers DCF, RIM, and DDM fair values.",
+    defaultText: "0.75 (PWON.JK) / Scraped live for any searched equity"
+  },
+  rf: {
+    title: "Risk-Free Rate (Rf)",
+    badge: "BANK INDONESIA 10Y",
+    badgeColor: "bg-emerald-900 text-emerald-200 border-emerald-500",
+    source: "Bank Indonesia / Ministry of Finance (DJPPR)",
+    citation: "10-Year Republic of Indonesia Benchmark Government Bond Yield (INDOGB 10Y)",
+    methodology: "Secondary market yield-to-maturity (YTM) of sovereign benchmark bond. Zero-default risk rate for IDR capital assets.",
+    impact: "Lifts the baseline discount hurdle for both equity and debt capital across all valuation models.",
+    defaultText: "6.60% (Secondary market benchmark)"
+  },
+  matureErp: {
+    title: "Mature Market Equity Risk Premium",
+    badge: "DAMODARAN MATURE",
+    badgeColor: "bg-purple-900 text-purple-200 border-purple-500",
+    source: "Prof. Aswath Damodaran (NYU Stern School of Business)",
+    citation: "Damodaran Online - Historical & Implied Mature Market ERP Dataset",
+    methodology: "Implied premium demanded by equity investors over 10-year US Treasuries in developed AAA-rated economies based on dividend yields and buyback payouts.",
+    impact: "Foundational baseline equity risk return before emerging market country risk adjustments.",
+    defaultText: "5.00% (Jan 2026 Damodaran update)"
+  },
+  crp: {
+    title: "Country Risk Premium (CRP)",
+    badge: "DAMODARAN CRP",
+    badgeColor: "bg-purple-900 text-purple-200 border-purple-500",
+    source: "Prof. Aswath Damodaran (NYU Stern School of Business)",
+    citation: "Country Default Spreads and Risk Premiums (Indonesia Baa2 / BBB)",
+    methodology: "Computed as Indonesia's Moody's Baa2 sovereign default spread (1.50%) scaled by emerging market relative equity-to-bond volatility (1.44x) = 2.16%.",
+    impact: "Compensates international investors for Indonesian macroeconomic, currency, and regulatory volatility.",
+    defaultText: "2.16% (Sovereign Spread: 1.50% × 1.44)"
+  },
+  kdPre: {
+    title: "Pre-Tax Cost of Debt (Kd)",
+    badge: "AUDITED BORROWING",
+    badgeColor: "bg-amber-900 text-amber-200 border-amber-500",
+    source: "Audited Financial Statements Notes / Bank Indonesia",
+    citation: "Effective Bank Lending Rate & Corporate Bond Coupon (BI 7DRR + Corporate Spread)",
+    methodology: "Effective weighted borrowing cost on outstanding bank credit facilities and corporate rupiah debt notes.",
+    impact: "Direct cost of debt capital. Mitigated by the corporate income tax shield: Kd(after) = Kd × (1 - t).",
+    defaultText: "6.50% (Effective corporate borrowing rate)"
+  },
+  wd: {
+    title: "Debt Weight (Wd) / Leverage",
+    badge: "CAPITAL STRUCTURE",
+    badgeColor: "bg-slate-800 text-slate-200 border-slate-600",
+    source: "Audited Balance Sheet & Market Capitalization",
+    citation: "Gearing = Total Debt / (Total Debt + Market Equity Value)",
+    methodology: "Proportion of interest-bearing debt in the firm's total enterprise funding structure.",
+    impact: "Balances the mix between higher-cost equity (Ke ~12%) and lower-cost after-tax debt (Kd ~5.07%).",
+    defaultText: "20.0% (Property sector target leverage)"
+  },
+  taxRate: {
+    title: "Corporate Tax Rate (t)",
+    badge: "UU HPP 22%",
+    badgeColor: "bg-emerald-900 text-emerald-200 border-emerald-500",
+    source: "Indonesian Directorate General of Taxes (DJP)",
+    citation: "Harmonization of Tax Regulations Law No. 7/2021 (UU HPP Pasal 17)",
+    methodology: "Statutory corporate income tax rate applicable to Indonesian corporate earnings.",
+    impact: "Determines the debt interest deduction shield and converts EBIT to NOPAT.",
+    defaultText: "22.0% (Statutory rate)"
+  },
+  terminalGrowth: {
+    title: "Terminal Perpetuity Growth (g)",
+    badge: "DAMODARAN GDP CAP",
+    badgeColor: "bg-blue-900 text-blue-200 border-blue-500",
+    source: "Aswath Damodaran & McKinsey Corporate Finance",
+    citation: "Sustainable Indonesian Long-Term Nominal GDP Growth Boundary",
+    methodology: "Long-term perpetual growth rate for Gordon Growth cash flows after Year 10. Cannot exceed risk-free rate or national GDP.",
+    impact: "Massive leverage on terminal value. Capped at 4.0% to prevent infinite economic value paradox.",
+    defaultText: "1.50% (Conservative steady-state)"
+  },
+  exitEbitdaMultiple: {
+    title: "Terminal Exit Multiple (EV/EBITDA)",
+    badge: "PROPERTY PEER COMPS",
+    badgeColor: "bg-indigo-900 text-indigo-200 border-indigo-500",
+    source: "IDX Property Universe Median Comps",
+    citation: "10-Year Normalized EV/EBITDA Multiple for Commercial Developers",
+    methodology: "Terminal multiple cross-check applied to Year 10 EBITDA.",
+    impact: "Blended 50/50 with Gordon Growth perpetuity to compute robust Enterprise Value.",
+    defaultText: "6.5x (Commercial mall peer median)"
+  }
+};
+
+// Interactive Hoverable Data Provenance Tooltip Component
+function ProvenanceTooltip({ paramKey }) {
+  const [show, setShow] = useState(false);
+  const meta = PARAM_PROVENANCE[paramKey];
+  if (!meta) return null;
+
+  return (
+    <div 
+      className="relative inline-flex items-center ml-1"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      <button 
+        type="button" 
+        onClick={(e) => { e.preventDefault(); setShow(!show); }}
+        className="text-slate-400 hover:text-blue-600 transition-colors cursor-pointer p-0.5 rounded-full hover:bg-slate-100"
+        title="View Data Provenance & Methodology"
+        aria-label="Data Provenance"
+      >
+        <Icon name="Info" size={13} />
+      </button>
+
+      {show && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-72 sm:w-80 bg-slate-900 text-white rounded-md shadow-2xl border border-slate-700 p-3 z-50 text-[11px] leading-snug animate-fadeIn pointer-events-none text-left font-sans">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-800 gap-1">
+            <span className="font-bold font-mono text-slate-100">{meta.title}</span>
+            <span className={`px-1.5 py-0.5 text-[9px] font-mono font-bold rounded-xs border ${meta.badgeColor}`}>
+              {meta.badge}
+            </span>
+          </div>
+          <div className="mt-2 space-y-1.5 text-slate-300">
+            <div>
+              <span className="text-slate-400 font-medium">Source: </span>
+              <span className="text-slate-200 font-semibold">{meta.source}</span>
+              <p className="text-[10px] text-slate-400 italic font-serif mt-0.5">{meta.citation}</p>
+            </div>
+            <div>
+              <span className="text-slate-400 font-medium">Methodology: </span>
+              <span className="text-slate-300">{meta.methodology}</span>
+            </div>
+            <div className="pt-1 border-t border-slate-800/80">
+              <span className="text-amber-400 font-medium">Valuation Impact: </span>
+              <span className="text-slate-200">{meta.impact}</span>
+            </div>
+            <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+              <span>Baseline Default:</span>
+              <span className="text-emerald-400 font-semibold">{meta.defaultText}</span>
+            </div>
+          </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-900"></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Helper: Calculate Granular CAPM & Cost of Debt Parameters
+function computeCapmParameters(assumptions = {}, company = {}) {
+  const rf = assumptions.rf !== undefined && assumptions.rf !== null ? Number(assumptions.rf) : 6.60;
+  const beta = assumptions.beta !== undefined && assumptions.beta !== null ? Number(assumptions.beta) : (company.beta || 0.75);
+  const matureErp = assumptions.matureErp !== undefined && assumptions.matureErp !== null ? Number(assumptions.matureErp) : 5.00;
+  const crp = assumptions.crp !== undefined && assumptions.crp !== null ? Number(assumptions.crp) : 2.16;
+  const totalErp = +(matureErp + crp).toFixed(2);
+  const kdPre = assumptions.kdPre !== undefined && assumptions.kdPre !== null ? Number(assumptions.kdPre) : 6.50;
+  const taxRate = assumptions.taxRate !== undefined && assumptions.taxRate !== null ? Number(assumptions.taxRate) : 22.0;
+  const wd = assumptions.wd !== undefined && assumptions.wd !== null ? Number(assumptions.wd) : 20.0;
+  const we = +(100.0 - wd).toFixed(1);
+
+  // Cost of Equity via CAPM: Ke = Rf + Beta * (Mature ERP + CRP)
+  const ke = +(rf + (beta * totalErp)).toFixed(2);
+  // After-Tax Cost of Debt: Kd(after) = Kd * (1 - t)
+  const kdAfter = +(kdPre * (1.0 - (taxRate / 100.0))).toFixed(2);
+  // Blended WACC = (We * Ke) + (Wd * KdAfter)
+  const derivedWacc = +(((we / 100.0) * ke) + ((wd / 100.0) * kdAfter)).toFixed(2);
+
+  // Effective WACC used across valuation models
+  const effectiveWacc = assumptions.useManualWacc && assumptions.waccOverride !== undefined
+    ? Number(assumptions.waccOverride)
+    : derivedWacc;
+
+  return {
+    rf,
+    beta,
+    matureErp,
+    crp,
+    totalErp,
+    kdPre,
+    kdAfter,
+    taxRate,
+    wd,
+    we,
+    ke,
+    derivedWacc,
+    effectiveWacc,
+    proofs: {
+      erp: `Total ERP = ${matureErp.toFixed(2)}% + ${crp.toFixed(2)}% = ${totalErp.toFixed(2)}%`,
+      ke: `Ke = ${rf.toFixed(2)}% + (${beta.toFixed(2)} × ${totalErp.toFixed(2)}%) = ${ke.toFixed(2)}%`,
+      kd: `Kd(after) = ${kdPre.toFixed(2)}% × (1 - ${taxRate.toFixed(1)}%) = ${kdAfter.toFixed(2)}%`,
+      wacc: `WACC = (${we.toFixed(1)}% × ${ke.toFixed(2)}%) + (${wd.toFixed(1)}% × ${kdAfter.toFixed(2)}%) = ${effectiveWacc.toFixed(2)}%`
+    }
+  };
+}
+
 // Client-side quick valuation estimator (synchronized with Python backend) - Full 10-Year Horizon
 function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
   const lastHist = company.historical && company.historical.length 
@@ -395,7 +592,8 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
 
   const marginAdj = scenarioMult === 1 ? 0 : (scenarioMult > 1 ? 2.0 : -2.5);
   const effMargin = Math.max(5, Math.min(80, (assumptions.ebitdaMargin || 50) + marginAdj));
-  const effWacc = Math.max(5.0, (assumptions.wacc || 10.42) + (scenarioMult === 1 ? 0 : (scenarioMult > 1 ? -0.5 : 0.8)));
+  const capm = computeCapmParameters(assumptions, company);
+  const effWacc = Math.max(5.0, (assumptions.wacc ?? capm.effectiveWacc) + (scenarioMult === 1 ? 0 : (scenarioMult > 1 ? -0.5 : 0.8)));
   const effTgr = Math.min(effWacc - 0.5, Math.max(0.5, assumptions.terminalGrowth || 1.5));
 
   let prevRev = baseRev;
@@ -458,7 +656,7 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
 
   // Residual Income Model (RIM)
   const bookEquity = lastHist.netIncome ? lastHist.netIncome * 10 : 22470;
-  const ke = effWacc + 1.5;
+  const ke = capm.ke;
   const equityCharge = bookEquity * (ke / 100);
   const residualIncome = (lastHist.netIncome || 2350) - equityCharge;
   const pvResidualIncome = residualIncome / (ke / 100);
@@ -520,7 +718,8 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
     impliedUpside,
     recommendation,
     avgCompEvEbitda: +avgCompEvEbitda.toFixed(1),
-    tvPctOfEv: +((pvTerminalVal / dcfEv) * 100).toFixed(1)
+    tvPctOfEv: +((pvTerminalVal / dcfEv) * 100).toFixed(1),
+    capm
   };
 }
 
@@ -660,6 +859,13 @@ function App() {
         const cash = (hist.cash_and_equivalents || 0) * 1000;
 
         const defAssumptions = {
+          beta: d.capm_params?.beta ?? +(beta).toFixed(2),
+          rf: d.capm_params?.rf ?? 6.60,
+          matureErp: d.capm_params?.mature_erp ?? 5.00,
+          crp: d.capm_params?.crp ?? 2.16,
+          sovereignSpread: d.capm_params?.sovereign_spread ?? 1.50,
+          kdPre: d.capm_params?.kd_pre ?? 6.50,
+          wd: d.capm_params?.wd ?? 20.0,
           revGrowthY1: 10.0,
           revGrowthY2: 9.0,
           revGrowthY3: 8.0,
@@ -775,12 +981,15 @@ function App() {
       ];
       payload.terminal_g = tG;
       payload.exit_multiple = customAssumptions.exitEbitdaMultiple || 6.0;
-      if (customAssumptions.wacc) {
-        payload.wacc_params = {
-          beta: customAssumptions.beta || 0.75,
-          tax_rate: customAssumptions.taxRate || 22.0
-        };
-      }
+      payload.wacc_params = {
+        beta: customAssumptions.beta ?? (coverageCompanies.find(c => c.ticker === ticker)?.beta || 0.75),
+        rf: customAssumptions.rf ?? 6.60,
+        mature_erp: customAssumptions.matureErp ?? 5.00,
+        crp: customAssumptions.crp ?? 2.16,
+        kd_pre: customAssumptions.kdPre ?? 6.50,
+        wd: customAssumptions.wd ?? 20.0,
+        tax_rate: customAssumptions.taxRate ?? 22.0
+      };
     }
     fetch('/api/recalculate', {
       method: 'POST',
@@ -1582,12 +1791,21 @@ function App() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-4 font-sans text-xs">
-              <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50">
+              <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50 space-y-1">
                 <span className="font-mono font-bold text-blue-900 uppercase block mb-1">
-                  1. Cost of Equity (CAPM) & WACC Proof
+                  1. Fundamental CAPM Cost of Equity & WACC Proof
                 </span>
-                <MathProof latex="K_e = R_f + \beta \times ERP = 6.60\% + 0.75 \times 7.20\% = 12.00\%" />
-                <MathProof latex="WACC = \left( \frac{E}{V} \times K_e \right) + \left( \frac{D}{V} \times K_d \times (1 - t) \right) = (0.80 \times 12.00\%) + (0.20 \times 6.50\% \times 0.78) = 10.42\%" />
+                {(() => {
+                  const cpm = computeCapmParameters(activeCompany?.assumptions || {}, activeCompany);
+                  return (
+                    <>
+                      <MathProof latex={`\\text{ERP} = \\text{Mature ERP} + \\text{CRP} = ${cpm.matureErp.toFixed(2)}\\% + ${cpm.crp.toFixed(2)}\\% = ${cpm.totalErp.toFixed(2)}\\%`} />
+                      <MathProof latex={`K_e = R_f + (\\beta \\times \\text{ERP}) = ${cpm.rf.toFixed(2)}\\% + (${cpm.beta.toFixed(2)} \\times ${cpm.totalErp.toFixed(2)}\\%) = ${cpm.ke.toFixed(2)}\\%`} />
+                      <MathProof latex={`K_{d,\\text{after}} = K_d \\times (1 - t) = ${cpm.kdPre.toFixed(2)}\\% \\times (1 - ${cpm.taxRate.toFixed(1)}\\%) = ${cpm.kdAfter.toFixed(2)}\\%`} />
+                      <MathProof latex={`\\text{WACC} = (${cpm.we.toFixed(1)}\\% \\times ${cpm.ke.toFixed(2)}\\%) + (${cpm.wd.toFixed(1)}\\% \\times ${cpm.kdAfter.toFixed(2)}\\%) = ${cpm.effectiveWacc.toFixed(2)}\\%`} />
+                    </>
+                  );
+                })()}
               </div>
 
               <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50">
@@ -3127,12 +3345,21 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
               KaTeX Step-by-Step Mathematical Proofs ({company.ticker})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50">
+              <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50 space-y-1">
                 <span className="font-mono font-bold text-blue-900 uppercase block mb-1">
-                  1. WACC Proof (Indonesian Hurdle Rate)
+                  1. Fundamental CAPM & WACC Proof
                 </span>
-                <MathProof latex="K_e = R_f + \beta \times ERP = 6.60\% + 0.75 \times 7.20\% = 12.00\%" />
-                <MathProof latex="WACC = (0.80 \times 12.00\%) + (0.20 \times 6.50\% \times 0.78) = 10.42\%" />
+                {(() => {
+                  const cpm = computeCapmParameters(a, company);
+                  return (
+                    <>
+                      <MathProof latex={`\\text{ERP} = \\text{Mature ERP} + \\text{CRP} = ${cpm.matureErp.toFixed(2)}\\% + ${cpm.crp.toFixed(2)}\\% = ${cpm.totalErp.toFixed(2)}\\%`} />
+                      <MathProof latex={`K_e = R_f + (\\beta \\times \\text{ERP}) = ${cpm.rf.toFixed(2)}\\% + (${cpm.beta.toFixed(2)} \\times ${cpm.totalErp.toFixed(2)}\\%) = ${cpm.ke.toFixed(2)}\\%`} />
+                      <MathProof latex={`K_{d,\\text{after}} = K_d \\times (1 - t) = ${cpm.kdPre.toFixed(2)}\\% \\times (1 - ${cpm.taxRate.toFixed(1)}\\%) = ${cpm.kdAfter.toFixed(2)}\\%`} />
+                      <MathProof latex={`\\text{WACC} = (${cpm.we.toFixed(1)}\\% \\times ${cpm.ke.toFixed(2)}\\%) + (${cpm.wd.toFixed(1)}\\% \\times ${cpm.kdAfter.toFixed(2)}\\%) = ${cpm.effectiveWacc.toFixed(2)}\\%`} />
+                    </>
+                  );
+                })()}
               </div>
               <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50">
                 <span className="font-mono font-bold text-blue-900 uppercase block mb-1">
@@ -3632,38 +3859,122 @@ function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAss
           ))}
         </div>
 
-        {/* Column 3: Cost of Capital & Terminal Metrics */}
-        <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs space-y-3">
-          <h2 className="text-xs font-bold uppercase font-mono text-slate-800 border-b border-slate-200 pb-2">
-            3. Cost of Capital & Terminal Metrics
-          </h2>
-          {[
-            { key: 'wacc', label: 'Hurdle WACC (%)', min: 6.0, max: 16.0, step: 0.1, default: 10.4 },
-            { key: 'terminalGrowth', label: 'Terminal Growth Rate g (%)', min: 0.5, max: 4.0, step: 0.1, default: 1.5 },
-            { key: 'exitEbitdaMultiple', label: 'Terminal Exit Multiple (x)', min: 3.0, max: 15.0, step: 0.5, default: 6.5 },
-          ].map(item => (
-            <div key={item.key} className="flex items-center justify-between text-xs py-1">
-              <label className="text-slate-700 font-medium">{item.label}</label>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="range"
-                  min={item.min}
-                  max={item.max}
-                  step={item.step}
-                  value={a[item.key] ?? item.default}
-                  onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
-                  className="w-24 accent-blue-600"
-                />
-                <input
-                  type="number"
-                  step={item.step}
-                  value={a[item.key] ?? item.default}
-                  onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
-                  className="w-16 text-right font-mono font-bold text-blue-700 bg-blue-50/50 border border-blue-300 rounded-xs px-1.5 py-1"
-                />
-              </div>
+        {/* Column 3: Cost of Capital & Fundamental CAPM Modeler */}
+        <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs space-y-3.5">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div>
+              <h2 className="text-xs font-bold uppercase font-mono text-slate-800">
+                3. Cost of Capital & Fundamental CAPM Modeler
+              </h2>
+              <span className="text-[10px] text-slate-500">Live Scraped Beta, Damodaran ERP/CRP & Spreads</span>
             </div>
-          ))}
+            <button
+              onClick={() => {
+                const defs = company.defaultAssumptions || {};
+                onUpdateMultipleAssumptions({
+                  beta: defs.beta ?? (company.beta || 0.75),
+                  rf: defs.rf ?? 6.60,
+                  matureErp: defs.matureErp ?? 5.00,
+                  crp: defs.crp ?? 2.16,
+                  kdPre: defs.kdPre ?? 6.50,
+                  wd: defs.wd ?? 20.0,
+                  taxRate: defs.taxRate ?? 22.0,
+                  wacc: defs.wacc ?? 10.42
+                }, 'Restore Scraped CAPM Defaults');
+              }}
+              className="text-[10px] text-blue-700 hover:text-blue-900 font-mono font-medium flex items-center space-x-1 cursor-pointer bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-xs border border-blue-200 transition"
+              title="Reset Beta and spreads to scraped defaults"
+            >
+              <Icon name="RotateCcw" size={11} />
+              <span>Reset CAPM</span>
+            </button>
+          </div>
+
+          {/* Live CAPM Result Summary Cards */}
+          {(() => {
+            const capm = computeCapmParameters(a, company);
+            return (
+              <div className="grid grid-cols-2 gap-2 bg-slate-900 text-white p-2.5 rounded-xs font-mono shadow-inner">
+                <div className="bg-slate-800/80 p-2 rounded-xs border border-slate-700">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span>HURDLE WACC</span>
+                    <span className="text-[9px] text-emerald-400 font-bold">LIVE SYNC</span>
+                  </div>
+                  <div className="text-base font-bold text-emerald-400 mt-0.5">
+                    {capm.effectiveWacc.toFixed(2)}%
+                  </div>
+                  <div className="text-[9px] text-slate-400 mt-0.5 truncate">
+                    We: {capm.we}% | Wd: {capm.wd}%
+                  </div>
+                </div>
+
+                <div className="bg-slate-800/80 p-2 rounded-xs border border-slate-700">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span>COST OF EQUITY (Ke)</span>
+                    <span className="text-[9px] text-blue-400 font-bold">CAPM</span>
+                  </div>
+                  <div className="text-base font-bold text-blue-400 mt-0.5">
+                    {capm.ke.toFixed(2)}%
+                  </div>
+                  <div className="text-[9px] text-slate-400 mt-0.5 truncate">
+                    Kd(after): {capm.kdAfter.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Fundamental CAPM Sliders & Inputs with Hoverable Provenance Tooltip */}
+          <div className="space-y-1.5 text-xs">
+            {[
+              { key: 'beta', label: 'Equity Beta (β)', paramKey: 'beta', min: 0.20, max: 2.50, step: 0.05, default: company.beta || 0.75, accent: 'accent-blue-600' },
+              { key: 'rf', label: 'Risk-Free Rate Rf (%)', paramKey: 'rf', min: 4.0, max: 12.0, step: 0.1, default: 6.60, accent: 'accent-emerald-600' },
+              { key: 'matureErp', label: 'Mature Market ERP (%)', paramKey: 'matureErp', min: 3.0, max: 9.0, step: 0.1, default: 5.00, accent: 'accent-purple-600' },
+              { key: 'crp', label: 'Country Risk Premium CRP (%)', paramKey: 'crp', min: 0.0, max: 8.0, step: 0.1, default: 2.16, accent: 'accent-purple-600' },
+              { key: 'kdPre', label: 'Pre-Tax Cost of Debt Kd (%)', paramKey: 'kdPre', min: 4.0, max: 14.0, step: 0.1, default: 6.50, accent: 'accent-amber-600' },
+              { key: 'wd', label: 'Debt Weight Wd (%)', paramKey: 'wd', min: 0.0, max: 60.0, step: 1.0, default: 20.0, accent: 'accent-slate-700' },
+              { key: 'taxRate', label: 'Corporate Tax Rate (%)', paramKey: 'taxRate', min: 10.0, max: 35.0, step: 0.5, default: 22.0, accent: 'accent-emerald-600' },
+              { key: 'terminalGrowth', label: 'Terminal Growth Rate g (%)', paramKey: 'terminalGrowth', min: 0.5, max: 4.0, step: 0.1, default: 1.50, accent: 'accent-blue-600' },
+              { key: 'exitEbitdaMultiple', label: 'Terminal Exit Multiple (x)', paramKey: 'exitEbitdaMultiple', min: 3.0, max: 15.0, step: 0.5, default: 6.5, accent: 'accent-indigo-600' },
+            ].map(item => (
+              <div key={item.key} className="flex items-center justify-between py-0.5 border-b border-slate-100 last:border-b-0">
+                <div className="flex items-center">
+                  <label className="text-slate-700 font-medium text-[11px]">{item.label}</label>
+                  <ProvenanceTooltip paramKey={item.paramKey} />
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <input
+                    type="range"
+                    min={item.min}
+                    max={item.max}
+                    step={item.step}
+                    value={a[item.key] ?? item.default}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      onUpdateAssumption(item.key, val, item.label);
+                      const nextAssump = { ...a, [item.key]: val };
+                      const newCapm = computeCapmParameters(nextAssump, company);
+                      onUpdateAssumption('wacc', newCapm.effectiveWacc);
+                    }}
+                    className={`w-20 ${item.accent}`}
+                  />
+                  <input
+                    type="number"
+                    step={item.step}
+                    value={a[item.key] ?? item.default}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      onUpdateAssumption(item.key, val, item.label);
+                      const nextAssump = { ...a, [item.key]: val };
+                      const newCapm = computeCapmParameters(nextAssump, company);
+                      onUpdateAssumption('wacc', newCapm.effectiveWacc);
+                    }}
+                    className="w-14 text-right font-mono font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xs px-1 py-0.5 text-[11px]"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

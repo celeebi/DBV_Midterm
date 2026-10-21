@@ -172,6 +172,7 @@ $$\text{ROE} = \left(\frac{\text{Net Income}}{\text{EBT}}\right) \times \left(\f
 | **M5: Blank Screen Fix** | Oct 21 (`4a1a13f`) | Resolved Lucide UMD CDN `createElement` and bundled synchronous initial coverage data. | **Completed** |
 | **M6: Restoration & Polish** | Oct 21 (`67dd6d9`) | Universal Ticker Search, expanded live ribbon height, full 10-year forecast sliders, auto-fade, and convergence warning. | **Completed** |
 | **M7: Option A & Donut Chart** | Oct 21 (`5dd4c78`) | Branch `develop_further`: 0-weight slider fix, interactive Weight Composition Donut Chart with quick presets, RNAV, 10k Monte Carlo, EVA/MVA, Tornado, DuPont, and 10 subtabs in Valuation workspace. | **Completed** |
+| **M8: Fundamental CAPM & Provenance** | Oct 21 (`develop_further`) | Live scraped Beta from Yahoo Finance, Damodaran mature ERP (5.00%) & CRP (2.16%), Bank Indonesia 10Y Yield (6.60%), pre-tax debt cost (6.50%), interactive hoverable Provenance Tooltips (`[ⓘ]`), live WACC sync cards, and `/api/wacc` endpoint. | **Completed** |
 
 ---
 
@@ -181,13 +182,13 @@ $$\text{ROE} = \left(\frac{\text{Net Income}}{\text{EBT}}\right) \times \left(\f
 | :--- | :--- | :--- | :--- |
 | `tests/test_dcf_and_exporter.py` | DCF & Excel Exporter | Discounting arithmetic, Enterprise-to-Equity bridge, active formula creation | **100% Passed** |
 | `tests/test_ddm.py` | Dividend Discount Model | Multi-stage dividend discounting, Gordon Growth TV, 4-way triangulation | **100% Passed** |
-| `tests/test_pro_forma.py` | Pro Forma 10-Year Horizon | 10-year roll-forward, WACC formula accuracy, auto-fade interpolation | **100% Passed** |
+| `tests/test_pro_forma.py` | Pro Forma & Fundamental CAPM | 10-year roll-forward, WACC formula accuracy, mature ERP + CRP decomposition, auto-fade | **100% Passed** |
 | `tests/test_sanity_checks.py` | Model Guardrails | $g \ge \text{WACC}$ fatal error, $g > \text{GDP}$ warning, negative multiples detection | **100% Passed** |
 | `tests/test_three_statement.py` | 3-Statement Model | Articulation across IS, BS, CFS; zero-balance check ($\text{Assets} - (\text{L} + \text{E}) \equiv 0$) | **100% Passed** |
 | `tests/test_rnav.py` | Revalued Net Asset Value | GAV calculation, NOI cap rate, land bank MTM, conglomerate discount | **100% Passed** |
 | `tests/test_monte_carlo.py` | Monte Carlo Simulation | 10k runs, seed reproducibility, P10–P90 monotonicity, VaR 95%, histogram | **100% Passed** |
 | `tests/test_eva.py` | Economic Value Added | EVA identity, 10Y schedule, MVA, value destruction when ROIC < WACC | **100% Passed** |
 | `tests/test_analytics_advanced.py` | Tornado & DuPont | DCF sensitivity swing rankings, 5-stage DuPont ROE identity, peer benchmarking | **100% Passed** |
-| `tests/test_api_endpoints.py` | Starlette REST Endpoints | `/api/coverage`, `/api/recalculate`, `/api/rnav`, `/api/monte-carlo`, `/api/eva`, `/api/tornado`, `/api/dupont` | **100% Passed** |
+| `tests/test_api_endpoints.py` | Starlette REST Endpoints | `/api/coverage`, `/api/recalculate`, `/api/wacc`, `/api/rnav`, `/api/monte-carlo`, `/api/eva`, `/api/tornado`, `/api/dupont` | **100% Passed** |
 
-**Summary**: 31 passed in 2.35s (100% pass rate).
+**Summary**: 32 passed in 2.88s (100% pass rate).

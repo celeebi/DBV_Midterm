@@ -127,6 +127,13 @@ window.INITIAL_COVERAGE = [
       }
     ],
     "defaultAssumptions": {
+      "beta": 0.75,
+      "rf": 6.60,
+      "matureErp": 5.00,
+      "crp": 2.16,
+      "sovereignSpread": 1.50,
+      "kdPre": 6.50,
+      "wd": 20.0,
       "revGrowthY1": 12.0,
       "revGrowthY2": 14.0,
       "revGrowthY3": 10.0,
@@ -333,6 +340,13 @@ window.INITIAL_COVERAGE = [
       }
     ],
     "defaultAssumptions": {
+      "beta": 0.85,
+      "rf": 6.60,
+      "matureErp": 5.00,
+      "crp": 2.16,
+      "sovereignSpread": 1.50,
+      "kdPre": 6.50,
+      "wd": 22.0,
       "revGrowthY1": 10.5,
       "revGrowthY2": 9.5,
       "revGrowthY3": 9.0,
@@ -520,6 +534,13 @@ window.INITIAL_COVERAGE = [
       }
     ],
     "defaultAssumptions": {
+      "beta": 0.80,
+      "rf": 6.60,
+      "matureErp": 5.00,
+      "crp": 2.16,
+      "sovereignSpread": 1.50,
+      "kdPre": 6.50,
+      "wd": 21.0,
       "revGrowthY1": 9.2,
       "revGrowthY2": 8.8,
       "revGrowthY3": 8.0,
@@ -707,6 +728,13 @@ window.INITIAL_COVERAGE = [
       }
     ],
     "defaultAssumptions": {
+      "beta": 0.90,
+      "rf": 6.60,
+      "matureErp": 5.00,
+      "crp": 2.16,
+      "sovereignSpread": 1.50,
+      "kdPre": 6.50,
+      "wd": 28.0,
       "revGrowthY1": 8.8,
       "revGrowthY2": 8.4,
       "revGrowthY3": 7.8,
@@ -894,6 +922,13 @@ window.INITIAL_COVERAGE = [
       }
     ],
     "defaultAssumptions": {
+      "beta": 0.85,
+      "rf": 6.60,
+      "matureErp": 5.00,
+      "crp": 2.16,
+      "sovereignSpread": 1.50,
+      "kdPre": 6.50,
+      "wd": 21.5,
       "revGrowthY1": 6.5,
       "revGrowthY2": 6.0,
       "revGrowthY3": 5.5,

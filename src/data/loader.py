@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional, List
 import pandas as pd
 import numpy as np
 import yfinance as yf
+from src.data.country_data import INDONESIA_MACRO
 
 # Standard fallback baseline for PWON.JK (Audited 2021-2025 in IDR Trillion)
 # Primary benchmark ticker for MM6026 Valuation
@@ -20,6 +21,18 @@ FALLBACK_PWON_DATA: Dict[str, Any] = {
     "shares_outstanding": 48.16,  # Billions (48,159,602,400 shares)
     "market_cap": 13.00,  # Trillion IDR
     "beta": 0.75,
+    "capm_params": {
+        "beta": 0.75,
+        "rf": 6.60,
+        "mature_erp": 5.00,
+        "crp": 2.16,
+        "sovereign_spread": 1.50,
+        "total_erp": 7.16,
+        "kd_pre": 6.50,
+        "wd": 20.0,
+        "tax_rate": 22.0
+    },
+    "provenance": INDONESIA_MACRO.get("provenance", {}),
     "historical": {
         "years": [2021, 2022, 2023, 2024, 2025],
         "revenue": [4.71, 5.99, 6.20, 6.67, 7.11],
@@ -47,6 +60,18 @@ FALLBACK_ASII_DATA: Dict[str, Any] = {
     "shares_outstanding": 40.48,  # Billions
     "market_cap": 212.52,  # Trillion IDR
     "beta": 0.85,
+    "capm_params": {
+        "beta": 0.85,
+        "rf": 6.60,
+        "mature_erp": 5.00,
+        "crp": 2.16,
+        "sovereign_spread": 1.50,
+        "total_erp": 7.16,
+        "kd_pre": 6.50,
+        "wd": 21.5,
+        "tax_rate": 22.0
+    },
+    "provenance": INDONESIA_MACRO.get("provenance", {}),
     "historical": {
         "years": [2021, 2022, 2023, 2024, 2025],
         "revenue": [233.5, 301.4, 316.5, 312.8, 316.4],
@@ -146,6 +171,12 @@ class FinancialDataLoader:
                     return FALLBACK_ASII_DATA
                 historical = FinancialDataLoader._create_synthetic_history(market_cap_t)
 
+            # Calculate default capital structure debt weight
+            debt_val = float(historical.get("total_debt", 5.58) if isinstance(historical, dict) else 5.58)
+            tot_cap = market_cap_t + debt_val
+            calc_wd = round((debt_val / tot_cap) * 100.0, 1) if tot_cap > 0 else 20.0
+            clamped_wd = max(5.0, min(60.0, calc_wd))
+
             return {
                 "ticker": symbol,
                 "name": name,
@@ -156,7 +187,19 @@ class FinancialDataLoader:
                 "shares_outstanding": shares_b,
                 "market_cap": market_cap_t,
                 "beta": beta,
-                "historical": historical
+                "historical": historical,
+                "capm_params": {
+                    "beta": round(beta, 2),
+                    "rf": 6.60,
+                    "mature_erp": 5.00,
+                    "crp": 2.16,
+                    "sovereign_spread": 1.50,
+                    "total_erp": 7.16,
+                    "kd_pre": 6.50,
+                    "wd": clamped_wd,
+                    "tax_rate": 22.0
+                },
+                "provenance": INDONESIA_MACRO.get("provenance", {})
             }
 
         except Exception as e:

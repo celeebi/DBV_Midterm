@@ -57,3 +57,17 @@ def test_standalone_api_endpoints():
     r5 = client.get("/api/dupont?ticker=PWON.JK")
     assert r5.status_code == 200
     assert r5.json()["data"]["calculated_roe_pct"] > 0
+
+    # WACC & Provenance
+    r6 = client.get("/api/wacc?beta=0.80&rf=6.60&mature_erp=5.00&crp=2.16&kd_pre=6.50&wd=25.0&tax_rate=22.0")
+    assert r6.status_code == 200
+    w_data = r6.json()
+    assert w_data["status"] == "success"
+    assert "data" in w_data
+    assert "provenance" in w_data
+    assert "beta" in w_data["provenance"]
+    assert "country_risk_premium" in w_data["provenance"]
+    assert w_data["data"]["beta"] == 0.80
+    assert w_data["data"]["ke"] > 0
+    assert w_data["data"]["wacc"] > 0
+    assert "Total ERP" in w_data["data"]["proofs"]["erp"]

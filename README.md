@@ -4,7 +4,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests: 31 Passed](https://img.shields.io/badge/Tests-31%20Passed-brightgreen.svg)](tests/)
+[![Tests: 32 Passed](https://img.shields.io/badge/Tests-32%20Passed-brightgreen.svg)](tests/)
 [![Architecture: Clean Modular](https://img.shields.io/badge/Architecture-Clean%20Modular-orange.svg)](src/)
 [![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Benchmark-PWON.JK-informational.svg)](https://www.idx.co.id/)
 [![Git Branch: develop_further](https://img.shields.io/badge/Branch-develop__further-blueviolet.svg)](https://github.com/celeebi/DBV_Midterm)
@@ -20,14 +20,15 @@ The platform pairs a high-performance **Python Starlette/Uvicorn backend** with 
 - [The 8 Institutional Workflow Tabs](#-the-8-institutional-workflow-tabs)
 - [Key Modeling Capabilities](#-key-modeling-capabilities)
   - [1. Multi-Model Valuation Triangulation & Live Donut Chart](#1-multi-model-valuation-triangulation--live-donut-chart)
-  - [2. Institutional Revalued Net Asset Value (RNAV)](#2-institutional-revalued-net-asset-value-rnav)
-  - [3. 10,000-Run Vectorized Monte Carlo Simulation & VaR](#3-10000-run-vectorized-monte-carlo-simulation--var)
-  - [4. Economic Value Added (EVA®) & Market Value Added (MVA)](#4-economic-value-added-eva--market-value-added-mva)
-  - [5. Tornado Sensitivity Analysis & 5-Stage DuPont ROE Decomposition](#5-tornado-sensitivity-analysis--5-stage-dupont-roe-decomposition)
-  - [6. Universal Ticker Search & Live Fetcher](#6-universal-ticker-search--live-fetcher)
-  - [7. Full 10-Year Explicit Forecasts & Auto-Fade](#7-full-10-year-explicit-forecasts--auto-fade)
-  - [8. Integrated 10-Year 3-Statement Financial Model](#8-integrated-10-year-3-statement-financial-model)
-  - [9. Formula-Active 6-Sheet Microsoft Excel Export](#9-formula-active-6-sheet-microsoft-excel-export)
+  - [2. Fundamental CAPM Modeler & Live Data Provenance Notes](#2-fundamental-capm-modeler--live-data-provenance-notes)
+  - [3. Institutional Revalued Net Asset Value (RNAV)](#3-institutional-revalued-net-asset-value-rnav)
+  - [4. 10,000-Run Vectorized Monte Carlo Simulation & VaR](#4-10000-run-vectorized-monte-carlo-simulation--var)
+  - [5. Economic Value Added (EVA®) & Market Value Added (MVA)](#5-economic-value-added-eva--market-value-added-mva)
+  - [6. Tornado Sensitivity Analysis & 5-Stage DuPont ROE Decomposition](#6-tornado-sensitivity-analysis--5-stage-dupont-roe-decomposition)
+  - [7. Universal Ticker Search & Live Fetcher](#7-universal-ticker-search--live-fetcher)
+  - [8. Full 10-Year Explicit Forecasts & Auto-Fade](#8-full-10-year-explicit-forecasts--auto-fade)
+  - [9. Integrated 10-Year 3-Statement Financial Model](#9-integrated-10-year-3-statement-financial-model)
+  - [10. Formula-Active 6-Sheet Microsoft Excel Export](#10-formula-active-6-sheet-microsoft-excel-export)
 - [System Architecture](#-system-architecture)
 - [Repository Structure](#-repository-structure)
 - [Quick Start Guide](#-quick-start-guide)
@@ -94,6 +95,11 @@ The VALUEX Terminal implements an institutional equity research workflow. Every 
    - **Phase 2: Transition & Fade Phase (Years 6–10)**: 5 individual sliders/inputs for transition period.
    - **⚡ Auto-Fade Helper (Y6–Y10)**: Linearly fades Year 5 growth into terminal $g$ ($1.5\%$).
    - **Amateur Financier / Convergence Warning**: Educational alert banner triggered if Year 10 growth is set higher than sustainable GDP ($5.0\%$) or WACC.
+   - **Section 3: Cost of Capital & Fundamental CAPM Modeler**:
+     - Sliders and numeric inputs for **Beta ($\beta$)**, **Risk-Free Rate ($R_f$)**, **Mature Market ERP**, **Country Risk Premium (CRP)**, **Pre-tax Cost of Debt ($K_d$)**, **Debt Weight ($W_d$)**, and **Tax Rate ($t$)**.
+     - **Interactive Hoverable Provenance Notes (`[ⓘ]`)**: Sleek dark-slate tooltips detailing live data sources, citations, methodologies, and valuation impacts.
+     - **Live Sync Cards**: Real-time reactive recalculation of Hurdle WACC (`10.42%`) and Cost of Equity ($K_e$: `12.00%`).
+     - **"Reset CAPM"** button restoring scraped/calibrated defaults in 1 click.
    - **Section 4: Model Weight Composition & Real-Time Donut Chart**:
      - Sliders support setting any weight to **`0%`** cleanly (resolved falsy coercion bug).
      - Interactive SVG Donut Chart dynamically renders methodology slice proportions.
@@ -123,14 +129,23 @@ $$\text{Composite Target} = \sum_{m \in \{\text{DCF}, \text{Comps}, \text{RIM}, 
 - **Interactive SVG Donut**: Slices update in real-time with responsive tooltips and color matching.
 - **Dynamic KaTeX Proofs**: Substituted step-by-step mathematical proof automatically suppresses zero-weighted methods and reflects custom allocations.
 
-### 2. Institutional Revalued Net Asset Value (RNAV)
+### 2. Fundamental CAPM Modeler & Live Data Provenance Notes
+Replaces opaque single WACC sliders with institutional bottom-up capital structure modeling:
+- **Live Scraped Beta ($\beta$)**: Sourced directly from Yahoo Finance 5-year regression against the IHSG for any searched company, with property sector fallbacks.
+- **Risk-Free Rate ($R_f$)**: Calibrated to Bank Indonesia / Ministry of Finance 10-Year Indonesian Sovereign Bond Yield (`INDOGB 10Y`: $6.60\%$).
+- **Mature Market ERP & Damodaran Country Risk Premium (CRP)**: Decomposed into mature market equity premium ($5.00\%$) and Indonesian sovereign default spread / equity volatility premium ($2.16\%$).
+- **Cost of Debt ($K_d$) & Corporate Spread**: Commercial borrowing rate ($6.50\%$) with automated after-tax debt shielding: $K_{d,\text{after}} = K_d \times (1 - 22.0\% \text{ Tax}) = 5.07\%$.
+- **Interactive Data Provenance Tooltips (`[ⓘ]`)**: Sleek dark-mode popovers beside every parameter explaining data sources, citations, financial methodologies, and valuation sensitivities.
+- **Reactive Valuation Sync**: Real-time recalculation of $K_e$, $K_{d,\text{after}}$, and WACC, instantly updating DCF, RIM, and DDM target prices.
+
+### 3. Institutional Revalued Net Asset Value (RNAV)
 Engineered specifically for real estate developers like `PWON.JK`:
 - **Direct Capitalization of Retail Malls & Hotels**: NOI capitalized at sector cap rates ($8.5\%$).
 - **Land Bank Mark-to-Market (MTM)**: Revalues undeveloped land reserves from book value to market value ($IDR 4.5M/m^2$ vs $IDR 1.2M/m^2$ historical cost).
 - **Presales Discounting**: Present value of unbilled property presales over 3-year delivery horizon.
 - **Target RNAV per Share**: GAV less net debt, applying property holding-company conglomerate discounts ($25\%$).
 
-### 3. 10,000-Run Vectorized Monte Carlo Simulation & VaR
+### 4. 10,000-Run Vectorized Monte Carlo Simulation & VaR
 Replaces static single-point estimates with probability distributions using NumPy:
 - **Correlated Stochastic Parameters**: Revenue growth (Normal), EBITDA margin (Normal), WACC (Normal, $9.5\% \text{ to } 11.5\%$), and terminal $g$ (Normal, $1.0\% \text{ to } 2.0\%$).
 - **Statistical Output**: Mean target price, median (P50), standard deviation, 95% Confidence Interval, P10 (Downside / Bear), P90 (Upside / Bull).
@@ -138,22 +153,22 @@ Replaces static single-point estimates with probability distributions using NumP
 - **Probability of Undervaluation**: Percentage of simulation runs where intrinsic value exceeds current market price ($P(\text{Target} > P_{\text{market}})$).
 - **Dynamic 25-Bin Frequency Histogram**: Visualized via responsive SVG with mean and market price reference lines.
 
-### 4. Economic Value Added (EVA®) & Market Value Added (MVA)
+### 5. Economic Value Added (EVA®) & Market Value Added (MVA)
 Stern Stewart & Co. value-based management framework:
 - **Economic Profit Identity**: $\text{EVA}_t = \text{NOPAT}_t - (\text{WACC} \times \text{Invested Capital}_{t-1}) \equiv (\text{ROIC}_t - \text{WACC}) \times \text{Invested Capital}_{t-1}$.
 - **10-Year Schedule**: Explicit schedule of NOPAT, Invested Capital, ROIC, Economic Spread, and EVA discounted at WACC.
 - **Market Value Added (MVA)**: PV of future EVA + Invested Capital, measuring net enterprise wealth creation above invested capital.
 
-### 5. Tornado Sensitivity Analysis & 5-Stage DuPont ROE Decomposition
+### 6. Tornado Sensitivity Analysis & 5-Stage DuPont ROE Decomposition
 - **Tornado Sensitivity**: Two-sided DCF sensitivity swings ($\pm 100 \text{ bps}$ on WACC, $g$, margins, growth, and exit multiples) sorted in descending order of valuation impact.
 - **5-Stage DuPont ROE Decomposition**:
   $$\text{ROE} = \left(\frac{\text{Net Income}}{\text{EBT}}\right) \times \left(\frac{\text{EBT}}{\text{EBIT}}\right) \times \left(\frac{\text{EBIT}}{\text{Revenue}}\right) \times \left(\frac{\text{Revenue}}{\text{Assets}}\right) \times \left(\frac{\text{Assets}}{\text{Equity}}\right)$$
   Decomposes ROE into Tax Burden, Interest Burden, Operating Margin, Asset Turnover, and Financial Leverage, benchmarked against Indonesian property sector averages.
 
-### 6. Universal Ticker Search & Live Fetcher
+### 7. Universal Ticker Search & Live Fetcher
 In addition to the pre-calibrated `PWON.JK` benchmark and property universe, analysts can type **any** ticker into the header bar or Screener card (e.g. `BBCA.JK`, `TLKM.JK`, `BMRI.JK`, `UNVR.JK`, `ICBP.JK`). The system queries `yfinance`, extracts audited balance sheets, income statements, cash flows, beta, shares, and current prices, normalizes currency units, and integrates the stock directly into the terminal.
 
-### 7. Full 10-Year Explicit Forecasts & Auto-Fade
+### 8. Full 10-Year Explicit Forecasts & Auto-Fade
 Rather than truncating the forecast at Year 5, the platform provides explicit controls for all 10 periods:
 - **Phase 1 (Years 1–5)**: High-growth operational roll-forward.
 - **Phase 2 (Years 6–10)**: Macroeconomic transition & fade.
@@ -161,13 +176,13 @@ Rather than truncating the forecast at Year 5, the platform provides explicit co
   $$\Delta g = \frac{g_5 - g_{\text{terminal}}}{5}, \quad g_t = g_5 - \Delta g \times (t - 5) \quad \text{for } t \in [6, 10]$$
 - **Amateur Financier Warning**: Flags a Damodaran boundary error if an analyst attempts to run Year 10 growth above long-term Indonesian GDP ($5.0\%$) into terminal perpetuity.
 
-### 8. Integrated 10-Year 3-Statement Financial Model
+### 9. Integrated 10-Year 3-Statement Financial Model
 Full mathematical articulation across Income Statement, Balance Sheet, and Cash Flow Statement:
 - **Balance Sheet Check**: $\text{Assets} - (\text{Liabilities} + \text{Equity}) \equiv \text{IDR } 0.00$ across all 10 forecast years.
 - Dynamic Working Capital schedules (DSO = 15 days, DIO = 521 days for property inventories, DPO = 72 days).
 - PP&E continuity schedules ($\text{PP\&E}_t = \text{PP\&E}_{t-1} + \text{CapEx}_t - \text{Depr}_t$).
 
-### 9. Formula-Active 6-Sheet Microsoft Excel Export
+### 10. Formula-Active 6-Sheet Microsoft Excel Export
 Generates institutional `.xlsx` workbooks via `openpyxl` with dynamic, uppercase Excel formulas:
 - **Sheet 1: `Executive Summary`**: Valuation matrix, KPI cards, and methodology football field.
 - **Sheet 2: `10Y Pro Forma DCF`**: Explicit FCFF schedules with dynamic Excel formulas (`=B1*(1+B2)`, `=SUM(B3:B10)`).
@@ -319,7 +334,7 @@ To verify all financial engines, 3-statement balance checks, advanced models, an
 ```powershell
 .\.venv\Scripts\pytest.exe -v
 ```
-Expected output: **31 passed in ~2.3s** (100% pass rate).
+Expected output: **32 passed in ~2.8s** (100% pass rate).
 
 ---
 
@@ -327,7 +342,7 @@ Expected output: **31 passed in ~2.3s** (100% pass rate).
 
 | Branch / Tag | Description | Commit |
 | :--- | :--- | :--- |
-| **`develop_further`** (Active) | Institutional Option A upgrade: RNAV, Monte Carlo (10k), EVA/MVA, Tornado, DuPont, Weight Donut Chart, and 0-weight support. | `5dd4c78` |
+| **`develop_further`** (Active) | Institutional Option A + Fundamental CAPM upgrade: live-scraped beta, Damodaran ERP/CRP, data provenance tooltips, RNAV, Monte Carlo (10k), EVA/MVA, Tornado, DuPont, Weight Donut Chart, and 0-weight support. | `1efeadb` |
 | **`develop`** (Feature) | Contains the institutional VALUEX Terminal, Universal Ticker Search, expanded live ribbon, and 10-year sliders. | `67dd6d9` |
 | **`main`** (Stable) | Untouched stable baseline containing the verified 4-way valuation models and Excel exporter. | `36a99e3` |
 | **`v1.0-checkpoint`** (Tag) | Fixed checkpoint tag anchored to `36a99e3` for instant rollback safety. | `36a99e3` |

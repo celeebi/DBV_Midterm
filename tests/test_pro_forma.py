@@ -25,6 +25,28 @@ def test_wacc_calculation_accuracy():
     assert "WACC = (We × Ke) + (Wd × Kd)" in res["proofs"]["wacc"]
 
 
+def test_capm_mature_erp_and_crp_decomposition():
+    # Rf=6.6%, Beta=0.75, Mature ERP=5.0%, CRP=2.16% -> Total ERP = 7.16%
+    # Ke = 6.6% + 0.75 * 7.16% = 11.97%
+    # Kd_pre=6.5%, t=22% -> Kd_after = 6.5% * 0.78 = 5.07%
+    # Wd=20.0%, We=80.0%
+    # WACC = (0.80 * 11.97%) + (0.20 * 5.07%) = 9.576% + 1.014% = 10.59%
+    res = CapitalStructureModel.calculate_wacc(
+        rf=0.0660,
+        beta=0.75,
+        mature_erp=0.0500,
+        crp=0.0216,
+        kd_pre=0.0650,
+        tax_rate=0.22,
+        wd=0.200
+    )
+    assert abs(res["erp"] - 0.0716) < 0.0001
+    assert abs(res["ke"] - 0.1197) < 0.0005
+    assert abs(res["kd_after"] - 0.0507) < 0.0005
+    assert abs(res["wacc"] - 0.1059) < 0.0005
+    assert "Total ERP = Mature ERP + CRP" in res["proofs"]["erp"]
+
+
 def test_pro_forma_10_year_roll_forward():
     # Test that year-by-year growth rolls forward correctly
     custom_growth = [6.0, 3.0, 2.5, 5.0, 4.5, 3.9, 3.3, 2.7, 2.1, 1.5]
