@@ -375,6 +375,13 @@ const fmtPct = (val, decimals = 1, showPlus = true) => {
   return `${sign}${val.toFixed(decimals)}%`;
 };
 
+// Converts financial metric to Trillion IDR unit defensively
+const toTrillion = (val) => {
+  if (val === undefined || val === null || isNaN(val)) return 0;
+  const n = Number(val);
+  return Math.abs(n) > 100 ? n / 1000.0 : n;
+};
+
 // Institutional Recommendation Badge
 const RecommendationBadge = ({ rec, size = 'md' }) => {
   const styles = {
@@ -2949,9 +2956,26 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
   const a = company.assumptions || {};
   const lastHist = company.historical ? company.historical[company.historical.length - 1] : {};
 
+  const capm = computeCapmParameters(a, company);
+  const rawWacc = backendData?.wacc?.wacc ?? (a.wacc ?? capm.effectiveWacc);
+  const liveWacc = rawWacc < 1.0 ? rawWacc * 100.0 : rawWacc;
+  const rawKe = backendData?.wacc?.ke ?? capm.ke;
+  const liveKe = rawKe < 1.0 ? rawKe * 100.0 : rawKe;
+  const liveTerminalG = a.terminalGrowth ?? 1.5;
+
+  const dcfBackend = backendData?.dcf;
+  const displaySumPvFcf = dcfBackend?.pv_explicit !== undefined ? dcfBackend.pv_explicit * 1000 : v.sumPvFcf;
+  const displayPvTv = dcfBackend?.pv_tv_gordon !== undefined ? dcfBackend.pv_tv_gordon * 1000 : v.pvTerminalValue;
+  const displayEv = dcfBackend?.enterprise_value !== undefined ? dcfBackend.enterprise_value * 1000 : v.dcfEnterpriseValue;
+  const displayNetDebt = (dcfBackend?.debt !== undefined && dcfBackend?.cash !== undefined)
+    ? (dcfBackend.debt - dcfBackend.cash) * 1000
+    : v.netDebt;
+  const displaySharePrice = dcfBackend?.dcf_price !== undefined ? Math.round(dcfBackend.dcf_price) : v.dcfSharePrice;
+  const displayTvPct = displayEv > 0 ? +((displayPvTv / displayEv) * 100).toFixed(1) : v.tvPctOfEv;
+
   // Football Field Range Setup
   const footballField = [
-    { method: '10-Year DCF (FCFF)', low: Math.round(v.dcfSharePrice * 0.85), base: v.dcfSharePrice, high: Math.round(v.dcfSharePrice * 1.15) },
+    { method: '10-Year DCF (FCFF)', low: Math.round(displaySharePrice * 0.85), base: displaySharePrice, high: Math.round(displaySharePrice * 1.15) },
     { method: 'Property Trading Comps', low: Math.round(v.compsSharePrice * 0.88), base: v.compsSharePrice, high: Math.round(v.compsSharePrice * 1.12) },
     { method: 'Residual Income (RIM)', low: Math.round(v.rimSharePrice * 0.90), base: v.rimSharePrice, high: Math.round(v.rimSharePrice * 1.10) },
     { method: 'Dividend Discount (DDM)', low: Math.round(v.ddmSharePrice * 0.85), base: v.ddmSharePrice, high: Math.round(v.ddmSharePrice * 1.15) },
@@ -3047,8 +3071,8 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
 
           <div className="border-r border-slate-100 pr-2">
             <span className="text-[10px] text-slate-500 uppercase block">Hurdle WACC</span>
-            <span className="text-lg font-bold text-slate-900">10.42%</span>
-            <span className="block text-[11px] text-slate-500">Ke: 12.00% | g: 1.50%</span>
+            <span className="text-lg font-bold text-slate-900">{liveWacc.toFixed(2)}%</span>
+            <span className="block text-[11px] text-slate-500">Ke: {liveKe.toFixed(2)}% | g: {liveTerminalG.toFixed(2)}%</span>
           </div>
 
           <div className="border-r border-slate-100 pr-2">
@@ -3229,11 +3253,16 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
           <div className="p-4 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
-                  Explicit 10-Year Unlevered Free Cash Flow (FCFF) Schedule
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Forecast horizon 2026E–2035E with growth fading to terminal perpetuity rate (g = {(a.terminalGrowth ?? 1.5).toFixed(2)}%).
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+                    Explicit 10-Year Unlevered Free Cash Flow (FCFF) Schedule
+                  </h3>
+                  <span className="text-[10px] font-mono bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded-xs font-semibold">
+                    IDR Trillion (Rp T)
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Forecast horizon 2026E–2035E with growth fading to terminal perpetuity rate (g = {liveTerminalG.toFixed(2)}%). All cash flow figures in IDR Trillion.
                 </p>
               </div>
               <div className="flex items-center space-x-3">
@@ -3248,7 +3277,7 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
                 </button>
                 <div className="text-right font-mono">
                   <span className="text-[10px] text-slate-500 block uppercase">DCF Fair Value</span>
-                  <span className="text-base font-bold text-blue-700">IDR {v.dcfSharePrice} / sh</span>
+                  <span className="text-base font-bold text-blue-700">IDR {displaySharePrice} / sh</span>
                 </div>
               </div>
             </div>
@@ -3257,9 +3286,11 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
               <table className="w-full text-left border-collapse text-xs font-mono">
                 <thead>
                   <tr className="border-b border-slate-300 bg-slate-100 text-[10px] uppercase text-slate-600">
-                    <th className="py-2 px-3 sticky left-0 bg-slate-100 z-10 font-sans w-56">FCFF Line Item (IDR Trillion)</th>
+                    <th className="py-2.5 px-3 sticky left-0 bg-slate-100 z-10 font-sans w-64">FCFF Line Item (IDR Trillion)</th>
                     {proFormaRows.map((p, idx) => (
-                      <th key={idx} className="py-2 px-3 text-right whitespace-nowrap">{p.year || `Y${idx+1}`}</th>
+                      <th key={idx} className="py-2.5 px-3 text-right whitespace-nowrap">
+                        {p.year ? `${p.year}E` : (p.period || `Y${idx+1}`)}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -3267,44 +3298,87 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
                   <tr>
                     <td className="py-2 px-3 sticky left-0 bg-white z-10 font-sans font-semibold text-slate-900">Revenue (Rp T)</td>
                     {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-2 px-3 text-right font-semibold">{(p.revenue / 1000).toFixed(2)}</td>
+                      <td key={idx} className="py-2 px-3 text-right font-semibold text-slate-900">{toTrillion(p.revenue).toFixed(2)}</td>
+                    ))}
+                  </tr>
+                  <tr className="text-slate-500 bg-slate-50/50">
+                    <td className="py-1 px-3 sticky left-0 bg-slate-50/50 z-10 font-sans text-[11px]">Revenue Growth (%)</td>
+                    {proFormaRows.map((p, idx) => (
+                      <td key={idx} className="py-1 px-3 text-right text-[11px] text-slate-600">+{Number(p.growth_pct ?? p.growth ?? 0).toFixed(1)}%</td>
                     ))}
                   </tr>
                   <tr>
                     <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">Operating Income (EBIT)</td>
                     {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-1.5 px-3 text-right text-slate-800">{(p.ebit / 1000).toFixed(2)}</td>
+                      <td key={idx} className="py-1.5 px-3 text-right text-slate-800">{toTrillion(p.ebit).toFixed(2)}</td>
                     ))}
                   </tr>
                   <tr>
                     <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">NOPAT (Post-Tax EBIT)</td>
                     {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{(p.nopat / 1000).toFixed(2)}</td>
+                      <td key={idx} className="py-1.5 px-3 text-right text-slate-700">{toTrillion(p.nopat).toFixed(2)}</td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">(+) Depreciation</td>
+                    <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">(+) Depreciation & Amortization</td>
                     {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-1.5 px-3 text-right text-slate-600">{(p.da / 1000).toFixed(2)}</td>
+                      <td key={idx} className="py-1.5 px-3 text-right text-slate-600">{toTrillion(p.depr !== undefined ? p.depr : p.da).toFixed(2)}</td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">(-) CapEx</td>
+                    <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">(-) Capital Expenditures (CapEx)</td>
                     {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-1.5 px-3 text-right text-slate-600">({(p.capex / 1000).toFixed(2)})</td>
+                      <td key={idx} className="py-1.5 px-3 text-right text-slate-600">({toTrillion(p.capex).toFixed(2)})</td>
                     ))}
                   </tr>
-                  <tr className="bg-blue-50/60 font-bold text-slate-900 border-t-2 border-slate-300">
-                    <td className="py-2.5 px-3 sticky left-0 bg-blue-50/60 z-10 font-sans">Free Cash Flow (FCFF)</td>
-                    {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-2.5 px-3 text-right text-blue-900">{(p.fcf / 1000).toFixed(2)}</td>
-                    ))}
+                  <tr>
+                    <td className="py-1.5 px-3 sticky left-0 bg-white z-10 font-sans text-slate-700">(-/+) Change in Working Capital (ΔNWC)</td>
+                    {proFormaRows.map((p, idx) => {
+                      const val = toTrillion(p.delta_nwc !== undefined ? p.delta_nwc : p.nwcChange);
+                      return (
+                        <td key={idx} className="py-1.5 px-3 text-right text-slate-600">
+                          {val > 0 ? `(${val.toFixed(2)})` : `${Math.abs(val).toFixed(2)}`}
+                        </td>
+                      );
+                    })}
                   </tr>
-                  <tr className="text-slate-600">
-                    <td className="py-2 px-3 sticky left-0 bg-white z-10 font-sans">Present Value of FCFF (@ 10.42%)</td>
-                    {proFormaRows.map((p, idx) => (
-                      <td key={idx} className="py-2 px-3 text-right font-semibold">{(p.pvFcf / 1000).toFixed(2)}</td>
-                    ))}
+                  <tr className="bg-blue-50/70 font-bold text-slate-900 border-t-2 border-slate-300">
+                    <td className="py-2.5 px-3 sticky left-0 bg-blue-50/70 z-10 font-sans text-blue-900">Free Cash Flow to Firm (FCFF)</td>
+                    {proFormaRows.map((p, idx) => {
+                      const val = toTrillion(p.fcff !== undefined ? p.fcff : p.fcf);
+                      return (
+                        <td key={idx} className="py-2.5 px-3 text-right text-blue-950 font-bold">
+                          {val.toFixed(2)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr className="text-slate-500 bg-slate-50/30">
+                    <td className="py-1.5 px-3 sticky left-0 bg-slate-50/30 z-10 font-sans text-[11px]">
+                      Discount Factor (df = 1 / (1 + WACC)^t)
+                    </td>
+                    {proFormaRows.map((p, idx) => {
+                      const t = p.t || idx + 1;
+                      const df = p.discount_factor !== undefined ? Number(p.discount_factor) : (1.0 / Math.pow(1.0 + (liveWacc / 100.0), t));
+                      return (
+                        <td key={idx} className="py-1.5 px-3 text-right text-[11px] font-mono text-slate-600">
+                          {df.toFixed(4)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr className="font-semibold text-slate-800 bg-emerald-50/40 border-t border-slate-200">
+                    <td className="py-2 px-3 sticky left-0 bg-emerald-50/40 z-10 font-sans text-emerald-900">
+                      Present Value of FCFF (@ {liveWacc.toFixed(2)}%)
+                    </td>
+                    {proFormaRows.map((p, idx) => {
+                      const val = toTrillion(p.pv_fcff !== undefined ? p.pv_fcff : p.pvFcf);
+                      return (
+                        <td key={idx} className="py-2 px-3 text-right font-bold text-emerald-900">
+                          {val.toFixed(2)}
+                        </td>
+                      );
+                    })}
                   </tr>
                 </tbody>
               </table>
@@ -3313,23 +3387,23 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 font-mono text-xs">
               <div className="bg-slate-50 border border-slate-200 p-3 rounded-xs">
                 <span className="text-[10px] text-slate-500 uppercase block">Cumulative PV of 10Y FCF</span>
-                <span className="text-base font-bold text-slate-900">{fmtCompact(v.sumPvFcf)}</span>
+                <span className="text-base font-bold text-slate-900">{fmtCompact(displaySumPvFcf)}</span>
               </div>
               <div className="bg-slate-50 border border-slate-200 p-3 rounded-xs">
                 <span className="text-[10px] text-slate-500 uppercase block">PV of Terminal Value</span>
-                <span className="text-base font-bold text-slate-900">{fmtCompact(v.pvTerminalValue)}</span>
-                <span className="text-[10px] text-slate-500 block mt-0.5">{v.tvPctOfEv}% of Implied EV</span>
+                <span className="text-base font-bold text-slate-900">{fmtCompact(displayPvTv)}</span>
+                <span className="text-[10px] text-slate-500 block mt-0.5">{displayTvPct}% of Implied EV</span>
               </div>
               <div className="bg-slate-50 border border-slate-200 p-3 rounded-xs">
                 <span className="text-[10px] text-slate-500 uppercase block">Enterprise Value</span>
-                <span className="text-base font-bold text-slate-900">{fmtCompact(v.dcfEnterpriseValue)}</span>
-                <span className="text-[10px] text-slate-500 block mt-0.5">Less Net Debt: {fmtCompact(v.netDebt)}</span>
+                <span className="text-base font-bold text-slate-900">{fmtCompact(displayEv)}</span>
+                <span className="text-[10px] text-slate-500 block mt-0.5">Less Net Debt: {fmtCompact(displayNetDebt)}</span>
               </div>
               <div className="bg-[#0A1120] text-white p-3 rounded-xs">
                 <span className="text-[10px] text-blue-300 uppercase block">Implied DCF Target</span>
-                <span className="text-lg font-bold text-white">IDR {v.dcfSharePrice}</span>
+                <span className="text-lg font-bold text-white">IDR {displaySharePrice}</span>
                 <span className="text-[10px] text-emerald-400 block mt-0.5 font-bold">
-                  Upside: {fmtPct(((v.dcfSharePrice / company.referencePrice) - 1) * 100)}
+                  Upside: {fmtPct(((displaySharePrice / (company.referencePrice || 1)) - 1) * 100)}
                 </span>
               </div>
             </div>
