@@ -2062,6 +2062,495 @@ function CompanyDiscovery({ companies, onSelectCompany, onToggleWatchlist, onLoa
   );
 }
 
+// TAB 7: RNAV (REVALUED NET ASSET VALUE)
+function RNAVTab({ company, backendData, onNavigate }) {
+  const rnav = backendData?.rnav || {
+    gross_asset_value: 52137.5,
+    revalued_investment_properties: 30625.0,
+    revalued_land_bank: 15675.0,
+    unbilled_presales_contribution: 647.5,
+    cash_and_equivalents: 5190.0,
+    total_debt: 5580.0,
+    other_liabilities: 2100.0,
+    total_obligations: 7680.0,
+    net_asset_value: 44457.5,
+    target_nav_discount_pct: 25.0,
+    discount_amount: 11114.38,
+    target_equity_value: 33343.12,
+    undiscounted_nav_per_share: 923,
+    target_share_price: 692,
+    total_noi: 2450.0,
+    total_hectares: 285.0,
+    properties_detail: [
+      { name: 'Kota Kasablanka Complex (Retail & Office)', city: 'Jakarta Selatan', noi: 850.0, cap_rate: 0.078, gross_asset_value: 10897.4 },
+      { name: 'Gandaria City Retail Mall & Tower', city: 'Jakarta Selatan', noi: 620.0, cap_rate: 0.080, gross_asset_value: 7750.0 },
+      { name: 'Tunjungan Plaza 1-6 Superblock', city: 'Surabaya', noi: 580.0, cap_rate: 0.082, gross_asset_value: 7073.2 },
+      { name: 'Pakuwon Mall & PTC Superblock', city: 'Surabaya Barat', noi: 400.0, cap_rate: 0.085, gross_asset_value: 4705.9 }
+    ],
+    land_detail: [
+      { location: 'Pakuwon City (East Surabaya)', hectares: 120.0, price_sqm: 7500000, market_value_billion: 9000.0 },
+      { location: 'Grand Pakuwon (West Surabaya)', hectares: 95.0, price_sqm: 5000000, market_value_billion: 4750.0 },
+      { location: 'Bekasi & Central Java Land Reserves', hectares: 70.0, price_sqm: 3500000, market_value_billion: 2450.0 }
+    ]
+  };
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 bg-orange-600 rounded-xs"></span>
+            <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+              Revalued Net Asset Value (RNAV) - Property Portfolio Breakdown
+            </h3>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Marks investment properties to market cap rates (7.8%–8.5%) and revalues strategic land banks (285 ha).
+          </p>
+        </div>
+        <div className="text-right font-mono">
+          <span className="text-[10px] text-slate-500 uppercase block">RNAV Target Fair Value</span>
+          <span className="text-base font-bold text-orange-600">IDR {rnav.target_share_price} / sh</span>
+          <span className="text-[10px] text-slate-400 block">(Undiscounted NAV: IDR {rnav.undiscounted_nav_per_share})</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono">
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Gross Assets (GAV)</span>
+          <span className="text-sm font-bold text-slate-900">IDR {rnav.gross_asset_value?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Operating Properties</span>
+          <span className="text-sm font-bold text-blue-700">IDR {rnav.revalued_investment_properties?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Land Bank MTM</span>
+          <span className="text-sm font-bold text-emerald-700">IDR {rnav.revalued_land_bank?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Presales & Cash</span>
+          <span className="text-sm font-bold text-slate-900">IDR {(rnav.unbilled_presales_contribution + rnav.cash_and_equivalents)?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Debt & Obligations</span>
+          <span className="text-sm font-bold text-rose-700">-IDR {rnav.total_obligations?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-orange-50 border border-orange-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-orange-800 uppercase block">Target NAV Discount</span>
+          <span className="text-sm font-bold text-orange-700">{rnav.target_nav_discount_pct}%</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="border border-slate-200 rounded-xs overflow-hidden">
+          <div className="bg-slate-100 px-3 py-2 border-b border-slate-200 flex justify-between items-center">
+            <span className="text-xs font-bold font-mono text-slate-800 uppercase">Commercial Investment Assets</span>
+            <span className="text-[11px] font-mono text-slate-600">Total NOI: IDR {rnav.total_noi} B</span>
+          </div>
+          <table className="w-full text-xs font-mono">
+            <thead className="bg-slate-50 text-[10px] uppercase text-slate-500 border-b border-slate-200">
+              <tr>
+                <th className="py-1.5 px-3 text-left font-sans">Asset Name</th>
+                <th className="py-1.5 px-2 text-right">NOI (B)</th>
+                <th className="py-1.5 px-2 text-right">Cap Rate</th>
+                <th className="py-1.5 px-3 text-right">GAV (B)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {(rnav.properties_detail || []).map((p, idx) => (
+                <tr key={idx} className="hover:bg-slate-50">
+                  <td className="py-1.5 px-3 font-sans text-slate-800">
+                    <div className="font-semibold">{p.name}</div>
+                    <div className="text-[10px] text-slate-400">{p.city}</div>
+                  </td>
+                  <td className="py-1.5 px-2 text-right">{p.noi?.toLocaleString()}</td>
+                  <td className="py-1.5 px-2 text-right text-blue-700 font-bold">{(p.cap_rate * 100).toFixed(1)}%</td>
+                  <td className="py-1.5 px-3 text-right font-bold text-slate-900">{p.gross_asset_value?.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="border border-slate-200 rounded-xs overflow-hidden">
+          <div className="bg-slate-100 px-3 py-2 border-b border-slate-200 flex justify-between items-center">
+            <span className="text-xs font-bold font-mono text-slate-800 uppercase">Raw Land Bank Reserves</span>
+            <span className="text-[11px] font-mono text-slate-600">Total: {rnav.total_hectares} Ha</span>
+          </div>
+          <table className="w-full text-xs font-mono">
+            <thead className="bg-slate-50 text-[10px] uppercase text-slate-500 border-b border-slate-200">
+              <tr>
+                <th className="py-1.5 px-3 text-left font-sans">Location</th>
+                <th className="py-1.5 px-2 text-right">Area (Ha)</th>
+                <th className="py-1.5 px-2 text-right">MTM Price / Sqm</th>
+                <th className="py-1.5 px-3 text-right">Value (B)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {(rnav.land_detail || []).map((l, idx) => (
+                <tr key={idx} className="hover:bg-slate-50">
+                  <td className="py-1.5 px-3 font-sans font-semibold text-slate-800">{l.location}</td>
+                  <td className="py-1.5 px-2 text-right">{l.hectares}</td>
+                  <td className="py-1.5 px-2 text-right text-emerald-700 font-bold">Rp {l.price_sqm?.toLocaleString()}</td>
+                  <td className="py-1.5 px-3 text-right font-bold text-slate-900">{l.market_value_billion?.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// TAB 8: MONTE CARLO SIMULATION (10,000 RUNS)
+function MonteCarloTab({ company, backendData }) {
+  const mc = backendData?.monte_carlo || {
+    simulations_count: 10000,
+    mean: 498.5,
+    median: 495.2,
+    std_dev: 74.3,
+    min: 242.0,
+    max: 820.0,
+    p10: 405.0,
+    p25: 448.0,
+    p50: 495.2,
+    p75: 546.0,
+    p90: 598.0,
+    current_market_price: 270.0,
+    probability_undervalued_pct: 99.2,
+    var_95_amount: 0.0,
+    var_95_pct: 0.0,
+    histogram: []
+  };
+
+  const hist = mc.histogram || [];
+  const maxCount = Math.max(...hist.map(h => h.count), 1);
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 bg-indigo-600 rounded-xs"></span>
+            <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+              Monte Carlo Probabilistic Simulation ({mc.simulations_count?.toLocaleString()} Iterations)
+            </h3>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Stochastic distributions across WACC, terminal growth, operating margins, and revenue CAGR.
+          </p>
+        </div>
+        <div className="text-right font-mono">
+          <span className="text-[10px] text-slate-500 uppercase block">Median Intrinsic Fair Value (P50)</span>
+          <span className="text-base font-bold text-indigo-600">IDR {mc.median} / sh</span>
+          <span className="text-[10px] text-emerald-600 font-semibold block">Prob. Undervalued: {mc.probability_undervalued_pct}%</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono">
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">P10 (Bearish 90% Conf)</span>
+          <span className="text-sm font-bold text-rose-700">IDR {mc.p10}</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">P25 (Lower Quartile)</span>
+          <span className="text-sm font-bold text-slate-800">IDR {mc.p25}</span>
+        </div>
+        <div className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-indigo-700 uppercase block">P50 (Central Median)</span>
+          <span className="text-sm font-bold text-indigo-800">IDR {mc.p50}</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">P75 (Upper Quartile)</span>
+          <span className="text-sm font-bold text-slate-800">IDR {mc.p75}</span>
+        </div>
+        <div className="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-emerald-700 uppercase block">P90 (Bullish 90% Conf)</span>
+          <span className="text-sm font-bold text-emerald-800">IDR {mc.p90}</span>
+        </div>
+      </div>
+
+      <div className="border border-slate-200 rounded-xs p-4 bg-white">
+        <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+          <span className="text-xs font-bold font-mono uppercase text-slate-800">
+            Simulated Fair Value Distribution Frequency (N={mc.simulations_count?.toLocaleString()})
+          </span>
+          <div className="flex items-center space-x-4 text-[11px] font-mono">
+            <span className="flex items-center space-x-1">
+              <span className="w-2.5 h-2.5 bg-amber-500 rounded-xs"></span>
+              <span>Market Ref (IDR {mc.current_market_price})</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <span className="w-2.5 h-2.5 bg-indigo-600 rounded-xs"></span>
+              <span>Median P50 (IDR {mc.median})</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="h-44 w-full flex items-end space-x-1 pt-4 pb-2">
+          {hist.map((b, idx) => {
+            const hPct = (b.count / maxCount) * 100;
+            const isBelowMarket = b.bin_high < mc.current_market_price;
+            const isMedianBin = b.bin_low <= mc.median && b.bin_high >= mc.median;
+            return (
+              <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                <div
+                  style={{ height: `${Math.max(4, hPct)}%` }}
+                  className={`w-full rounded-t-xs transition-all ${
+                    isMedianBin ? 'bg-indigo-600' : (isBelowMarket ? 'bg-rose-400' : 'bg-blue-500/80 hover:bg-blue-600')
+                  }`}
+                />
+                <div className="hidden group-hover:block absolute -top-8 z-20 bg-slate-900 text-white text-[9px] font-mono px-1.5 py-0.5 rounded-xs whitespace-nowrap shadow-md">
+                  {b.range_label}: {b.count} ({b.pct}%)
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex justify-between text-[10px] font-mono text-slate-500 border-t border-slate-200 pt-1">
+          <span>Min: IDR {mc.min}</span>
+          <span>Median P50: IDR {mc.median}</span>
+          <span>Max: IDR {mc.max}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// TAB 9: ECONOMIC VALUE ADDED (EVA & MVA)
+function EVATab({ company, backendData }) {
+  const eva = backendData?.eva || {
+    initial_invested_capital: 24100.0,
+    base_nopat: 3199.5,
+    base_roic_pct: 13.28,
+    wacc_pct: 10.42,
+    base_economic_spread_pct: 2.86,
+    sum_pv_eva_10yr: 3820.0,
+    terminal_eva: 640.0,
+    pv_terminal_mva: 2780.0,
+    total_mva: 6600.0,
+    enterprise_value: 30700.0,
+    net_debt: 390.0,
+    equity_value: 30310.0,
+    target_share_price: 629,
+    schedule: []
+  };
+
+  const schedule = eva.schedule || [];
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 bg-teal-600 rounded-xs"></span>
+            <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+              Economic Value Added (EVA®) & Market Value Added (MVA)
+            </h3>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Stern Stewart & Co. framework: Measures genuine economic profit created in excess of hurdle capital charges.
+          </p>
+        </div>
+        <div className="text-right font-mono">
+          <span className="text-[10px] text-slate-500 uppercase block">EVA Implied Fair Value</span>
+          <span className="text-base font-bold text-teal-700">IDR {eva.target_share_price} / sh</span>
+          <span className="text-[10px] text-emerald-600 font-semibold block">Economic Spread: +{eva.base_economic_spread_pct}%</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono">
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">ROIC (Return on Capital)</span>
+          <span className="text-sm font-bold text-teal-700">{eva.base_roic_pct}%</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Hurdle WACC</span>
+          <span className="text-sm font-bold text-slate-700">{eva.wacc_pct}%</span>
+        </div>
+        <div className="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-emerald-800 uppercase block">Economic Spread</span>
+          <span className="text-sm font-bold text-emerald-700">+{eva.base_economic_spread_pct}%</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Invested Capital (IC)</span>
+          <span className="text-sm font-bold text-slate-900">IDR {eva.initial_invested_capital?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Total MVA Created</span>
+          <span className="text-sm font-bold text-blue-700">IDR {eva.total_mva?.toLocaleString()} B</span>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xs">
+          <span className="text-[10px] text-slate-500 uppercase block">Enterprise Value (IC+MVA)</span>
+          <span className="text-sm font-bold text-slate-900">IDR {eva.enterprise_value?.toLocaleString()} B</span>
+        </div>
+      </div>
+
+      <div className="border border-slate-200 rounded-xs overflow-x-auto">
+        <table className="w-full text-left border-collapse text-xs font-mono">
+          <thead className="bg-slate-100 text-[10px] uppercase text-slate-600 border-b border-slate-200">
+            <tr>
+              <th className="py-2 px-3 sticky left-0 bg-slate-100 font-sans w-24">Year</th>
+              <th className="py-2 px-3 text-right">Revenue (B)</th>
+              <th className="py-2 px-3 text-right">NOPAT (B)</th>
+              <th className="py-2 px-3 text-right">Invested Cap (B)</th>
+              <th className="py-2 px-3 text-right">ROIC (%)</th>
+              <th className="py-2 px-3 text-right">Cap Charge (B)</th>
+              <th className="py-2 px-3 text-right text-teal-800 font-bold">EVA (B)</th>
+              <th className="py-2 px-3 text-right font-bold">PV(EVA) (B)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {schedule.map((r, idx) => (
+              <tr key={idx} className="hover:bg-slate-50">
+                <td className="py-1.5 px-3 sticky left-0 bg-white font-sans font-semibold text-slate-800">{r.year}</td>
+                <td className="py-1.5 px-3 text-right">{r.revenue?.toLocaleString()}</td>
+                <td className="py-1.5 px-3 text-right">{r.nopat?.toLocaleString()}</td>
+                <td className="py-1.5 px-3 text-right">{r.invested_capital_beg?.toLocaleString()}</td>
+                <td className="py-1.5 px-3 text-right font-semibold text-teal-700">{r.roic_pct}%</td>
+                <td className="py-1.5 px-3 text-right text-rose-700">{r.capital_charge?.toLocaleString()}</td>
+                <td className="py-1.5 px-3 text-right font-bold text-teal-700">+{r.eva?.toLocaleString()}</td>
+                <td className="py-1.5 px-3 text-right font-bold text-slate-900">{r.pv_eva?.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// TAB 10: ADVANCED VISUAL ANALYTICS (TORNADO & DUPONT)
+function VisualAnalyticsTab({ company, backendData }) {
+  const tornado = backendData?.tornado || {
+    base_share_price: 531,
+    items: [
+      { key: 'wacc', label: 'Cost of Capital (WACC)', base_val: 10.42, low_val: 9.42, high_val: 11.42, unit: '%', min_price: 452, max_price: 638, swing: 186, downside_delta: -79, upside_delta: 107 },
+      { key: 'ebitda_margin', label: 'EBITDA Margin', base_val: 50.0, low_val: 47.0, high_val: 53.0, unit: '%', min_price: 470, max_price: 592, swing: 122, downside_delta: -61, upside_delta: 61 },
+      { key: 'rev_growth', label: 'Revenue Growth (CAGR)', base_val: 10.0, low_val: 8.0, high_val: 12.0, unit: '%', min_price: 485, max_price: 582, swing: 97, downside_delta: -46, upside_delta: 51 },
+      { key: 'terminal_growth', label: 'Terminal Growth Rate (g)', base_val: 1.5, low_val: 1.0, high_val: 2.0, unit: '%', min_price: 494, max_price: 574, swing: 80, downside_delta: -37, upside_delta: 43 },
+      { key: 'capex_percent_rev', label: 'CapEx (% of Revenue)', base_val: 8.5, low_val: 7.0, high_val: 10.0, unit: '%', min_price: 508, max_price: 554, swing: 46, downside_delta: -23, upside_delta: 23 },
+      { key: 'exit_multiple', label: 'Terminal Exit Multiple', base_val: 6.5, low_val: 5.0, high_val: 8.0, unit: 'x', min_price: 504, max_price: 558, swing: 54, downside_delta: -27, upside_delta: 27 },
+    ]
+  };
+
+  const dupont = backendData?.dupont || {
+    calculated_roe_pct: 12.8,
+    direct_roe_pct: 12.8,
+    peer_median_roe_pct: 9.35,
+    spread_vs_peer_median_pct: 3.45,
+    stages: {
+      '1_tax_burden': { name: 'Tax Burden (NI / EBT)', value: 0.88, pct: 88.0, peer_benchmark: 0.87 },
+      '2_interest_burden': { name: 'Interest Burden (EBT / EBIT)', value: 0.82, pct: 82.0, peer_benchmark: 0.775 },
+      '3_operating_margin': { name: 'Operating Margin (EBIT / Rev)', value: 0.45, pct: 45.0, peer_benchmark: 33.0 },
+      '4_asset_turnover': { name: 'Asset Turnover (Rev / Assets)', value: 0.22, mult: 0.22, peer_benchmark: 0.21 },
+      '5_financial_leverage': { name: 'Equity Multiplier (Assets / Equity)', value: 1.48, mult: 1.48, peer_benchmark: 1.585 }
+    }
+  };
+
+  const baseP = tornado.base_share_price || 531;
+  const maxSwing = Math.max(...tornado.items.map(it => Math.max(Math.abs(it.downside_delta), Math.abs(it.upside_delta))), 1);
+
+  return (
+    <div className="p-4 space-y-5">
+      <div className="border border-slate-200 rounded-xs p-4 bg-white">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-4">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 bg-rose-600 rounded-xs"></span>
+              <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+                Tornado Sensitivity Analysis (Fair Value Swing Range)
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Two-sided valuation swings relative to baseline fair value (IDR {baseP}) from low to high parameter bounds.
+            </p>
+          </div>
+          <span className="text-xs font-mono bg-slate-100 text-slate-800 px-2.5 py-1 rounded-xs font-bold">
+            Baseline: IDR {baseP}
+          </span>
+        </div>
+
+        <div className="space-y-3 font-mono text-xs">
+          {tornado.items.map((item, idx) => {
+            const downPct = (Math.abs(item.downside_delta) / maxSwing) * 50;
+            const upPct = (Math.abs(item.upside_delta) / maxSwing) * 50;
+
+            return (
+              <div key={idx} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="font-semibold text-slate-800 font-sans">{item.label} ({item.low_val}{item.unit} → {item.high_val}{item.unit})</span>
+                  <span className="text-slate-600 text-[11px]">
+                    IDR {item.min_price} — <strong className="text-slate-900">IDR {baseP}</strong> — IDR {item.max_price} (Swing: <strong className="text-blue-700">IDR {item.swing}</strong>)
+                  </span>
+                </div>
+                <div className="flex items-center h-5 bg-slate-50 rounded-xs border border-slate-200 overflow-hidden relative">
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-400 z-10" />
+                  <div className="w-1/2 flex justify-end">
+                    <div
+                      style={{ width: `${downPct}%` }}
+                      className="h-3.5 bg-rose-500 rounded-l-xs flex items-center justify-start pl-1 text-[9px] text-white font-bold"
+                    >
+                      {item.downside_delta}
+                    </div>
+                  </div>
+                  <div className="w-1/2 flex justify-start">
+                    <div
+                      style={{ width: `${upPct}%` }}
+                      className="h-3.5 bg-emerald-500 rounded-r-xs flex items-center justify-end pr-1 text-[9px] text-white font-bold"
+                    >
+                      +{item.upside_delta}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="border border-slate-200 rounded-xs p-4 bg-white">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-4">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 bg-purple-600 rounded-xs"></span>
+              <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+                5-Stage DuPont ROE Decomposition vs. Indonesian Property Sector Benchmark
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              ROE = Tax Burden × Interest Burden × Operating Margin × Asset Turnover × Financial Leverage.
+            </p>
+          </div>
+          <div className="flex items-center space-x-2 font-mono text-xs">
+            <span className="text-slate-500">Sector Median: <strong>{dupont.peer_median_roe_pct}%</strong></span>
+            <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-xs font-bold">
+              {company.ticker} ROE: {dupont.calculated_roe_pct}% (+{dupont.spread_vs_peer_median_pct}%)
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 font-mono">
+          {Object.entries(dupont.stages || {}).map(([key, st]) => (
+            <div key={key} className="bg-slate-50 border border-slate-200 p-3 rounded-xs space-y-1">
+              <span className="text-[10px] text-slate-500 uppercase font-sans block truncate">{st.name}</span>
+              <div className="text-lg font-bold text-slate-900">
+                {st.pct !== undefined ? `${st.pct}%` : `${st.mult}x`}
+              </div>
+              <div className="text-[10px] text-slate-500 flex justify-between pt-1 border-t border-slate-200/60">
+                <span>Peer Med:</span>
+                <span className="font-semibold text-slate-700">{st.peer_benchmark}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // 3. VALUATION WORKSPACE (DCF, COMPS, RIM, DDM, FOOTBALL FIELD)
 function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetAssumptions, onToggleWatchlist, onNavigate, onOpenInspector, onDownloadExcel }) {
   const [activeTab, setActiveTab] = useState('dcf');
@@ -2309,8 +2798,12 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
               { id: 'comps', label: '2. Relative Multiples Comps' },
               { id: 'rim', label: '3. Residual Income Model (RIM)' },
               { id: 'ddm', label: '4. Dividend Discount Model (DDM)' },
-              { id: 'sensitivity', label: '5. 5x5 WACC Sensitivity' },
-              { id: 'proofs', label: '6. KaTeX LaTeX Proofs' },
+              { id: 'rnav', label: '5. RNAV Property Assets' },
+              { id: 'montecarlo', label: '6. Monte Carlo (10k Runs)' },
+              { id: 'eva', label: '7. EVA & MVA (Economic Profit)' },
+              { id: 'analytics', label: '8. Tornado & DuPont Analytics' },
+              { id: 'sensitivity', label: '9. 5x5 WACC Sensitivity' },
+              { id: 'proofs', label: '10. KaTeX LaTeX Proofs' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -2662,6 +3155,26 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
               </div>
             </div>
           </div>
+        )}
+
+        {/* TAB 7: RNAV (PROPERTY ASSETS) */}
+        {activeTab === 'rnav' && (
+          <RNAVTab company={company} backendData={backendData} onNavigate={onNavigate} />
+        )}
+
+        {/* TAB 8: MONTE CARLO (10K SIMULATIONS) */}
+        {activeTab === 'montecarlo' && (
+          <MonteCarloTab company={company} backendData={backendData} />
+        )}
+
+        {/* TAB 9: EVA & MVA */}
+        {activeTab === 'eva' && (
+          <EVATab company={company} backendData={backendData} />
+        )}
+
+        {/* TAB 10: TORNADO & DUPONT */}
+        {activeTab === 'analytics' && (
+          <VisualAnalyticsTab company={company} backendData={backendData} />
         )}
       </div>
     </div>
