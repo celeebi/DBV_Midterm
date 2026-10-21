@@ -3603,6 +3603,7 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
 // 4. DEDICATED 3-STATEMENT FINANCIAL MODEL WORKSPACE
 function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRefreshCalculation, onDownloadExcel }) {
   const [activeStmt, setActiveStmt] = useState('bs');
+  const [showScopeInfo, setShowScopeInfo] = useState(false);
   const threeStmt = backendData?.three_statement || {};
   const isBalanced = threeStmt.is_balanced !== undefined ? threeStmt.is_balanced : true;
 
@@ -3614,13 +3615,25 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-lg font-bold text-slate-900 tracking-tight">
               10-Year Integrated 3-Statement Financial Model
             </h1>
             <span className="text-[11px] font-mono bg-blue-100 text-blue-800 px-2 py-0.5 rounded-xs font-bold">
               {company.ticker} AUDITED ENGINE
             </span>
+            <span className="text-[11px] font-mono bg-slate-100 text-slate-700 border border-slate-300 px-2 py-0.5 rounded-xs font-medium flex items-center space-x-1">
+              <Icon name="Building2" size={11} className="text-slate-500" />
+              <span>Corporate Finance Scope (Non-Banking)</span>
+            </span>
+            <button
+              onClick={() => setShowScopeInfo(!showScopeInfo)}
+              className="text-[11px] font-mono text-blue-600 hover:text-blue-800 underline flex items-center space-x-0.5 cursor-pointer ml-1"
+              title="Click to view financial methodology and industry scope details"
+            >
+              <Icon name="Info" size={11} />
+              <span>{showScopeInfo ? "Hide Scope Details" : "Scope Rationale"}</span>
+            </button>
           </div>
           <p className="text-xs text-slate-600 mt-0.5">
             Articulated Income Statement, Balance Sheet, and Cash Flow Statement across 2026E–2035E with live zero-balance reconciliation.
@@ -3652,6 +3665,43 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
           </button>
         </div>
       </div>
+
+      {showScopeInfo && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xs p-4 text-xs text-slate-700 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div className="flex items-center space-x-2 font-bold text-slate-900">
+              <Icon name="Layers" size={15} className="text-blue-600" />
+              <span>Methodology Framework: Top-Down Corporate Finance (Non-Banking Focus)</span>
+            </div>
+            <button
+              onClick={() => setShowScopeInfo(false)}
+              className="text-slate-400 hover:text-slate-600 text-xs font-mono cursor-pointer"
+            >
+              ✕ Close
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] leading-relaxed">
+            <div className="bg-white p-3 rounded-xs border border-slate-200 space-y-1.5">
+              <div className="flex items-center space-x-1.5 text-blue-700 font-bold font-mono text-[11px] uppercase">
+                <Icon name="CheckCircle2" size={13} className="text-blue-600" />
+                <span>Applicable Scope: Non-Banking & Non-Lending Corporates</span>
+              </div>
+              <p className="text-slate-600">
+                In non-financial corporate enterprises (Real Estate, Consumer Staples, Industrials, Retail, and Tech), value creation follows a top-down operational path: <strong>Customer Demand & Revenue (P × Q) → EBITDA Margins → Net Income → Free Cash Flow (FCFF)</strong>. Operating performance is independent of capital structure, and working capital (DSO/DIO/DPO) alongside CapEx represents tangible reinvestment into productive assets.
+              </p>
+            </div>
+            <div className="bg-white p-3 rounded-xs border border-slate-200 space-y-1.5">
+              <div className="flex items-center space-x-1.5 text-amber-700 font-bold font-mono text-[11px] uppercase">
+                <Icon name="AlertTriangle" size={13} className="text-amber-600" />
+                <span>Distinct Scope: Why Banking & Lending Firms Require ALM</span>
+              </div>
+              <p className="text-slate-600">
+                Commercial banks and lending institutions cannot be modeled top-down: their balance sheet (loans and customer deposits) <em>is</em> the earning product itself, interest expense is Cost of Goods Sold (COGS), and capacity is legally constrained by Basel III / OJK Capital Adequacy Ratios (CAR), necessitating an Asset-Liability Management (ALM) spread engine and regulatory-constrained DDM.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white border border-slate-200 rounded-xs shadow-2xs overflow-hidden">
         <div className="border-b border-slate-200 bg-slate-50 px-4 flex space-x-1">
@@ -5503,6 +5553,53 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
               <span className="text-slate-500">Author Personal Email:</span>
               <a href="mailto:afenterprisefarhan@gmail.com" className="font-bold text-slate-900 hover:underline">afenterprisefarhan@gmail.com</a>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Industry Applicability & Architectural Scope */}
+      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center space-x-2">
+            <Icon name="Target" size={18} className="text-emerald-600" />
+            <h2 className="text-base font-bold text-slate-900">
+              Methodology Scope: Non-Banking & Non-Lending Corporate Focus
+            </h2>
+          </div>
+          <span className="text-[10px] font-mono uppercase bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-xs font-bold self-start sm:self-auto">
+            Design Scope
+          </span>
+        </div>
+
+        <p className="text-xs text-slate-600 leading-relaxed">
+          VALUEX is deliberately architected for <strong className="text-slate-900">non-financial corporate enterprises</strong> (Real Estate Developers, Conglomerates, Consumer Staples, Industrials, Retail, and Technology). In corporate finance theory (Damodaran, McKinsey Valuation), non-financial corporates follow distinct fundamental mechanics compared to commercial banks and lending institutions:
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xs space-y-2.5">
+            <div className="flex items-center space-x-1.5 text-blue-800 font-bold font-mono text-[11px] uppercase">
+              <Icon name="CheckCircle2" size={14} className="text-blue-600" />
+              <span>Target Scope: Non-Banking Corporate Model</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] text-slate-600 list-disc list-inside leading-relaxed">
+              <li><strong className="text-slate-800">Top-Down Demand Engine:</strong> Value creation originates from customer demand ($P \times Q$), market penetration, and operating margin efficiency.</li>
+              <li><strong className="text-slate-800">Operational vs. Financial Separation:</strong> Operating profitability (EBITDA / EBIT) is independent of financing decisions (debt vs. equity gearing).</li>
+              <li><strong className="text-slate-800">Physical Working Capital:</strong> Receivables and inventories represent physical operational cycles (DSO, DIO, DPO) supporting delivery of real goods and lease spaces.</li>
+              <li><strong className="text-slate-800">Enterprise Cash Flows (FCFF):</strong> Enterprise Value is driven by unlevered cash flows available to all capital providers discounted at WACC.</li>
+            </ul>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xs space-y-2.5">
+            <div className="flex items-center space-x-1.5 text-amber-800 font-bold font-mono text-[11px] uppercase">
+              <Icon name="AlertTriangle" size={14} className="text-amber-600" />
+              <span>Excluded Scope: Banking & Lending Institutions</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] text-slate-600 list-disc list-inside leading-relaxed">
+              <li><strong className="text-slate-800">Balance Sheet as Product:</strong> For banks, deposits and loans are not operational overhead—they are the core raw materials and revenue-earning assets themselves.</li>
+              <li><strong className="text-slate-800">Interest is COGS:</strong> Interest expense is an operating cost, meaning Enterprise Value (EV) and FCFF are conceptually and mathematically inapplicable.</li>
+              <li><strong className="text-slate-800">Regulatory Capital Ceiling:</strong> Balance sheet expansion is legally governed by Basel III / OJK Capital Adequacy Ratios (CAR), not operational capacity.</li>
+              <li><strong className="text-slate-800">Requires Specialized ALM:</strong> Financial firms require specialized Asset-Liability Management (ALM) spread modeling and regulatory DDM.</li>
+            </ul>
           </div>
         </div>
       </div>
