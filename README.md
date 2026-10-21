@@ -195,8 +195,8 @@ Generates institutional `.xlsx` workbooks via `openpyxl` with dynamic, uppercase
 ### 11. Institutional Website Footer, Co-Branding & Navigable Pages
 - **Persistent Viewport Footer**: Multi-column institutional directory rendered across all workspace screens.
 - **Academic Co-Branding**: Features the **VALUEX** platform logo alongside the **University Logo** (`/static/img/university_logo.png`) and **MM6026 Course Logo** (`/static/img/course_logo.png`), complete with graceful image fallback badges.
-- **Dedicated "About Us" Workspace (`activeNav === 'about'`)**: Comprehensive institutional presentation of the MM6026 Digital Business Valuation project, academic pedigree at SBM ITB, multi-model triangulation methodology, and pure Python / React 18 architecture.
-- **Dedicated "Contact Us & Research Desk" Workspace (`activeNav === 'contact'`)**: Interactive inquiry and model feedback form with asynchronous dispatch, unique reference ID generation (`#VALUEX-XXXXX`), campus coordinates, and valuation FAQ accordion.
+- **Dedicated "About Us" Workspace (`activeNav === 'about'`)**: Comprehensive presentation of the MM6026 Digital Business Valuation project in the Master of Business Administration (MBA) program at SBM ITB, multi-model triangulation methodology, and pure Python / React 18 architecture.
+- **Dedicated "Contact Author" Workspace (`activeNav === 'contact'`)**: Direct inquiry form with asynchronous dispatch, unique reference ID generation (`#VALUEX-XXXXX`), campus coordinates, valuation FAQ accordion, and direct author contact emails (`29125329@mahasiswa.itb.ac.id` & `afenterprisefarhan@gmail.com`).
 
 ---
 

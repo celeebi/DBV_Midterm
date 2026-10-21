@@ -1313,7 +1313,7 @@ function App() {
 
   const platformNavItems = [
     { id: 'about', label: 'About Platform', icon: 'Info', shortcut: '⌘9' },
-    { id: 'contact', label: 'Contact Desk', icon: 'Mail', shortcut: '⌘0' },
+    { id: 'contact', label: 'Contact Author', icon: 'Mail', shortcut: '⌘0' },
   ];
 
   const currentWire = BREAKING_WIRE_HEADLINES[activeHeadlineIdx] || BREAKING_WIRE_HEADLINES[0];
@@ -4895,7 +4895,7 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
               <li>
                 <button onClick={() => onNavigate('contact')} className="hover:text-white transition text-left flex items-center space-x-1.5 text-slate-300 font-medium cursor-pointer">
                   <Icon name="Mail" size={12} className="text-slate-400" />
-                  <span>Contact Us & Desk</span>
+                  <span>Contact Author</span>
                 </button>
               </li>
               <li>
@@ -4994,22 +4994,26 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
             </ul>
           </div>
 
-          {/* Col 4: Academic Affiliation & Research Desk */}
+          {/* Col 4: Author & Academic Affiliation */}
           <div>
             <h4 className="font-mono text-[11px] font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center space-x-1.5">
               <Icon name="GraduationCap" size={13} className="text-blue-400" />
-              <span>Academic & Desk</span>
+              <span>Author & Academic</span>
             </h4>
             <p className="text-[11px] text-slate-400 leading-relaxed mb-2.5">
-              Master of Management Program (<strong className="text-slate-200">MM6026</strong>) Digital Business Valuation. School of Business and Management (SBM ITB).
+              Master of Business Administration (MBA) • <strong className="text-slate-200">MM6026</strong> Digital Business Valuation. School of Business and Management (SBM ITB).
             </p>
-            <div className="text-[11px] text-slate-400 space-y-1 font-mono">
+            <div className="text-[11px] text-slate-400 space-y-1.5 font-mono">
               <div>Campus: SBM ITB, Bandung, ID</div>
-              <div>Hours: 09:00 - 16:00 WIB (IDX Sessions)</div>
               <div>
-                Desk: <a href="mailto:research@valuex-terminal.local" className="text-blue-400 hover:underline">research@valuex-terminal.local</a>
+                <span className="text-slate-500 block text-[10px] uppercase">University Email:</span>
+                <a href="mailto:29125329@mahasiswa.itb.ac.id" className="text-blue-400 hover:underline">29125329@mahasiswa.itb.ac.id</a>
               </div>
-              <div className="pt-2 text-[10px] text-slate-500">
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase">Personal Email:</span>
+                <a href="mailto:afenterprisefarhan@gmail.com" className="text-blue-400 hover:underline">afenterprisefarhan@gmail.com</a>
+              </div>
+              <div className="pt-1 text-[10px] text-slate-500">
                 Release: <span className="text-slate-400">develop_further (v1.2.0)</span>
               </div>
             </div>
@@ -5024,7 +5028,7 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
           <div className="flex items-center space-x-3 text-slate-400">
             <button onClick={() => onNavigate('about')} className="hover:text-white transition cursor-pointer">About Us</button>
             <span>•</span>
-            <button onClick={() => onNavigate('contact')} className="hover:text-white transition cursor-pointer">Contact Desk</button>
+            <button onClick={() => onNavigate('contact')} className="hover:text-white transition cursor-pointer">Contact Author</button>
             <span>•</span>
             <button onClick={() => onNavigate('modeler')} className="hover:text-white transition cursor-pointer">Methodology</button>
             <span>•</span>
@@ -5112,7 +5116,7 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xs text-xs font-medium transition flex items-center space-x-2 cursor-pointer"
             >
               <Icon name="Mail" size={14} />
-              <span>Contact Research Desk</span>
+              <span>Contact Author</span>
             </button>
           </div>
         </div>
@@ -5161,13 +5165,17 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed">
           <div className="space-y-3">
             <p>
-              This digital valuation platform was conceptualized, engineered, and calibrated as part of the <strong className="text-slate-900">MM6026 Digital Business Valuation</strong> course within the Master of Management program at the <strong className="text-slate-900">School of Business and Management (SBM ITB)</strong>.
+              This digital valuation platform was conceptualized, engineered, and calibrated as part of the <strong className="text-slate-900">MM6026 Digital Business Valuation</strong> course within the Master of Business Administration (MBA) program at the <strong className="text-slate-900">School of Business and Management (SBM ITB)</strong>.
             </p>
             <p>
               Under institutional financial modeling frameworks, the platform benchmarks <strong className="text-slate-900">PT Pakuwon Jati Tbk (IDX:PWON)</strong> — a premier Indonesian real estate conglomerate specializing in high-margin superblocks, recurring retail malls, and hospitality assets across Jakarta and Surabaya.
             </p>
           </div>
           <div className="space-y-2 bg-slate-50 p-4 rounded-xs border border-slate-200 font-mono text-[11px]">
+            <div className="flex justify-between py-1 border-b border-slate-200">
+              <span className="text-slate-500">Degree Program:</span>
+              <span className="font-bold text-slate-900">Master of Business Administration (MBA)</span>
+            </div>
             <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="text-slate-500">Course Identifier:</span>
               <span className="font-bold text-slate-900">MM6026 Digital Business Valuation</span>
@@ -5180,9 +5188,13 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
               <span className="text-slate-500">Core Benchmark Security:</span>
               <span className="font-bold text-blue-700">IDX:PWON (Pakuwon Jati Tbk)</span>
             </div>
+            <div className="flex justify-between py-1 border-b border-slate-200">
+              <span className="text-slate-500">Author University Email:</span>
+              <a href="mailto:29125329@mahasiswa.itb.ac.id" className="font-bold text-blue-700 hover:underline">29125329@mahasiswa.itb.ac.id</a>
+            </div>
             <div className="flex justify-between py-1">
-              <span className="text-slate-500">Comparative Peer Set:</span>
-              <span className="font-bold text-slate-900">BSDE, CTRA, SMRA, ASII</span>
+              <span className="text-slate-500">Author Personal Email:</span>
+              <a href="mailto:afenterprisefarhan@gmail.com" className="font-bold text-slate-900 hover:underline">afenterprisefarhan@gmail.com</a>
             </div>
           </div>
         </div>
@@ -5266,9 +5278,9 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
         {/* Left Column (7 cols): Interactive Contact Form */}
         <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Contact Research & Modeling Desk</h2>
+            <h2 className="text-lg font-bold text-slate-900">Contact Author & Research Inquiries</h2>
             <p className="text-xs text-slate-600 mt-1">
-              Submit model questions, assumption feedback, data provenance inquiries, or academic collaboration proposals.
+              Submit model questions, assumption feedback, data provenance inquiries, or valuation research inquiries directly to the author.
             </p>
           </div>
 
@@ -5279,7 +5291,7 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
                 <span>INQUIRY LOGGED SUCCESSFULLY (REF: #{submittedRefId})</span>
               </div>
               <p>
-                Your inquiry has been queued for review by the MM6026 research desk. Inquiries submitted during market hours (09:00 - 16:00 WIB) are typically processed on the same trading day.
+                Your inquiry has been queued for review by the author. Thank you for your feedback and interest in the MM6026 valuation model.
               </p>
             </div>
           )}
@@ -5387,30 +5399,36 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
 
         {/* Right Column (5 cols): Campus Coordinates & FAQ */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Institutional Desk Coordinates */}
+          {/* Author & Academic Coordinates */}
           <div className="bg-[#0A1120] text-white rounded-xs p-5 border border-slate-800 shadow-2xs space-y-4">
-            <div className="flex items-center space-x-3 pb-3 border-b border-slate-800">
-              <AcademicLogo
-                src="/static/img/university_logo.png"
-                alt="University Logo"
-                label="SBM ITB"
-                height={32}
-              />
-              <AcademicLogo
-                src="/static/img/course_logo.png"
-                alt="Course Logo"
-                label="MM6026"
-                height={32}
-              />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-3">
+                <AcademicLogo
+                  src="/static/img/university_logo.png"
+                  alt="University Logo"
+                  label="SBM ITB"
+                  height={32}
+                />
+                <AcademicLogo
+                  src="/static/img/course_logo.png"
+                  alt="Course Logo"
+                  label="MM6026"
+                  height={32}
+                />
+              </div>
+              <span className="text-[10px] font-mono bg-blue-900/60 text-blue-300 border border-blue-700/50 px-2 py-0.5 rounded-xs font-semibold">
+                MBA CANDIDATE
+              </span>
             </div>
 
             <div className="space-y-3 text-xs text-slate-300">
               <div className="flex items-start space-x-2.5">
-                <Icon name="MapPin" size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <Icon name="GraduationCap" size={16} className="text-blue-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-white block">Academic Campus</span>
-                  <span className="text-slate-400">School of Business and Management (SBM ITB)</span>
-                  <span className="text-slate-400 block">Jl. Ganesha No. 10, Bandung, Indonesia</span>
+                  <span className="font-semibold text-white block">Academic Program</span>
+                  <span className="text-slate-300 font-medium">Master of Business Administration (MBA)</span>
+                  <span className="text-slate-400 block text-[11px]">School of Business and Management (SBM ITB)</span>
+                  <span className="text-slate-400 block text-[11px]">Jl. Ganesha No. 10, Bandung, Indonesia</span>
                 </div>
               </div>
 
@@ -5425,10 +5443,20 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
 
               <div className="flex items-start space-x-2.5">
                 <Icon name="Mail" size={16} className="text-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white block">Electronic Correspondence</span>
-                  <span className="text-slate-400 font-mono text-[11px] block">research@valuex-terminal.local</span>
-                  <span className="text-slate-400 font-mono text-[11px] block">mm6026.valuation@sbm-itb.ac.id</span>
+                <div className="space-y-1.5">
+                  <span className="font-semibold text-white block">Direct Author Email Addresses</span>
+                  <div>
+                    <span className="text-slate-500 block text-[10px] uppercase font-mono">University Email:</span>
+                    <a href="mailto:29125329@mahasiswa.itb.ac.id" className="text-blue-400 hover:underline font-mono text-[11px] block">
+                      29125329@mahasiswa.itb.ac.id
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-[10px] uppercase font-mono">Personal Email:</span>
+                    <a href="mailto:afenterprisefarhan@gmail.com" className="text-blue-400 hover:underline font-mono text-[11px] block">
+                      afenterprisefarhan@gmail.com
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
