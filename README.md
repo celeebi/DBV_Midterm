@@ -29,6 +29,7 @@ The platform pairs a high-performance **Python Starlette/Uvicorn backend** with 
   - [8. Full 10-Year Explicit Forecasts & Auto-Fade](#8-full-10-year-explicit-forecasts--auto-fade)
   - [9. Integrated 10-Year 3-Statement Financial Model](#9-integrated-10-year-3-statement-financial-model)
   - [10. Formula-Active 6-Sheet Microsoft Excel Export](#10-formula-active-6-sheet-microsoft-excel-export)
+  - [11. Institutional Website Footer, Co-Branding & Navigable Pages](#11-institutional-website-footer-co-branding--navigable-pages)
 - [System Architecture](#-system-architecture)
 - [Repository Structure](#-repository-structure)
 - [Quick Start Guide](#-quick-start-guide)
@@ -191,6 +192,12 @@ Generates institutional `.xlsx` workbooks via `openpyxl` with dynamic, uppercase
 - **Sheet 5: `RIM & DDM`**: Economic profit schedules, dividend discount schedules, and terminal values.
 - **Sheet 6: `Audit & Sensitivity`**: 5x5 WACC vs $g$ sensitivity matrix and LaTeX proof summaries.
 
+### 11. Institutional Website Footer, Co-Branding & Navigable Pages
+- **Persistent Viewport Footer**: Multi-column institutional directory rendered across all workspace screens.
+- **Academic Co-Branding**: Features the **VALUEX** platform logo alongside the **University Logo** (`/static/img/university_logo.png`) and **MM6026 Course Logo** (`/static/img/course_logo.png`), complete with graceful image fallback badges.
+- **Dedicated "About Us" Workspace (`activeNav === 'about'`)**: Comprehensive institutional presentation of the MM6026 Digital Business Valuation project, academic pedigree at SBM ITB, multi-model triangulation methodology, and pure Python / React 18 architecture.
+- **Dedicated "Contact Us & Research Desk" Workspace (`activeNav === 'contact'`)**: Interactive inquiry and model feedback form with asynchronous dispatch, unique reference ID generation (`#VALUEX-XXXXX`), campus coordinates, and valuation FAQ accordion.
+
 ---
 
 ## 🏛 System Architecture
@@ -254,6 +261,9 @@ Project BA/
 ├── AI_DISCLOSURE.md                # Academic AI disclosure and verification statement
 ├── LICENSE                         # MIT License
 ├── static/
+│   ├── img/                        # Institutional co-branding and academic assets
+│   │   ├── university_logo.png     # SBM ITB / University crest logo
+│   │   └── course_logo.png         # MM6026 Digital Business Valuation course logo
 │   ├── index.html                  # React 18 production shell (Tailwind CDN, Lucide, KaTeX, Error Boundary)
 │   ├── app_react.jsx               # VALUEX Terminal application (8 workflow views, Donut chart, 10 subtabs)
 │   ├── coverage_data.js            # Synchronous initial Indonesian property coverage (PWON, BSDE, CTRA, SMRA, ASII)

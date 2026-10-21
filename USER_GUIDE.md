@@ -331,3 +331,40 @@ Click the **"Inspector 🔍"** button in the top navigation bar to open the LaTe
 - **Enterprise-to-Equity Bridge**: Complete reconciliation proof verifying:
   $$\text{Equity Value} \equiv \text{Enterprise Value} + \text{Cash} - \text{Total Debt} - \text{Minority Interest}$$
 - **Multi-Model Triangulation Proof**: Dynamically displays only active weights and target components.
+
+---
+
+## 11. Institutional Website Footer, Co-Branding & Informational Pages
+
+### A. The Institutional Website Footer
+Located permanently at the base of the scrollable workspace across all views, the footer provides universal navigation, system status monitoring, and academic co-branding:
+1. **Top Co-Branded Ribbon**:
+   - **Platform Logo**: Blue `VX` icon badge and `VALUEX TERMINAL` typography.
+   - **University & Course Logos**: Direct visual co-branding featuring the **University Logo** (`/static/img/university_logo.png`) and the **MM6026 Course Logo** (`/static/img/course_logo.png`).
+   - **Live System Health**: `● ALL SYSTEMS OPERATIONAL` real-time badge.
+   - **Quick Smooth Scroll**: `TOP ↑` button returning analysts immediately to the top of the workspace.
+2. **4-Column Navigation Directory**:
+   - **Platform & Info**: Links to *About Us*, *Contact Us & Desk*, *Fundamental CAPM Modeler*, *Research Tear Sheet*, and *Coverage Screener*.
+   - **Valuation Engines**: Direct links to *DCF*, *RIM*, *DDM*, *RNAV*, *EVA*, and the *3-Statement Model*.
+   - **Benchmark Universe**: One-click company switchers for `PWON.JK`, `BSDE.JK`, `CTRA.JK`, `SMRA.JK`, and `ASII.JK`.
+   - **Academic & Desk**: Overview of MM6026 course context at SBM ITB, desk trading hours (09:00 - 16:00 WIB), and direct research email (`research@valuex-terminal.local`).
+3. **Academic Disclaimer & Copyright**:
+   - Non-investment advisory disclosure and educational research license under MM6026.
+
+### B. Dedicated "About Us" Page (`⌘9` / Footer Link)
+Accessible by clicking *"About Us"* in the footer or the left sidebar:
+- **Academic Credentials**: Detailed institutional syllabus context for **MM6026 Digital Business Valuation** at the School of Business and Management (SBM ITB).
+- **Core Pillars**: Architectural breakdown of the 5-way valuation triangulation, 10-year articulated pro forma, and fundamental CAPM decomposition.
+- **Technology Architecture**: Details the zero-node pure Python Starlette/Uvicorn backend and React 18 frontend with KaTeX equation rendering.
+- **Return Action**: Prominent *"← Return to Dashboard"* button for seamless workflow continuity.
+
+### C. Dedicated "Contact Us & Research Desk" Page (`⌘0` / Footer Link)
+Accessible by clicking *"Contact Us"* in the footer or sidebar:
+- **Interactive Inquiry Dispatch Form**:
+  - Accepts Full Name, Organization, Institutional Email, Target Ticker, Inquiry Topic, and Detailed Message.
+  - Submits asynchronously, generates an institutional ticket ID (`#VALUEX-XXXXX`), logs confirmation to the activity stream, and alerts the analyst via toast notification.
+- **Campus & Desk Coordinates**:
+  - Academic Campus: School of Business and Management (SBM ITB), Jl. Ganesha No. 10, Bandung, Indonesia.
+  - Operating Hours: Jakarta Trading Hours (09:00 - 16:00 WIB, Sessions I & II synchronized).
+  - Electronic Inquiries: `research@valuex-terminal.local` and `mm6026.valuation@sbm-itb.ac.id`.
+- **Valuation FAQ Accordion**: Instant answers to common questions regarding hurdle rate derivation, custom ticker additions, and Excel model exportation.

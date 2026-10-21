@@ -173,6 +173,7 @@ $$\text{ROE} = \left(\frac{\text{Net Income}}{\text{EBT}}\right) \times \left(\f
 | **M6: Restoration & Polish** | Oct 21 (`67dd6d9`) | Universal Ticker Search, expanded live ribbon height, full 10-year forecast sliders, auto-fade, and convergence warning. | **Completed** |
 | **M7: Option A & Donut Chart** | Oct 21 (`5dd4c78`) | Branch `develop_further`: 0-weight slider fix, interactive Weight Composition Donut Chart with quick presets, RNAV, 10k Monte Carlo, EVA/MVA, Tornado, DuPont, and 10 subtabs in Valuation workspace. | **Completed** |
 | **M8: Fundamental CAPM & Provenance** | Oct 21 (`develop_further`) | Live scraped Beta from Yahoo Finance, Damodaran mature ERP (5.00%) & CRP (2.16%), Bank Indonesia 10Y Yield (6.60%), pre-tax debt cost (6.50%), interactive hoverable Provenance Tooltips (`[ⓘ]`), live WACC sync cards, and `/api/wacc` endpoint. | **Completed** |
+| **M9: Institutional Footer & Informational Pages** | Oct 21 (`develop_further`) | Persistent multi-column Institutional Footer with live status, smooth scroll, academic co-branding (University & MM6026 Course Logos with graceful auto-fallback), and dedicated navigable workspaces for "About Us" and "Contact Us & Research Desk". | **Completed** |
 
 ---
 
