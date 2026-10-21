@@ -5442,7 +5442,7 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
             </p>
 
             {/* Social & Direct Profile Pills */}
-            <div className="flex items-center space-x-2 mb-3">
+            <div className="flex flex-wrap items-center gap-1.5 mb-3">
               <a
                 href="https://www.linkedin.com/in/afenterprisefarhan"
                 target="_blank"
@@ -5462,6 +5462,16 @@ function InstitutionalFooter({ onNavigate, onSelectCompany }) {
               >
                 <Icon name="Github" size={11} />
                 <span>GitHub</span>
+              </a>
+              <a
+                href="https://instagram.com/abas.space"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-1 bg-pink-950/40 hover:bg-pink-900/50 text-pink-300 hover:text-white border border-pink-700/50 rounded-xs text-[10px] font-mono flex items-center space-x-1 transition cursor-pointer"
+                title="Instagram (@abas.space)"
+              >
+                <Icon name="Instagram" size={11} />
+                <span>Instagram</span>
               </a>
               <button
                 onClick={() => onNavigate('about')}
@@ -5704,12 +5714,6 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
           <p>
             I built this web application to simplify and streamline core business valuation frameworks—translating complex financial modeling, discounted cash flows, and intrinsic valuation theories into an intuitive, accessible tool for students, analysts, and practitioners alike.
           </p>
-          <div className="bg-slate-950/70 border border-slate-800/80 p-3.5 rounded-xs text-[11px] text-slate-300 flex items-start space-x-2.5">
-            <Icon name="Activity" size={16} className="text-amber-400 shrink-0 mt-0.5" />
-            <span>
-              When I’m not building models or analyzing statements, you can usually find me on the <strong className="text-white font-medium">badminton court</strong> or digging into <strong className="text-white font-medium">behavioral economics</strong> and <strong className="text-white font-medium">complex systems</strong>.
-            </span>
-          </div>
         </div>
 
         {/* Connect & Feedback Channels */}
@@ -5736,6 +5740,15 @@ function AboutUsPage({ onNavigate, onSelectCompany }) {
             >
               <Icon name="Github" size={13} />
               <span>GitHub (@celeebi)</span>
+            </a>
+            <a
+              href="https://instagram.com/abas.space"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-pink-950/40 hover:bg-pink-900/50 text-pink-300 hover:text-white border border-pink-700/50 rounded-xs text-xs font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Icon name="Instagram" size={13} />
+              <span>Instagram (@abas.space)</span>
             </a>
             <a
               href="mailto:afenterprisefarhan@gmail.com"
@@ -6025,7 +6038,7 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
 
             <div className="space-y-3 text-xs text-slate-300">
               <p className="text-[11px] text-slate-300 leading-relaxed">
-                Operating at the intersection of quantitative rigor and financial modeling. Active in badminton, behavioral economics, and complex systems.
+                Operating at the intersection of quantitative rigor and financial modeling to streamline institutional business valuation frameworks.
               </p>
 
               {/* Direct Connect Pills */}
@@ -6047,6 +6060,15 @@ function ContactUsPage({ onNavigate, onTriggerToast, onSelectCompany }) {
                 >
                   <Icon name="Github" size={12} />
                   <span>GitHub (@celeebi)</span>
+                </a>
+                <a
+                  href="https://instagram.com/abas.space"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 bg-pink-950/40 hover:bg-pink-900/50 text-pink-300 hover:text-white border border-pink-700/50 rounded-xs text-[11px] font-mono font-medium flex items-center space-x-1.5 transition cursor-pointer"
+                >
+                  <Icon name="Instagram" size={12} />
+                  <span>@abas.space</span>
                 </a>
               </div>
 
