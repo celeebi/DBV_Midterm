@@ -110,6 +110,148 @@ function PriceHistoryChart({ data = [] }) {
   );
 }
 
+// Real-Time Valuation Weight Composition Donut / Pie Chart
+function WeightCompositionDonut({
+  weights = { dcfWeight: 50, compsWeight: 25, rimWeight: 15, ddmWeight: 10 },
+  prices = {},
+  size = 170,
+  strokeWidth = 24,
+  centerTitle = "Target Price",
+  centerValue = null,
+  showLegend = true
+}) {
+  const models = [
+    { key: 'dcfWeight', label: '10-Yr DCF (FCFF)', shortLabel: 'DCF', color: '#2563eb', weight: Number(weights.dcfWeight ?? 50), price: prices.dcfSharePrice || 0 },
+    { key: 'compsWeight', label: 'Property Comps', shortLabel: 'Comps', color: '#059669', weight: Number(weights.compsWeight ?? 25), price: prices.compsSharePrice || 0 },
+    { key: 'rimWeight', label: 'Residual Income (RIM)', shortLabel: 'RIM', color: '#7c3aed', weight: Number(weights.rimWeight ?? 15), price: prices.rimSharePrice || 0 },
+    { key: 'ddmWeight', label: 'Dividend Discount (DDM)', shortLabel: 'DDM', color: '#d97706', weight: Number(weights.ddmWeight ?? 10), price: prices.ddmSharePrice || 0 },
+  ];
+  if (weights.rnavWeight !== undefined && weights.rnavWeight !== null) {
+    models.push({ key: 'rnavWeight', label: 'RNAV Property Net Assets', shortLabel: 'RNAV', color: '#ea580c', weight: Number(weights.rnavWeight ?? 0), price: prices.rnavSharePrice || 0 });
+  }
+
+  const rawSum = models.reduce((acc, m) => acc + (m.weight > 0 ? m.weight : 0), 0);
+  const isZeroTotal = rawSum <= 0;
+
+  // Geometry
+  const center = size / 2;
+  const radius = center - strokeWidth / 2 - 4;
+  const circumference = 2 * Math.PI * radius;
+
+  // Compute slices
+  let accumulatedFraction = 0;
+  const slices = models.map(m => {
+    const fraction = rawSum > 0 ? (Math.max(0, m.weight) / rawSum) : 0;
+    const dashLength = fraction * circumference;
+    const strokeDashoffset = -(accumulatedFraction * circumference);
+    const effectivePct = rawSum > 0 ? Math.round(fraction * 100) : 0;
+    const contribution = rawSum > 0 ? Math.round((m.price * Math.max(0, m.weight)) / rawSum) : 0;
+    accumulatedFraction += fraction;
+    return {
+      ...m,
+      fraction,
+      effectivePct,
+      dashLength,
+      strokeDashoffset,
+      contribution
+    };
+  });
+
+  const activeSlices = slices.filter(s => s.fraction > 0);
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xs w-full">
+      {/* SVG Donut */}
+      <div className="relative shrink-0 flex items-center justify-center" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible">
+          {isZeroTotal ? (
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke="#cbd5e1"
+              strokeWidth={strokeWidth}
+              strokeDasharray="4 4"
+            />
+          ) : activeSlices.length === 1 ? (
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke={activeSlices[0].color}
+              strokeWidth={strokeWidth}
+            />
+          ) : (
+            <g transform={`rotate(-90 ${center} ${center})`}>
+              {activeSlices.map(s => (
+                <circle
+                  key={s.key}
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  fill="none"
+                  stroke={s.color}
+                  strokeWidth={strokeWidth}
+                  strokeDasharray={`${s.dashLength} ${circumference}`}
+                  strokeDashoffset={s.strokeDashoffset}
+                  strokeLinecap="butt"
+                  className="transition-all duration-300"
+                />
+              ))}
+            </g>
+          )}
+        </svg>
+
+        {/* Center Readout */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2">
+          {centerValue ? (
+            <>
+              <span className="text-[10px] font-mono text-slate-500 uppercase leading-none block">{centerTitle}</span>
+              <span className="text-sm font-bold font-mono text-slate-900 leading-tight mt-0.5">{centerValue}</span>
+              <span className={`text-[9px] font-mono font-semibold px-1 py-0.2 rounded-xs mt-0.5 ${rawSum === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                {rawSum === 100 ? '100% Balanced' : `${rawSum}% Sum`}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-[10px] font-mono text-slate-500 uppercase leading-none block">Total Weight</span>
+              <span className="text-base font-bold font-mono text-slate-900 leading-tight mt-0.5">{rawSum}%</span>
+              <span className="text-[9px] font-mono text-slate-400 block">{rawSum === 100 ? 'Normalized' : 'Auto-Scaled'}</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Legend & Breakdown */}
+      {showLegend && (
+        <div className="w-full space-y-1.5 font-mono text-xs">
+          {slices.map(s => (
+            <div key={s.key} className="flex items-center justify-between py-0.5 border-b border-slate-200/60 last:border-0">
+              <div className="flex items-center space-x-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-xs shrink-0" style={{ backgroundColor: s.color }} />
+                <span className="text-slate-700 font-sans truncate text-xs">{s.label}</span>
+              </div>
+              <div className="flex items-center space-x-2 shrink-0 text-right">
+                <span className="font-bold" style={{ color: s.weight > 0 ? s.color : '#94a3b8' }}>
+                  {s.weight}%
+                </span>
+                {s.weight > 0 && rawSum !== 100 && (
+                  <span className="text-[10px] text-slate-400">({s.effectivePct}%)</span>
+                )}
+                <span className="text-slate-500 text-[11px] w-16">
+                  {s.price ? `IDR ${s.price}` : '—'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Generic Lucide Icon Renderer
 const Icon = ({ name, size = 16, className = "" }) => {
   const ref = useRef(null);
@@ -337,16 +479,20 @@ function calculateClientValuation(company, assumptions, scenarioMult = 1.0) {
   const pvTvDiv = tvDiv / Math.pow(1 + ke / 100, 10);
   const ddmSharePrice = Math.round(sumPvDiv + pvTvDiv);
 
-  // 4-Way Triangulation
-  const wDcf = assumptions.dcfWeight || 50;
-  const wComps = assumptions.compsWeight || 25;
-  const wRim = assumptions.rimWeight || 15;
-  const wDdm = assumptions.ddmWeight || 10;
-  const totalW = wDcf + wComps + wRim + wDdm || 100;
+  // Valuation Multi-Method Triangulation with Safe 0-Weight Handling
+  const wDcf = assumptions.dcfWeight !== undefined && assumptions.dcfWeight !== null ? Number(assumptions.dcfWeight) : 50;
+  const wComps = assumptions.compsWeight !== undefined && assumptions.compsWeight !== null ? Number(assumptions.compsWeight) : 25;
+  const wRim = assumptions.rimWeight !== undefined && assumptions.rimWeight !== null ? Number(assumptions.rimWeight) : 15;
+  const wDdm = assumptions.ddmWeight !== undefined && assumptions.ddmWeight !== null ? Number(assumptions.ddmWeight) : 10;
+  const wRnav = assumptions.rnavWeight !== undefined && assumptions.rnavWeight !== null ? Number(assumptions.rnavWeight) : 0;
+  const rnavSharePrice = company.rnavSharePrice || Math.round(dcfSharePrice * 1.02);
 
-  const compositeIntrinsicValue = Math.round(
-    (dcfSharePrice * wDcf + compsSharePrice * wComps + rimSharePrice * wRim + ddmSharePrice * wDdm) / totalW
-  );
+  const rawTotalW = wDcf + wComps + wRim + wDdm + wRnav;
+  const totalW = rawTotalW > 0 ? rawTotalW : 1;
+
+  const compositeIntrinsicValue = rawTotalW > 0
+    ? Math.round((dcfSharePrice * wDcf + compsSharePrice * wComps + rimSharePrice * wRim + ddmSharePrice * wDdm + rnavSharePrice * wRnav) / totalW)
+    : dcfSharePrice;
 
   const marketCap = Math.round(company.referencePrice * company.sharesOutstanding);
   const currentEv = marketCap + netDebt;
@@ -752,7 +898,7 @@ function App() {
   }, [enrichedCompanies, selectedCompanyId]);
 
   const updateAssumption = (companyId, key, value, label) => {
-    const numVal = parseFloat(value);
+    const numVal = typeof value === 'number' ? value : parseFloat(value);
     if (isNaN(numVal)) return;
 
     setCustomAssumptionsMap(prev => ({
@@ -771,8 +917,41 @@ function App() {
           timestamp: 'Just now',
           ticker,
           parameter: label,
-          oldVal: `${customAssumptionsMap[companyId]?.[key] || ''}`,
+          oldVal: `${customAssumptionsMap[companyId]?.[key] ?? ''}`,
           newVal: `${numVal}`,
+          user: 'Current Analyst'
+        },
+        ...prev.slice(0, 9)
+      ]);
+    }
+  };
+
+  const updateMultipleAssumptions = (companyId, updatesObj, label) => {
+    setCustomAssumptionsMap(prev => {
+      const current = prev[companyId] || {};
+      const nextCompany = { ...current };
+      Object.entries(updatesObj).forEach(([k, v]) => {
+        const num = typeof v === 'number' ? v : parseFloat(v);
+        if (!isNaN(num)) {
+          nextCompany[k] = num;
+        }
+      });
+      return {
+        ...prev,
+        [companyId]: nextCompany
+      };
+    });
+
+    if (label) {
+      const ticker = coverageCompanies.find(c => c.id === companyId)?.ticker || 'SYS';
+      setActivityLog(prev => [
+        {
+          id: Date.now(),
+          timestamp: 'Just now',
+          ticker,
+          parameter: label,
+          oldVal: 'Preset',
+          newVal: Object.entries(updatesObj).map(([k, v]) => `${k}:${v}%`).join(', '),
           user: 'Current Analyst'
         },
         ...prev.slice(0, 9)
@@ -1335,7 +1514,9 @@ function App() {
             <ValuationModelEditor
               company={activeCompany}
               onUpdateAssumption={(key, val, label) => updateAssumption(activeCompany.id, key, val, label)}
+              onUpdateMultipleAssumptions={(updates, label) => updateMultipleAssumptions(activeCompany.id, updates, label)}
               onResetAssumptions={() => resetAssumptions(activeCompany.id)}
+              onApplyAutoFade={() => applyAutoFade(activeCompany.id)}
               onNavigate={setActiveNav}
             />
           )}
@@ -1434,9 +1615,9 @@ function App() {
 
               <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50">
                 <span className="font-mono font-bold text-blue-900 uppercase block mb-1">
-                  5. 4-Way Triangulation Composite Weighted Target Price
+                  5. Composite Valuation Triangulation Target Price
                 </span>
-                <MathProof latex="\text{Target} = (50\% \times \text{DCF}) + (25\% \times \text{Comps}) + (15\% \times \text{RIM}) + (10\% \times \text{DDM}) = \text{IDR } 440 \text{ / Share}" />
+                <MathProof latex={`\\text{Target} = (${activeCompany?.assumptions?.dcfWeight ?? 50}\\% \\times \\text{DCF}) + (${activeCompany?.assumptions?.compsWeight ?? 25}\\% \\times \\text{Comps}) + (${activeCompany?.assumptions?.rimWeight ?? 15}\\% \\times \\text{RIM}) + (${activeCompany?.assumptions?.ddmWeight ?? 10}\\% \\times \\text{DDM}) = \\text{IDR } ${activeCompany?.valuation?.compositeIntrinsicValue?.toLocaleString()} \\text{ / Share}`} />
               </div>
             </div>
 
@@ -1884,6 +2065,7 @@ function CompanyDiscovery({ companies, onSelectCompany, onToggleWatchlist, onLoa
 // 3. VALUATION WORKSPACE (DCF, COMPS, RIM, DDM, FOOTBALL FIELD)
 function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetAssumptions, onToggleWatchlist, onNavigate, onOpenInspector, onDownloadExcel }) {
   const [activeTab, setActiveTab] = useState('dcf');
+  const [footballView, setFootballView] = useState('bars');
   const v = company.valuation || {};
   const a = company.assumptions || {};
   const lastHist = company.historical ? company.historical[company.historical.length - 1] : {};
@@ -2018,46 +2200,86 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
           <div className="h-56 w-full"><PriceHistoryChart data={company.priceHistory || []} /></div>
         </div>
 
-        {/* Valuation Methodology Football Field */}
+        {/* Valuation Methodology Football Field & Live Weight Composition */}
         <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
               <div>
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono">
-                  Valuation Football Field Range (IDR / Share)
+                  {footballView === 'bars' ? 'Valuation Football Field Range (IDR / Share)' : 'Valuation Weight Composition (Pie Chart)'}
                 </h2>
-                <p className="text-[11px] text-slate-500">Methodology spreads against current market reference</p>
+                <p className="text-[11px] text-slate-500">
+                  {footballView === 'bars' ? 'Methodology spreads against current market reference' : 'Live proportional weighting of active valuation methods'}
+                </p>
+              </div>
+              <div className="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-xs">
+                <button
+                  onClick={() => setFootballView('bars')}
+                  className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-xs transition ${footballView === 'bars' ? 'bg-white shadow-2xs text-blue-700' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  Range Bars
+                </button>
+                <button
+                  onClick={() => setFootballView('pie')}
+                  className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-xs transition ${footballView === 'pie' ? 'bg-white shadow-2xs text-blue-700' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  Weight Pie
+                </button>
               </div>
             </div>
 
-            <div className="space-y-3.5 my-2">
-              {footballField.map((item, idx) => {
-                const rangeWidth = maxPrice - minPrice;
-                const leftPct = ((item.low - minPrice) / rangeWidth) * 100;
-                const widthPct = ((item.high - item.low) / rangeWidth) * 100;
-                const basePct = ((item.base - minPrice) / rangeWidth) * 100;
-                const refPct = ((company.referencePrice - minPrice) / rangeWidth) * 100;
+            {footballView === 'bars' ? (
+              <div className="space-y-3.5 my-2">
+                {footballField.map((item, idx) => {
+                  const rangeWidth = maxPrice - minPrice;
+                  const leftPct = ((item.low - minPrice) / rangeWidth) * 100;
+                  const widthPct = ((item.high - item.low) / rangeWidth) * 100;
+                  const basePct = ((item.base - minPrice) / rangeWidth) * 100;
+                  const refPct = ((company.referencePrice - minPrice) / rangeWidth) * 100;
 
-                return (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium text-slate-800">{item.method}</span>
-                      <span className="font-mono text-[11px] text-slate-600">
-                        IDR {item.low} — <strong className="text-slate-900">IDR {item.base}</strong> — IDR {item.high}
-                      </span>
+                  return (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="font-medium text-slate-800">{item.method}</span>
+                        <span className="font-mono text-[11px] text-slate-600">
+                          IDR {item.low} — <strong className="text-slate-900">IDR {item.base}</strong> — IDR {item.high}
+                        </span>
+                      </div>
+                      <div className="relative h-5 bg-slate-100 rounded-xs overflow-hidden border border-slate-200">
+                        <div
+                          style={{ left: `${Math.max(0, leftPct)}%`, width: `${Math.min(100, widthPct)}%` }}
+                          className={`absolute top-1 bottom-1 rounded-xs ${idx === 4 ? 'bg-blue-600/80' : 'bg-slate-700/75'}`}
+                        />
+                        <div style={{ left: `${basePct}%` }} className="absolute top-0 bottom-0 w-0.5 bg-white z-10" />
+                        <div style={{ left: `${refPct}%` }} className="absolute top-0 bottom-0 w-0.5 bg-amber-500 z-20" />
+                      </div>
                     </div>
-                    <div className="relative h-5 bg-slate-100 rounded-xs overflow-hidden border border-slate-200">
-                      <div
-                        style={{ left: `${Math.max(0, leftPct)}%`, width: `${Math.min(100, widthPct)}%` }}
-                        className={`absolute top-1 bottom-1 rounded-xs ${idx === 4 ? 'bg-blue-600/80' : 'bg-slate-700/75'}`}
-                      />
-                      <div style={{ left: `${basePct}%` }} className="absolute top-0 bottom-0 w-0.5 bg-white z-10" />
-                      <div style={{ left: `${refPct}%` }} className="absolute top-0 bottom-0 w-0.5 bg-amber-500 z-20" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-1">
+                <WeightCompositionDonut
+                  weights={{
+                    dcfWeight: a.dcfWeight ?? 50,
+                    compsWeight: a.compsWeight ?? 25,
+                    rimWeight: a.rimWeight ?? 15,
+                    ddmWeight: a.ddmWeight ?? 10
+                  }}
+                  prices={{
+                    dcfSharePrice: v.dcfSharePrice,
+                    compsSharePrice: v.compsSharePrice,
+                    rimSharePrice: v.rimSharePrice,
+                    ddmSharePrice: v.ddmSharePrice
+                  }}
+                  size={145}
+                  strokeWidth={22}
+                  centerTitle="Composite"
+                  centerValue={`IDR ${v.compositeIntrinsicValue?.toLocaleString()}`}
+                  showLegend={true}
+                />
+              </div>
+            )}
           </div>
 
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
@@ -2065,7 +2287,15 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
               <span className="w-2.5 h-2.5 bg-amber-500 inline-block mr-1.5 rounded-xs" />
               Amber Line = Current Market Price (IDR {company.referencePrice})
             </span>
-            <span>Weights: 50% DCF / 25% Comps / 15% RIM / 10% DDM</span>
+            <div className="flex items-center space-x-2">
+              <span>Weights: {a.dcfWeight ?? 50}% DCF / {a.compsWeight ?? 25}% Comps / {a.rimWeight ?? 15}% RIM / {a.ddmWeight ?? 10}% DDM</span>
+              <button
+                onClick={() => onNavigate && onNavigate('modeler')}
+                className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline text-[11px]"
+              >
+                Adjust →
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2426,9 +2656,9 @@ function ValuationWorkspace({ company, backendData, onUpdateAssumption, onResetA
               </div>
               <div className="border border-slate-200 rounded-xs p-3.5 bg-slate-50">
                 <span className="font-mono font-bold text-blue-900 uppercase block mb-1">
-                  4. 4-Way Triangulation Composite Target
+                  4. Composite Triangulation Target Proof
                 </span>
-                <MathProof latex="\text{Target} = (50\% \times 531) + (25\% \times 341) + (15\% \times 480) + (10\% \times 174) = \text{IDR } 440" />
+                <MathProof latex={`\\text{Target} = (${a.dcfWeight ?? 50}\\% \\times ${v.dcfSharePrice}) + (${a.compsWeight ?? 25}\\% \\times ${v.compsSharePrice}) + (${a.rimWeight ?? 15}\\% \\times ${v.rimSharePrice}) + (${a.ddmWeight ?? 10}\\% \\times ${v.ddmSharePrice}) = \\text{IDR } ${v.compositeIntrinsicValue?.toLocaleString()}`} />
               </div>
             </div>
           </div>
@@ -2640,9 +2870,38 @@ function ThreeStatementWorkspace({ company, backendData, onDownloadExcel }) {
 }
 
 // 5. VALUATION MODEL ASSUMPTIONS & PARAMETER EDITOR
-function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions, onApplyAutoFade, onNavigate }) {
+function ValuationModelEditor({ company, onUpdateAssumption, onUpdateMultipleAssumptions, onResetAssumptions, onApplyAutoFade, onNavigate }) {
   const a = company.assumptions || {};
   const v = company.valuation || {};
+
+  const wDcfCur = Number(a.dcfWeight ?? 50);
+  const wCompsCur = Number(a.compsWeight ?? 25);
+  const wRimCur = Number(a.rimWeight ?? 15);
+  const wDdmCur = Number(a.ddmWeight ?? 10);
+  const rawWeightSum = wDcfCur + wCompsCur + wRimCur + wDdmCur;
+
+  const handlePreset = (presetObj, name) => {
+    if (onUpdateMultipleAssumptions) {
+      onUpdateMultipleAssumptions(presetObj, name);
+    } else {
+      Object.entries(presetObj).forEach(([k, val]) => onUpdateAssumption(k, val, `${name}: ${k}`));
+    }
+  };
+
+  const handleNormalize = () => {
+    if (rawWeightSum <= 0) return;
+    const normDcf = Math.round((wDcfCur / rawWeightSum) * 100);
+    const normComps = Math.round((wCompsCur / rawWeightSum) * 100);
+    const normRim = Math.round((wRimCur / rawWeightSum) * 100);
+    const normDdm = Math.max(0, 100 - (normDcf + normComps + normRim));
+
+    handlePreset({
+      dcfWeight: Math.max(0, normDcf),
+      compsWeight: Math.max(0, normComps),
+      rimWeight: Math.max(0, normRim),
+      ddmWeight: Math.max(0, normDdm)
+    }, 'Normalize to 100%');
+  };
 
   return (
     <div className="space-y-5">
@@ -2830,11 +3089,11 @@ function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions,
             2. Operating Margins & Reinvestment
           </h2>
           {[
-            { key: 'ebitdaMargin', label: 'EBITDA Margin (%)', min: 10, max: 70, step: 0.5 },
-            { key: 'taxRate', label: 'Corporate Tax Rate (%)', min: 10, max: 30, step: 0.5 },
-            { key: 'capexPercentRev', label: 'CapEx (% of Revenue)', min: 2, max: 25, step: 0.5 },
-            { key: 'daPercentRev', label: 'D&A (% of Revenue)', min: 2, max: 15, step: 0.2 },
-            { key: 'nwcPercentRevChange', label: 'NWC (% of Rev Growth)', min: 1, max: 20, step: 0.5 },
+            { key: 'ebitdaMargin', label: 'EBITDA Margin (%)', min: 10, max: 70, step: 0.5, default: 50 },
+            { key: 'taxRate', label: 'Corporate Tax Rate (%)', min: 10, max: 30, step: 0.5, default: 22 },
+            { key: 'capexPercentRev', label: 'CapEx (% of Revenue)', min: 2, max: 25, step: 0.5, default: 8.5 },
+            { key: 'daPercentRev', label: 'D&A (% of Revenue)', min: 2, max: 15, step: 0.2, default: 5.0 },
+            { key: 'nwcPercentRevChange', label: 'NWC (% of Rev Growth)', min: 1, max: 20, step: 0.5, default: 4.0 },
           ].map(item => (
             <div key={item.key} className="flex items-center justify-between text-xs py-1">
               <label className="text-slate-700 font-medium">{item.label}</label>
@@ -2844,14 +3103,14 @@ function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions,
                   min={item.min}
                   max={item.max}
                   step={item.step}
-                  value={a[item.key] || 20}
+                  value={a[item.key] ?? item.default}
                   onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
                   className="w-24 accent-blue-600"
                 />
                 <input
                   type="number"
                   step={item.step}
-                  value={a[item.key] || 20}
+                  value={a[item.key] ?? item.default}
                   onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
                   className="w-16 text-right font-mono font-bold text-blue-700 bg-blue-50/50 border border-blue-300 rounded-xs px-1.5 py-1"
                 />
@@ -2860,19 +3119,15 @@ function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions,
           ))}
         </div>
 
-        {/* Column 3: WACC & Weights */}
+        {/* Column 3: Cost of Capital & Terminal Metrics */}
         <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs space-y-3">
           <h2 className="text-xs font-bold uppercase font-mono text-slate-800 border-b border-slate-200 pb-2">
-            3. Cost of Capital & Method Weights
+            3. Cost of Capital & Terminal Metrics
           </h2>
           {[
-            { key: 'wacc', label: 'Hurdle WACC (%)', min: 6.0, max: 16.0, step: 0.1 },
-            { key: 'terminalGrowth', label: 'Terminal Growth Rate g (%)', min: 0.5, max: 4.0, step: 0.1 },
-            { key: 'exitEbitdaMultiple', label: 'Terminal Exit Multiple (x)', min: 3.0, max: 15.0, step: 0.5 },
-            { key: 'dcfWeight', label: 'DCF Weight (%)', min: 0, max: 100, step: 5 },
-            { key: 'compsWeight', label: 'Comps Weight (%)', min: 0, max: 100, step: 5 },
-            { key: 'rimWeight', label: 'RIM Weight (%)', min: 0, max: 100, step: 5 },
-            { key: 'ddmWeight', label: 'DDM Weight (%)', min: 0, max: 100, step: 5 },
+            { key: 'wacc', label: 'Hurdle WACC (%)', min: 6.0, max: 16.0, step: 0.1, default: 10.4 },
+            { key: 'terminalGrowth', label: 'Terminal Growth Rate g (%)', min: 0.5, max: 4.0, step: 0.1, default: 1.5 },
+            { key: 'exitEbitdaMultiple', label: 'Terminal Exit Multiple (x)', min: 3.0, max: 15.0, step: 0.5, default: 6.5 },
           ].map(item => (
             <div key={item.key} className="flex items-center justify-between text-xs py-1">
               <label className="text-slate-700 font-medium">{item.label}</label>
@@ -2882,20 +3137,179 @@ function ValuationModelEditor({ company, onUpdateAssumption, onResetAssumptions,
                   min={item.min}
                   max={item.max}
                   step={item.step}
-                  value={a[item.key] || 10}
+                  value={a[item.key] ?? item.default}
                   onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
                   className="w-24 accent-blue-600"
                 />
                 <input
                   type="number"
                   step={item.step}
-                  value={a[item.key] || 10}
+                  value={a[item.key] ?? item.default}
                   onChange={(e) => onUpdateAssumption(item.key, e.target.value, item.label)}
                   className="w-16 text-right font-mono font-bold text-blue-700 bg-blue-50/50 border border-blue-300 rounded-xs px-1.5 py-1"
                 />
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Section 4: Composite Valuation Model Selection & Live Weight Composition (Pie Chart) */}
+      <div className="bg-white border border-slate-200 rounded-xs p-5 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 bg-blue-600 rounded-xs"></span>
+              <h2 className="text-sm font-bold uppercase font-mono text-slate-900">
+                4. Valuation Model Selection & Live Weight Composition (Pie Chart)
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Customize composite weights (allows 0% to 100%). The live pie chart visually renders exact proportions in real time.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-mono text-slate-500 mr-1">Presets:</span>
+            <button
+              onClick={() => handlePreset({ dcfWeight: 50, compsWeight: 0, rimWeight: 50, ddmWeight: 0 }, '50/50 DCF & RIM')}
+              className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-xs text-xs font-mono font-semibold transition cursor-pointer"
+            >
+              50/50 DCF & RIM
+            </button>
+            <button
+              onClick={() => handlePreset({ dcfWeight: 100, compsWeight: 0, rimWeight: 0, ddmWeight: 0 }, '100% DCF')}
+              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xs text-xs font-mono font-semibold transition cursor-pointer"
+            >
+              100% DCF
+            </button>
+            <button
+              onClick={() => handlePreset({ dcfWeight: 50, compsWeight: 25, rimWeight: 15, ddmWeight: 10 }, 'Institutional 4-Way')}
+              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xs text-xs font-mono font-semibold transition cursor-pointer"
+            >
+              4-Way (50/25/15/10)
+            </button>
+            <button
+              onClick={() => handlePreset({ dcfWeight: 25, compsWeight: 25, rimWeight: 25, ddmWeight: 25 }, 'Equal Weight')}
+              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xs text-xs font-mono font-semibold transition cursor-pointer"
+            >
+              Equal (25% All)
+            </button>
+            {rawWeightSum !== 100 && rawWeightSum > 0 && (
+              <button
+                onClick={handleNormalize}
+                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xs text-xs font-mono font-bold transition flex items-center space-x-1 cursor-pointer"
+              >
+                <Icon name="CheckCircle2" size={12} />
+                <span>Normalize to 100%</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          {/* Sliders & Controls (7 Cols) */}
+          <div className="lg:col-span-7 space-y-3">
+            {[
+              { key: 'dcfWeight', label: '10-Year DCF (FCFF)', color: '#2563eb', price: v.dcfSharePrice, default: 50 },
+              { key: 'compsWeight', label: 'Relative Multiples (Comps)', color: '#059669', price: v.compsSharePrice, default: 25 },
+              { key: 'rimWeight', label: 'Residual Income Model (RIM)', color: '#7c3aed', price: v.rimSharePrice, default: 15 },
+              { key: 'ddmWeight', label: 'Dividend Discount Model (DDM)', color: '#d97706', price: v.ddmSharePrice, default: 10 },
+            ].map(m => {
+              const curW = Number(a[m.key] ?? m.default);
+              const effPct = rawWeightSum > 0 ? Math.round((curW / rawWeightSum) * 100) : 0;
+              const contrib = rawWeightSum > 0 ? Math.round((m.price * curW) / rawWeightSum) : 0;
+
+              return (
+                <div key={m.key} className="p-3 rounded-xs border border-slate-200 hover:border-slate-300 transition bg-white shadow-2xs">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-3 h-3 rounded-xs" style={{ backgroundColor: m.color }} />
+                      <span className="text-xs font-bold text-slate-800">{m.label}</span>
+                      <span className="text-[11px] font-mono text-slate-500">
+                        (Target: IDR {m.price})
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 font-mono text-xs">
+                      <span className="text-slate-500 text-[11px]">Contrib: <strong className="text-slate-800">IDR {contrib}</strong></span>
+                      <span className="font-bold px-1.5 py-0.5 rounded-xs" style={{ color: curW > 0 ? m.color : '#94a3b8', backgroundColor: curW > 0 ? `${m.color}15` : '#f1f5f9' }}>
+                        {curW}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={curW}
+                      onChange={(e) => onUpdateAssumption(m.key, parseFloat(e.target.value) || 0, m.label)}
+                      className="flex-1 accent-blue-600 cursor-pointer"
+                    />
+                    <div className="flex items-center space-x-1 shrink-0">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={curW}
+                        onChange={(e) => {
+                          const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                          onUpdateAssumption(m.key, isNaN(val) ? 0 : Math.max(0, Math.min(100, val)), m.label);
+                        }}
+                        className="w-16 text-right font-mono font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xs px-1.5 py-1 text-xs"
+                      />
+                      <span className="text-xs font-mono text-slate-500">%</span>
+                    </div>
+                    <button
+                      onClick={() => onUpdateAssumption(m.key, 0, `${m.label} set to 0%`)}
+                      className={`text-[10px] font-mono px-2 py-1 rounded-xs border transition cursor-pointer ${curW === 0 ? 'bg-rose-50 text-rose-700 border-rose-300 font-bold' : 'bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200'}`}
+                      title="Set weight to 0%"
+                    >
+                      0%
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Real-time Donut Chart & Live Composite Summary (5 Cols) */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center">
+            <WeightCompositionDonut
+              weights={{
+                dcfWeight: a.dcfWeight ?? 50,
+                compsWeight: a.compsWeight ?? 25,
+                rimWeight: a.rimWeight ?? 15,
+                ddmWeight: a.ddmWeight ?? 10
+              }}
+              prices={{
+                dcfSharePrice: v.dcfSharePrice,
+                compsSharePrice: v.compsSharePrice,
+                rimSharePrice: v.rimSharePrice,
+                ddmSharePrice: v.ddmSharePrice
+              }}
+              size={175}
+              strokeWidth={26}
+              centerTitle="Target Price"
+              centerValue={`IDR ${v.compositeIntrinsicValue?.toLocaleString()}`}
+              showLegend={true}
+            />
+
+            <div className="w-full mt-3 p-3 bg-slate-900 text-white rounded-xs font-mono text-xs flex items-center justify-between shadow-2xs">
+              <div>
+                <span className="text-[10px] text-slate-400 uppercase block">Composite Intrinsic Target</span>
+                <span className="text-sm font-bold text-emerald-400">IDR {v.compositeIntrinsicValue?.toLocaleString()} / share</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 uppercase block">Market Upside</span>
+                <span className={`text-sm font-bold ${v.impliedUpside >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {fmtPct(v.impliedUpside)}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
