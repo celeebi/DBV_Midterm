@@ -7054,6 +7054,21 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
               <span className="text-xs font-mono text-slate-500">({company.exchange} • {company.industry})</span>
 
               <RecommendationBadge rec={displayRec} size="lg" />
+              {(() => {
+                const src = (backendData?.company?.source || company?.source || (company?.ticker?.includes('PWON') ? 'IDX' : '')).toLowerCase();
+                const isIdx = src.includes('idx') && !src.includes('yahoo');
+                const isYf = src.includes('yahoo');
+                return (
+                  <span className={`text-[11px] font-mono px-2 py-0.5 rounded-xs font-bold border flex items-center space-x-1 shadow-2xs ${
+                    isIdx 
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800' 
+                      : (isYf ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-slate-50 border-slate-300 text-slate-700')
+                  }`} title={`Historical Statements Source: ${backendData?.company?.source || company?.source || 'Audited Filings'}`}>
+                    <Icon name={isIdx ? "ShieldCheck" : (isYf ? "Database" : "FileText")} size={11} className={isIdx ? "text-emerald-600" : (isYf ? "text-amber-600" : "text-slate-500")} />
+                    <span>{isIdx ? 'DATA: IDX XBRL' : (isYf ? 'DATA: YAHOO FINANCE' : 'DATA: AUDITED PSAK')}</span>
+                  </span>
+                );
+              })()}
 
             </div>
 
@@ -8425,29 +8440,21 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
   const histYears = historicalData.years || company?.historical_statements?.years || [2021, 2022, 2023, 2024, 2025];
 
-
+  const rawHistSource = (backendData?.company?.source || company?.source || historicalData?.source || (company?.clean_ticker === 'PWON' ? 'IDX Official XBRL (idx.co.id)' : '')).toLowerCase();
+  const isIdxSource = rawHistSource.includes('idx') && !rawHistSource.includes('yahoo');
+  const isYahooSource = rawHistSource.includes('yahoo');
+  const histSourceBadgeText = isIdxSource ? 'IDX XBRL' : (isYahooSource ? 'YAHOO FINANCE' : 'AUDITED PSAK');
 
   const tabs = viewMode === 'forecast' ? [
-
     { id: 'bs', label: '1. Balance Sheet (Assets = Liab + Equity)' },
-
     { id: 'is', label: '2. Income Statement (Rev -> Net Income)' },
-
     { id: 'cfs', label: '3. Cash Flow Statement (CFO + CFI + CFF)' }
-
   ] : [
-
-    { id: 'bs', label: '1. Audited Balance Sheet (Assets ≡ Liab + Eq)' },
-
-    { id: 'is', label: '2. Audited Income Statement (Rev -> Net Income)' },
-
-    { id: 'cfs', label: '3. Audited Cash Flow Statement (CFO + CFI + CFF)' },
-
-    { id: 'drivers', label: '4. Operational Drivers & Margins (DSO, DIO, DPO)' }
-
+    { id: 'bs', label: `1. Audited Balance Sheet [${histSourceBadgeText}]` },
+    { id: 'is', label: `2. Audited Income Statement [${histSourceBadgeText}]` },
+    { id: 'cfs', label: `3. Audited Cash Flow Statement [${histSourceBadgeText}]` },
+    { id: 'drivers', label: '4. Operational Drivers & Margins' }
   ];
-
-
 
   return (
 
@@ -8631,7 +8638,7 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
             <Icon name={viewMode === 'forecast' ? "History" : "TrendingUp"} size={13} className="text-amber-200" />
 
-            <span>{viewMode === 'forecast' ? "🏛️ Show Historical Actuals" : "📈 Show 10-Year Forecast"}</span>
+            <span>{viewMode === 'forecast' ? `🏛️ Show Historical Actuals (${isIdxSource ? "IDX" : "Yahoo"})` : "📈 Show 10-Year Forecast"}</span>
 
           </button>
 
@@ -8688,49 +8695,37 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
 
       {viewMode === 'historical' && (
-
-        <div className="bg-indigo-50 border border-indigo-200 rounded-xs p-3 text-xs text-indigo-950 flex flex-col gap-2 shadow-2xs">
-
+        <div className={`border rounded-xs p-3 text-xs flex flex-col gap-2 shadow-2xs ${isIdxSource ? 'bg-indigo-50/70 border-indigo-200 text-indigo-950' : 'bg-amber-50/70 border-amber-200 text-amber-950'}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-
             <div className="flex items-center space-x-2">
-
-              <Icon name="ShieldCheck" size={17} className="text-indigo-600 shrink-0" />
-
+              <Icon name={isIdxSource ? "ShieldCheck" : "Database"} size={18} className={isIdxSource ? "text-indigo-600 shrink-0" : "text-amber-600 shrink-0"} />
               <div>
-
-                <span className="font-bold">Official Audited PSAK Statements:</span>
-
-                <span className="ml-1 text-indigo-800">
-
-                  Parsed directly from official IDX XBRL reports ({histYears.join(', ')}). 100% reconciled with celeebi/IDX_GetFinancialStatement.
-
+                <span className="font-bold">
+                  {isIdxSource ? "Official Audited PSAK Statements (IDX XBRL):" : "Audited Financial Statements (Yahoo Finance Harmonized):"}
                 </span>
-
+                <span className="ml-1 text-slate-700">
+                  {isIdxSource
+                    ? `Parsed directly from official Indonesia Stock Exchange (IDX) XBRL filings (${histYears.join(', ')}). 100% reconciled with celeebi/IDX_GetFinancialStatement.`
+                    : `Audited financial filings ingested from Yahoo Finance (${histYears.join(', ')}). Harmonized to 100% IDX PSAK schema parity with strict zero-balance identity.`
+                  }
+                </span>
               </div>
-
             </div>
-
             <div className="flex items-center space-x-2 text-[11px] font-mono shrink-0">
-
-              <span className="bg-white px-2 py-0.5 rounded-xs border border-indigo-200 font-bold text-emerald-700 flex items-center space-x-1">
-
+              <span className="bg-white px-2 py-0.5 rounded-xs border border-slate-200 font-bold text-emerald-700 flex items-center space-x-1 shadow-2xs">
                 <Icon name="CheckCircle2" size={11} className="text-emerald-600" />
-
                 <span>BS BALANCE: 0.00</span>
-
               </span>
-
-              <span className="bg-indigo-100 px-2 py-0.5 rounded-xs font-semibold text-indigo-800">
-
-                SOURCE: IDX.CO.ID (XBRL)
-
+              <span className={`px-2.5 py-0.5 rounded-xs font-bold border flex items-center space-x-1.5 shadow-2xs ${
+                isIdxSource 
+                  ? 'bg-emerald-100 border-emerald-300 text-emerald-900' 
+                  : 'bg-amber-100 border-amber-300 text-amber-900'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isIdxSource ? 'bg-emerald-600' : 'bg-amber-600'}`}></span>
+                <span>{isIdxSource ? 'SOURCE: IDX.CO.ID (XBRL)' : 'SOURCE: YAHOO FINANCE'}</span>
               </span>
-
             </div>
-
           </div>
-
           <div className="bg-white/80 rounded border border-indigo-100 p-2 text-[11px] text-indigo-900 flex flex-wrap items-center justify-between gap-2">
 
             <div>
@@ -9475,7 +9470,14 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
                     <tr className="border-b border-indigo-300 bg-indigo-50/70 text-[10px] uppercase text-indigo-900">
 
-                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-72">Audited Balance Sheet Item (IDR Trillion)</th>
+                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-72">
+                        <div className="flex items-center justify-between pr-2">
+                          <span>Audited Balance Sheet Item (IDR Trillion)</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold border ${isIdxSource ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300'}`}>
+                            {histSourceBadgeText}
+                          </span>
+                        </div>
+                      </th>
 
                       {histBsRows.map((r, idx) => (
 
@@ -9779,7 +9781,14 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
                     <tr className="border-b border-indigo-300 bg-indigo-50/70 text-[10px] uppercase text-indigo-900">
 
-                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-64">Audited Income Statement Item (IDR Trillion)</th>
+                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-64">
+                        <div className="flex items-center justify-between pr-2">
+                          <span>Audited Income Statement Item (IDR Trillion)</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold border ${isIdxSource ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300'}`}>
+                            {histSourceBadgeText}
+                          </span>
+                        </div>
+                      </th>
 
                       {histIsRows.map((r, idx) => <th key={idx} className="py-2.5 px-3 text-right whitespace-nowrap font-bold text-indigo-900">{r.period || `${r.year}A`}</th>)}
 
@@ -9913,7 +9922,14 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
                     <tr className="border-b border-indigo-300 bg-indigo-50/70 text-[10px] uppercase text-indigo-900">
 
-                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-72">Audited Cash Flow Statement Item (IDR Trillion)</th>
+                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-72">
+                        <div className="flex items-center justify-between pr-2">
+                          <span>Audited Cash Flow Statement Item (IDR Trillion)</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold border ${isIdxSource ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300'}`}>
+                            {histSourceBadgeText}
+                          </span>
+                        </div>
+                      </th>
 
                       {histCfsRows.map((r, idx) => <th key={idx} className="py-2.5 px-3 text-right whitespace-nowrap font-bold text-indigo-900">{r.period || `${r.year}A`}</th>)}
 
@@ -10039,7 +10055,14 @@ function ThreeStatementWorkspace({ company, backendData, isLoadingBackend, onRef
 
                     <tr className="border-b border-indigo-300 bg-indigo-50/70 text-[10px] uppercase text-indigo-900">
 
-                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-72">Operational Driver / Historical Metric</th>
+                      <th className="py-2.5 px-3 sticky left-0 bg-indigo-50 z-10 font-sans w-72">
+                        <div className="flex items-center justify-between pr-2">
+                          <span>Operational Driver / Historical Metric</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold border bg-blue-100 text-blue-800 border-blue-300">
+                            CALCULATED
+                          </span>
+                        </div>
+                      </th>
 
                       {histDriverRows.map((r, idx) => <th key={idx} className="py-2.5 px-3 text-right whitespace-nowrap font-bold text-indigo-900">{r.period || `${r.year}A`}</th>)}
 

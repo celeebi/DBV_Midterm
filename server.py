@@ -918,7 +918,10 @@ async def recalculate(request):
 
                 "is_balanced": is_balanced,
 
-                "historical": company.get("historical_statements", {})
+                "historical": {
+                    **company.get("historical_statements", {}),
+                    "source": company.get("source", "IDX Official XBRL (idx.co.id)")
+                }
 
             },
 

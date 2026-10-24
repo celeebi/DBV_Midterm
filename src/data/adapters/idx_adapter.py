@@ -633,6 +633,7 @@ class IDXAdapter:
             },
             "historical_statements": {
                 "years": years,
+                "source": "IDX Official XBRL (idx.co.id)",
                 "balance_sheet": hist_bs,
                 "income_statement": hist_is,
                 "cash_flow": hist_cf,

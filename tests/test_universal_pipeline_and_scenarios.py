@@ -124,3 +124,16 @@ def test_idx_client_fast_fail_on_cloudflare_challenge():
     # Homepage or primary endpoint returns 403 Cloudflare challenge
     with pytest.raises(IDXCloudflareChallengeError):
         client.get("https://www.idx.co.id/primary/ListedCompany/GetFinancialReport?year=2024")
+
+
+def test_provenance_marking_idx_vs_yfinance():
+    """Verify explicit provenance marking distinguishing IDX XBRL from Yahoo Finance."""
+    pwon = FinancialDataLoader.fetch_company_data("PWON.JK", source="idx")
+    assert "source" in pwon
+    assert "idx" in pwon["source"].lower()
+    assert "yahoo" not in pwon["source"].lower()
+
+    icbp = FinancialDataLoader.fetch_company_data("ICBP.JK", source="idx")
+    assert "source" in icbp
+    assert "yahoo" in icbp["source"].lower()
+

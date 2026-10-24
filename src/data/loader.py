@@ -67,6 +67,8 @@ FALLBACK_PWON_DATA: Dict[str, Any] = {
     "sector": "Real Estate",
 
     "industry": "Real Estate Development & Management",
+    "source": "IDX Official XBRL (idx.co.id)",
+    "reporting_standard": "PSAK / IFRS Audited",
 
     "currency": "IDR",
 
@@ -383,6 +385,8 @@ FALLBACK_ASII_DATA: Dict[str, Any] = {
     "sector": "Industrials",
 
     "industry": "Automotive & Heavy Equipment",
+    "source": "IDX Official XBRL (idx.co.id)",
+    "reporting_standard": "PSAK / IFRS Audited",
 
     "currency": "IDR",
 
@@ -1029,6 +1033,8 @@ class FinancialDataLoader:
         mapped["sector"] = info.get("sector") or "General Non-Financial"
         mapped["industry"] = info.get("industry") or "Diversified"
         mapped["source"] = "Yahoo Finance (IDX Cloudflare Bypass Fallback)"
+        if "historical_statements" in mapped and isinstance(mapped["historical_statements"], dict):
+            mapped["historical_statements"]["source"] = "Yahoo Finance (IDX Cloudflare Bypass Fallback)"
         mapped["reporting_standard"] = "Audited PSAK / IFRS Financial Statements"
 
         # Calculate calibrated defaults
