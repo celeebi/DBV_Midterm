@@ -104,7 +104,7 @@ flowchart LR
 - Observe the **Data Provenance Mark**:
   - `SOURCE: IDX.CO.ID (XBRL)` (emerald badge) for official exchange filings.
   - `SOURCE: YAHOO FINANCE` (amber badge) for harmonized audited statements.
-- Verify the green **ZERO-BALANCE: ASSETS ≡ LIAB + EQUITY** badge proving exact mathematical accounting identity ($\text{balance\_check} = 0.00$).
+- Verify the green **ZERO-BALANCE: ASSETS ≡ LIAB + EQUITY** badge proving exact mathematical accounting identity (`balance_check == 0.00`).
 
 ### Step 4: Calibrate Assumptions & Trigger Live Recalculation
 - Navigate to **`⌘5 Assumptions`**.
@@ -339,7 +339,7 @@ Full mathematical articulation across Income Statement, Balance Sheet, and Cash 
   - **Balance Sheet**: Net Income flows into Retained Earnings; CapEx and Depreciation update Net PP&E; Cash acts as the dynamic liquidity plug.
   - **Cash Flow Statement**: CFO, CFI, and CFF update in exact balance with $\Delta\text{Cash}$.
 - **Zero-Balance Identity**: Proves:
-  $$\text{Total Assets} \equiv \text{Total Liabilities} + \text{Total Equity} + \text{Minority Interest} \quad (\text{balance\_check} = 0.00)$$
+  $$\text{Total Assets} \equiv \text{Total Liabilities} + \text{Total Equity} + \text{Minority Interest} \quad (\text{Balance Check} = 0.00)$$
 
 ### 5. Corporate Finance Scope vs Banking ALM Guard
 The platform enforces a strict methodology guard:
