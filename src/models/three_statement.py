@@ -15,46 +15,46 @@ import numpy as np
 class ThreeStatementModel:
     """Builds an integrated 10-year 3-statement financial model."""
 
-    # Default calibrated baseline for PWON.JK (Audited 2025 Actuals in IDR Trillion)
+    # Calibrated baseline for PWON.JK (Audited FY2024 Actuals from Official IDX XBRL in IDR Trillion)
     BASE_2025_ACTUALS: Dict[str, float] = {
         # Income Statement
-        "revenue": 7.11,
-        "cogs": 3.17,
-        "gross_profit": 3.94,
-        "sga": 1.00,
-        "ebit": 2.94,
-        "interest_expense": 0.33,
-        "interest_income": 0.60,
-        "ebt": 2.81,
+        "revenue": 6.67,
+        "cogs": 3.01,
+        "gross_profit": 3.66,
+        "sga": 0.76,
+        "ebit": 2.90,
+        "interest_expense": 0.38,
+        "interest_income": 0.36,
+        "ebt": 2.88,
         "tax": 0.46,
-        "net_income": 2.35,
+        "net_income": 2.42,
         # Balance Sheet - Assets
-        "cash": 5.19,
-        "ar": 0.29,
-        "inventory": 4.53,
-        "other_current_assets": 1.13,
-        "net_ppe": 3.06,
-        "other_non_current_assets": 22.27,
-        "total_assets": 36.47,
+        "cash": 9.20,
+        "ar": 0.12,
+        "inventory": 0.05,
+        "other_current_assets": 5.80,
+        "net_ppe": 2.76,
+        "other_non_current_assets": 16.68,
+        "total_assets": 34.61,
         # Balance Sheet - Liabilities
-        "ap": 0.63,
-        "short_term_debt": 0.01,
-        "other_current_liabilities": 2.52,
-        "long_term_debt": 5.57,
-        "total_debt": 5.58,
-        "other_non_current_liabilities": 1.11,
-        "total_liabilities": 9.84,
+        "ap": 0.22,
+        "short_term_debt": 0.00,
+        "other_current_liabilities": 2.62,
+        "long_term_debt": 6.44,
+        "total_debt": 6.44,
+        "other_non_current_liabilities": 0.59,
+        "total_liabilities": 9.87,
         # Balance Sheet - Equity
-        "share_capital": 1.57,
-        "retained_earnings": 20.91,
-        "minority_interest": 4.15,
-        "total_equity": 26.63,
+        "share_capital": 0.00,
+        "retained_earnings": 19.97,
+        "minority_interest": 4.77,
+        "total_equity": 24.74,
         # Operating Drivers
-        "dso_days": 15.0,
-        "dio_days": 521.0,
-        "dpo_days": 72.0,
+        "dso_days": 6.6,
+        "dio_days": 6.1,
+        "dpo_days": 26.7,
         "depr_rate_ppe": 0.140,
-        "effective_tax_rate": 0.164,
+        "effective_tax_rate": 0.160,
         "dividend_payout_ratio": 0.30
     }
 
@@ -67,12 +67,12 @@ class ThreeStatementModel:
         dividend_payout: float = 0.30,
         interest_rate_debt: float = 0.065,
         interest_rate_cash: float = 0.040,
-        dso_days: float = 15.0,
-        dio_days: float = 521.0,
-        dpo_days: float = 72.0,
+        dso_days: Optional[float] = None,
+        dio_days: Optional[float] = None,
+        dpo_days: Optional[float] = None,
         capex_pct: float = 0.080,
         nwc_pct: Optional[float] = None,
-        depr_pct_ppe: float = 0.140,
+        depr_pct_ppe: Optional[float] = None,
         start_year: int = 2026
     ) -> Dict[str, Any]:
         """
@@ -98,9 +98,21 @@ class ThreeStatementModel:
         prev_other_cl = act["other_current_liabilities"]
         prev_other_ncl = act["other_non_current_liabilities"]
 
-        prev_share_cap = act["share_capital"]
-        prev_re = act["retained_earnings"]
-        prev_mi = act["minority_interest"]
+        prev_share_cap = act.get("share_capital", 0.0)
+        prev_re = act.get("retained_earnings", 0.0)
+        prev_mi = act.get("minority_interest", 0.0)
+        prev_other_eq = act.get("other_equity", 0.0)
+
+        # Calibrate base gross margin and working capital drivers from actuals
+        if act.get("revenue", 0) > 0 and act.get("gross_profit") is not None:
+            base_gm = min(0.95, max(0.05, act["gross_profit"] / act["revenue"]))
+        else:
+            base_gm = 0.554
+
+        eff_dso = dso_days if dso_days is not None else float(act.get("dso_days") or 15.0)
+        eff_dio = dio_days if dio_days is not None else float(act.get("dio_days") or 30.0)
+        eff_dpo = dpo_days if dpo_days is not None else float(act.get("dpo_days") or 30.0)
+        eff_depr_rate = depr_pct_ppe if depr_pct_ppe is not None else float(act.get("depr_rate_ppe") or 0.10)
 
         is_rows = []
         bs_rows = []
@@ -118,10 +130,10 @@ class ThreeStatementModel:
             rev = prev_rev * (1.0 + g)
             ebit = rev * ebit_m
             
-            # Gross profit assumes ~55.4% gross margin for premier retail leasing & property; SG&A is difference
-            cogs = rev * (1.0 - 0.554)
+            # Gross profit and COGS calibrated from authentic emiten gross margin
+            cogs = rev * (1.0 - base_gm)
             gross_profit = rev - cogs
-            sga = gross_profit - ebit
+            sga = max(0.0, gross_profit - ebit)
 
             # Debt & Cash interest estimations based on beginning balances
             tot_debt_beg = prev_st_debt + prev_lt_debt
@@ -166,9 +178,9 @@ class ThreeStatementModel:
                 inv = prev_inv + target_delta_nwc * 0.90
                 ap = prev_ap + target_delta_nwc * 0.10
             else:
-                ar = (rev * dso_days) / 365.0
-                inv = (cogs * dio_days) / 365.0
-                ap = (cogs * dpo_days) / 365.0
+                ar = (rev * eff_dso) / 365.0
+                inv = (cogs * eff_dio) / 365.0
+                ap = (cogs * eff_dpo) / 365.0
 
             other_ca = prev_other_ca * (1.0 + g * 0.5)
             other_cl = prev_other_cl * (1.0 + g * 0.5)
@@ -184,7 +196,7 @@ class ThreeStatementModel:
             delta_other_ncl = other_ncl - prev_other_ncl
 
             # PP&E Roll-forward
-            depr = prev_ppe * depr_pct_ppe
+            depr = prev_ppe * eff_depr_rate
             capex = rev * capex_pct
             net_ppe = prev_ppe + capex - depr
 
@@ -241,7 +253,8 @@ class ThreeStatementModel:
             retained_earnings = prev_re + retained_addition
             share_capital = prev_share_cap
             minority_interest = prev_mi
-            total_equity = share_capital + retained_earnings + minority_interest
+            other_equity = prev_other_eq
+            total_equity = share_capital + retained_earnings + other_equity + minority_interest
 
             total_liabilities_equity = total_liabilities + total_equity
             balance_check = total_assets - total_liabilities_equity
@@ -271,6 +284,7 @@ class ThreeStatementModel:
                 "share_capital": round(share_capital, 2),
                 "retained_earnings": round(retained_earnings, 2),
                 "minority_interest": round(minority_interest, 2),
+                "other_equity": round(other_equity, 2),
                 "total_equity": round(total_equity, 2),
                 "total_liabilities_equity": round(total_liabilities_equity, 2),
                 "total_liab_and_equity": round(total_liabilities_equity, 2),

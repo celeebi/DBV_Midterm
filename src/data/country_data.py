@@ -24,8 +24,10 @@ INDONESIA_MACRO: Dict[str, Any] = {
     "default_terminal_g": 0.015,  # Conservative terminal perpetuity growth rate (1.5%)
     "provenance": {
         "beta": {
-            "source_name": "Yahoo Finance Live API",
-            "citation": "Yahoo Finance 5-Year Monthly Regression against IHSG",
+            "source_name": "Yahoo Finance Live API / CFA Institute",
+            "citation": "Yahoo Finance 5-Year Monthly Regression against IHSG & CFA CAPM Guide",
+            "source_url": "https://www.cfainstitute.org/en/membership/professional-development/refresher-readings/cost-capital",
+            "source_domain": "cfainstitute.org",
             "badge": "LIVE YAHOO API",
             "badge_color": "blue",
             "methodology": "Calculated as Cov(R_stock, R_ihsg) / Var(R_ihsg) over 60 monthly periods. Reflects cyclical sensitivity and operating leverage.",
@@ -34,6 +36,8 @@ INDONESIA_MACRO: Dict[str, Any] = {
         "risk_free_rate": {
             "source_name": "Bank Indonesia / Ministry of Finance (DJPPR)",
             "citation": "10-Year Republic of Indonesia Benchmark Government Bond Yield (INDOGB 10Y)",
+            "source_url": "https://tradingeconomics.com/indonesia/government-bond-yield",
+            "source_domain": "tradingeconomics.com",
             "badge": "BANK INDONESIA 10Y",
             "badge_color": "emerald",
             "methodology": "Secondary market yield-to-maturity (YTM) for benchmark sovereign paper. Represents default-free nominal rate in IDR.",
@@ -42,6 +46,8 @@ INDONESIA_MACRO: Dict[str, Any] = {
         "mature_equity_risk_premium": {
             "source_name": "Prof. Aswath Damodaran (NYU Stern)",
             "citation": "Damodaran Online - Equity Risk Premiums (US & Mature Markets)",
+            "source_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html",
+            "source_domain": "pages.stern.nyu.edu",
             "badge": "DAMODARAN MATURE",
             "badge_color": "purple",
             "methodology": "Implied premium of equities over 10-year US Treasury bonds based on sustainable dividend yields and buyback cash payouts.",
@@ -50,6 +56,8 @@ INDONESIA_MACRO: Dict[str, Any] = {
         "country_risk_premium": {
             "source_name": "Prof. Aswath Damodaran (NYU Stern)",
             "citation": "Damodaran Country Default Spreads & Risk Premiums Dataset (Indonesia Baa2)",
+            "source_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html",
+            "source_domain": "pages.stern.nyu.edu",
             "badge": "DAMODARAN CRP",
             "badge_color": "purple",
             "methodology": "Computed as Indonesia's sovereign credit rating default spread (1.50% for Baa2) multiplied by emerging market relative equity/bond volatility (1.44x) = 2.16%.",
@@ -58,6 +66,8 @@ INDONESIA_MACRO: Dict[str, Any] = {
         "sovereign_spread": {
             "source_name": "Moody's / S&P / Damodaran",
             "citation": "Indonesia Sovereign Credit Default Spread (Moody's Baa2 / S&P BBB)",
+            "source_url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html",
+            "source_domain": "pages.stern.nyu.edu",
             "badge": "SOVEREIGN SPREAD",
             "badge_color": "purple",
             "methodology": "Quoted 10-year Sovereign CDS spread and rating-based default spread over US Treasuries.",
@@ -66,26 +76,52 @@ INDONESIA_MACRO: Dict[str, Any] = {
         "cost_of_debt": {
             "source_name": "Audited Financial Notes / Bank Indonesia",
             "citation": "Effective Borrowing Rate on Bank Loans & Corporate Bonds (BI 7DRR + Commercial Spread)",
+            "source_url": "https://www.bi.go.id/id/statistik/indikator/bi-rate.aspx",
+            "source_domain": "bi.go.id",
             "badge": "AUDITED BORROWING",
             "badge_color": "amber",
             "methodology": "Calculated from annual interest expense divided by average interest-bearing debt, cross-checked with commercial prime lending rates.",
             "valuation_impact": "Pre-tax borrowing cost. High debt cost increases WACC, but is partially shielded by the corporate tax shield (Kd * (1 - t))."
         },
         "debt_weight": {
-            "source_name": "Audited Balance Sheet & Market Capitalization",
+            "source_name": "Audited Balance Sheet & CFA Capital Structure",
             "citation": "Gearing Ratio = Total Debt / (Total Debt + Market Equity Value)",
+            "source_url": "https://www.cfainstitute.org/en/membership/professional-development/refresher-readings/capital-structure",
+            "source_domain": "cfainstitute.org",
             "badge": "BALANCE SHEET",
             "badge_color": "slate",
-            "methodology": "Market value weight of debt in the enterprise capital structure. Benchmarked to Indonesian property developer capital structures.",
+            "methodology": "Market value weight of debt in the enterprise capital structure. Benchmarked to Indonesian corporate capital structures.",
             "valuation_impact": "Determines the mix between Cost of Equity and cheaper after-tax Cost of Debt in blending WACC."
         },
         "tax_rate": {
             "source_name": "Directorate General of Taxes (DJP) / UU HPP",
             "citation": "Harmonization of Tax Regulations Law No. 7/2021 (UU HPP Pasal 17)",
+            "source_url": "https://pajak.go.id/id/tarif-pajak-penghasilan-pph-badan",
+            "source_domain": "pajak.go.id",
             "badge": "UU HPP 22%",
             "badge_color": "emerald",
             "methodology": "Statutory corporate income tax rate for Indonesian resident corporate entities.",
             "valuation_impact": "Determines the debt interest tax deduction (tax shield) and reduces EBIT into NOPAT."
+        },
+        "terminal_growth": {
+            "source_name": "Aswath Damodaran & McKinsey Corporate Finance",
+            "citation": "Closing the Loop: Estimating Terminal Value in Valuation",
+            "source_url": "https://pages.stern.nyu.edu/~adamodar/pdfiles/country/termval.pdf",
+            "source_domain": "pages.stern.nyu.edu",
+            "badge": "DAMODARAN GDP CAP",
+            "badge_color": "blue",
+            "methodology": "Long-term perpetual growth rate for Gordon Growth cash flows after Year 10. Cannot exceed risk-free rate or national GDP.",
+            "valuation_impact": "Massive leverage on terminal value. Capped at 4.0% to prevent infinite economic value paradox."
+        },
+        "exit_multiple": {
+            "source_name": "Corporate Finance Institute (CFI) / IDX Comps",
+            "citation": "10-Year Normalized EV/EBITDA Multiple Valuation Methodology",
+            "source_url": "https://corporatefinanceinstitute.com/resources/valuation/ev-ebitda/",
+            "source_domain": "corporatefinanceinstitute.com",
+            "badge": "IDX PEER COMPS",
+            "badge_color": "indigo",
+            "methodology": "Terminal multiple cross-check applied to Year 10 EBITDA.",
+            "valuation_impact": "Blended 50/50 with Gordon Growth perpetuity to compute robust Enterprise Value."
         }
     }
 }

@@ -1,4 +1,930 @@
-window.INITIAL_COVERAGE = [
+window.INITIAL_COVERAGE = [];
+window.CATALOG_COVERAGE = [
+  {
+    "id": "asii",
+    "ticker": "ASII.JK",
+    "name": "PT Astra International Tbk",
+    "exchange": "IDX",
+    "sector": "Industrials",
+    "industry": "Automotive, Heavy Equipment & Infrastructure Conglomerate",
+    "currency": "IDR",
+    "referencePrice": 5250.0,
+    "priceChange1D": 0.5,
+    "priceChangeYTD": 2.1,
+    "sharesOutstanding": 40.48,
+    "totalDebt": 58200.0,
+    "cashAndEquivalents": 64900.0,
+    "lastUpdated": "2026-10-23 09:00 WIB",
+    "analyst": "M. Vance, CFA",
+    "confidence": "High",
+    "description": "Indonesia's preeminent diversified conglomerate, holding 54%+ national automotive market share alongside heavy mining equipment, infrastructure, agribusiness, and industrial concessions.",
+    "historical": [
+      {
+        "year": "2021A",
+        "revenue": 233500,
+        "ebitda": 41400,
+        "netIncome": 20200,
+        "fcf": 18200,
+        "eps": 499.01,
+        "capex": 12500
+      },
+      {
+        "year": "2022A",
+        "revenue": 301400,
+        "ebitda": 56300,
+        "netIncome": 28900,
+        "fcf": 25100,
+        "eps": 713.93,
+        "capex": 17800
+      },
+      {
+        "year": "2023A",
+        "revenue": 316500,
+        "ebitda": 58600,
+        "netIncome": 33800,
+        "fcf": 24800,
+        "eps": 834.98,
+        "capex": 19200
+      },
+      {
+        "year": "2024A",
+        "revenue": 312800,
+        "ebitda": 57900,
+        "netIncome": 30100,
+        "fcf": 22100,
+        "eps": 743.58,
+        "capex": 17500
+      },
+      {
+        "year": "2025A",
+        "revenue": 323400,
+        "ebitda": 59800,
+        "netIncome": 31800,
+        "fcf": 23400,
+        "eps": 785.57,
+        "capex": 18100
+      }
+    ],
+    "priceHistory": [
+      {
+        "month": "Nov 25",
+        "price": 5050.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Dec 25",
+        "price": 5125.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Jan 26",
+        "price": 5200.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Feb 26",
+        "price": 5175.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Mar 26",
+        "price": 5225.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Apr 26",
+        "price": 5300.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "May 26",
+        "price": 5250.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Jun 26",
+        "price": 5350.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Jul 26",
+        "price": 5400.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Aug 26",
+        "price": 5150.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Sep 26",
+        "price": 5200.0,
+        "intrinsic": 6820.0
+      },
+      {
+        "month": "Oct 26",
+        "price": 5250.0,
+        "intrinsic": 6820.0
+      }
+    ],
+    "defaultAssumptions": {
+      "beta": 0.85,
+      "rf": 6.6,
+      "matureErp": 5.0,
+      "crp": 2.16,
+      "sovereignSpread": 1.5,
+      "kdPre": 6.5,
+      "wd": 21.5,
+      "revGrowthY1": 6.5,
+      "revGrowthY2": 6.0,
+      "revGrowthY3": 5.5,
+      "revGrowthY4": 5.0,
+      "revGrowthY5": 4.5,
+      "ebitdaMargin": 18.5,
+      "taxRate": 22.0,
+      "capexPercentRev": 5.5,
+      "daPercentRev": 4.5,
+      "nwcPercentRevChange": 5.0,
+      "wacc": 10.15,
+      "terminalGrowth": 2.0,
+      "exitEbitdaMultiple": 6.5,
+      "targetPeMultiple": 8.5,
+      "payoutRatio": 50.0,
+      "dcfWeight": 45,
+      "compsWeight": 35,
+      "rimWeight": 10,
+      "ddmWeight": 10
+    },
+    "comps": [
+      {
+        "name": "United Tractors",
+        "ticker": "UNTR",
+        "mcap": 102000,
+        "evEbitda": 4.2,
+        "pe": 5.1,
+        "revGrowth": 5.2,
+        "ebitdaMargin": 22.5
+      },
+      {
+        "name": "Indomobil Sukses",
+        "ticker": "IMAS",
+        "mcap": 5800,
+        "evEbitda": 6.8,
+        "pe": 8.4,
+        "revGrowth": 4.1,
+        "ebitdaMargin": 11.2
+      }
+    ],
+    "thesis": [
+      "Pristine net cash balance sheet supporting steady 7%+ dividend yields across economic cycles.",
+      "Structural proxy for Indonesian middle-class consumerization and commodities logistics.",
+      "Strategic pivot into nickel processing, healthcare, and renewable geothermal energy."
+    ],
+    "risks": [
+      "EV competition from international electric vehicle brands pressuring 4W automotive margins.",
+      "Commodity cycle volatility dampening heavy machinery sales at subsidiary UNTR."
+    ]
+  },
+  {
+    "id": "antm",
+    "ticker": "ANTM.JK",
+    "name": "PT Aneka Tambang Tbk",
+    "exchange": "IDX",
+    "sector": "Basic Materials",
+    "industry": "Diversified Mining, Gold, Nickel & Bauxite",
+    "currency": "IDR",
+    "referencePrice": 1580.0,
+    "priceChange1D": 1.95,
+    "priceChangeYTD": 12.5,
+    "sharesOutstanding": 24.03,
+    "totalDebt": 10450.0,
+    "cashAndEquivalents": 11850.0,
+    "lastUpdated": "2026-10-23 09:00 WIB",
+    "analyst": "M. Vance, CFA",
+    "confidence": "High",
+    "description": "Leading Indonesian diversified mineral producer operating integrated gold refining, bauxite mining, and high-grade ferronickel smelters as a foundational pillar of Indonesia's national EV battery supply chain.",
+    "historical": [
+      {
+        "year": "2021A",
+        "revenue": 38450,
+        "ebitda": 3640,
+        "netIncome": 1860,
+        "fcf": 2100,
+        "eps": 77.4,
+        "capex": 1450
+      },
+      {
+        "year": "2022A",
+        "revenue": 45930,
+        "ebitda": 4120,
+        "netIncome": 3820,
+        "fcf": 2980,
+        "eps": 158.97,
+        "capex": 1620
+      },
+      {
+        "year": "2023A",
+        "revenue": 41050,
+        "ebitda": 3960,
+        "netIncome": 3080,
+        "fcf": 2450,
+        "eps": 128.17,
+        "capex": 1800
+      },
+      {
+        "year": "2024A",
+        "revenue": 69190,
+        "ebitda": 5210,
+        "netIncome": 2850,
+        "fcf": 3120,
+        "eps": 118.6,
+        "capex": 2100
+      },
+      {
+        "year": "2025A",
+        "revenue": 84640,
+        "ebitda": 6420,
+        "netIncome": 3910,
+        "fcf": 3850,
+        "eps": 162.71,
+        "capex": 2350
+      }
+    ],
+    "priceHistory": [
+      {
+        "month": "Nov 25",
+        "price": 1450.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Dec 25",
+        "price": 1480.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Jan 26",
+        "price": 1520.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Feb 26",
+        "price": 1500.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Mar 26",
+        "price": 1540.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Apr 26",
+        "price": 1560.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "May 26",
+        "price": 1550.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Jun 26",
+        "price": 1570.0,
+        "intrinsic": 2150.0
+      },
+      {
+        "month": "Jul 26",
+        "price": 1600.0,
+        "intrinsic": 2200.0
+      },
+      {
+        "month": "Aug 26",
+        "price": 1560.0,
+        "intrinsic": 2200.0
+      },
+      {
+        "month": "Sep 26",
+        "price": 1575.0,
+        "intrinsic": 2200.0
+      },
+      {
+        "month": "Oct 26",
+        "price": 1580.0,
+        "intrinsic": 2200.0
+      }
+    ],
+    "defaultAssumptions": {
+      "beta": 1.15,
+      "rf": 6.6,
+      "matureErp": 5.0,
+      "crp": 2.16,
+      "sovereignSpread": 1.5,
+      "kdPre": 6.75,
+      "wd": 18.0,
+      "revGrowthY1": 10.5,
+      "revGrowthY2": 9.0,
+      "revGrowthY3": 8.0,
+      "revGrowthY4": 7.0,
+      "revGrowthY5": 6.0,
+      "ebitdaMargin": 12.5,
+      "taxRate": 22.0,
+      "capexPercentRev": 3.8,
+      "daPercentRev": 2.8,
+      "nwcPercentRevChange": 4.5,
+      "wacc": 11.2,
+      "terminalGrowth": 1.5,
+      "exitEbitdaMultiple": 6.8,
+      "targetPeMultiple": 12.5,
+      "payoutRatio": 40.0,
+      "dcfWeight": 50,
+      "compsWeight": 30,
+      "rimWeight": 10,
+      "ddmWeight": 10
+    },
+    "comps": [
+      {
+        "name": "Vale Indonesia",
+        "ticker": "INCO",
+        "mcap": 38500,
+        "evEbitda": 7.4,
+        "pe": 14.2,
+        "revGrowth": 6.8,
+        "ebitdaMargin": 24.5
+      },
+      {
+        "name": "Merdeka Copper Gold",
+        "ticker": "MDKA",
+        "mcap": 52000,
+        "evEbitda": 9.8,
+        "pe": 28.5,
+        "revGrowth": 14.2,
+        "ebitdaMargin": 18.0
+      }
+    ],
+    "thesis": [
+      "Surging physical gold sales volume driven by sovereign retail wealth preservation and inflation hedging.",
+      "Integral supply chain role in upstream high-pressure acid leach (HPAL) nickel battery joint ventures.",
+      "Strong net cash position provides balance sheet resilience against global base metal cyclicality."
+    ],
+    "risks": [
+      "Global spot gold and nickel price fluctuations impacting processing margins.",
+      "Domestic mining royalty regulation or export tariff adjustments."
+    ]
+  },
+  {
+    "id": "akra",
+    "ticker": "AKRA.JK",
+    "name": "PT AKR Corporindo Tbk",
+    "exchange": "IDX",
+    "sector": "Energy & Infrastructure",
+    "industry": "Petroleum Logistics, Supply Chain & Industrial Estates",
+    "currency": "IDR",
+    "referencePrice": 1450.0,
+    "priceChange1D": 0.35,
+    "priceChangeYTD": 5.4,
+    "sharesOutstanding": 20.07,
+    "totalDebt": 4820.0,
+    "cashAndEquivalents": 5600.0,
+    "lastUpdated": "2026-10-23 09:00 WIB",
+    "analyst": "M. Vance, CFA",
+    "confidence": "High",
+    "description": "Leading private supply chain logistics enterprise in Indonesia, distributing petroleum and basic chemicals alongside developing the flagship JIIPE integrated deep-sea port and special economic zone in Gresik.",
+    "historical": [
+      {
+        "year": "2021A",
+        "revenue": 25710,
+        "ebitda": 1790,
+        "netIncome": 1110,
+        "fcf": 1250,
+        "eps": 55.31,
+        "capex": 480
+      },
+      {
+        "year": "2022A",
+        "revenue": 47540,
+        "ebitda": 3530,
+        "netIncome": 2400,
+        "fcf": 2340,
+        "eps": 119.58,
+        "capex": 620
+      },
+      {
+        "year": "2023A",
+        "revenue": 42090,
+        "ebitda": 3780,
+        "netIncome": 2780,
+        "fcf": 2680,
+        "eps": 138.52,
+        "capex": 710
+      },
+      {
+        "year": "2024A",
+        "revenue": 41920,
+        "ebitda": 3850,
+        "netIncome": 2810,
+        "fcf": 2750,
+        "eps": 140.01,
+        "capex": 750
+      },
+      {
+        "year": "2025A",
+        "revenue": 46020,
+        "ebitda": 4120,
+        "netIncome": 2940,
+        "fcf": 2890,
+        "eps": 146.49,
+        "capex": 820
+      }
+    ],
+    "priceHistory": [
+      {
+        "month": "Nov 25",
+        "price": 1380.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Dec 25",
+        "price": 1400.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Jan 26",
+        "price": 1420.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Feb 26",
+        "price": 1410.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Mar 26",
+        "price": 1440.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Apr 26",
+        "price": 1450.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "May 26",
+        "price": 1435.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Jun 26",
+        "price": 1460.0,
+        "intrinsic": 1720.0
+      },
+      {
+        "month": "Jul 26",
+        "price": 1475.0,
+        "intrinsic": 1750.0
+      },
+      {
+        "month": "Aug 26",
+        "price": 1430.0,
+        "intrinsic": 1750.0
+      },
+      {
+        "month": "Sep 26",
+        "price": 1445.0,
+        "intrinsic": 1750.0
+      },
+      {
+        "month": "Oct 26",
+        "price": 1450.0,
+        "intrinsic": 1750.0
+      }
+    ],
+    "defaultAssumptions": {
+      "beta": 0.8,
+      "rf": 6.6,
+      "matureErp": 5.0,
+      "crp": 2.16,
+      "sovereignSpread": 1.5,
+      "kdPre": 6.4,
+      "wd": 15.0,
+      "revGrowthY1": 8.0,
+      "revGrowthY2": 7.5,
+      "revGrowthY3": 7.0,
+      "revGrowthY4": 6.5,
+      "revGrowthY5": 6.0,
+      "ebitdaMargin": 9.5,
+      "taxRate": 22.0,
+      "capexPercentRev": 2.2,
+      "daPercentRev": 1.8,
+      "nwcPercentRevChange": 3.5,
+      "wacc": 9.85,
+      "terminalGrowth": 1.8,
+      "exitEbitdaMultiple": 7.5,
+      "targetPeMultiple": 11.5,
+      "payoutRatio": 55.0,
+      "dcfWeight": 50,
+      "compsWeight": 25,
+      "rimWeight": 15,
+      "ddmWeight": 10
+    },
+    "comps": [
+      {
+        "name": "Samudera Indonesia",
+        "ticker": "SMDR",
+        "mcap": 6200,
+        "evEbitda": 4.1,
+        "pe": 4.8,
+        "revGrowth": 5.4,
+        "ebitdaMargin": 21.0
+      },
+      {
+        "name": "Surya Esa Perkasa",
+        "ticker": "ESSA",
+        "mcap": 12800,
+        "evEbitda": 5.8,
+        "pe": 8.9,
+        "revGrowth": 8.2,
+        "ebitdaMargin": 32.0
+      }
+    ],
+    "thesis": [
+      "Formula-based petroleum pricing mechanism shields distribution margins from crude oil volatility.",
+      "JIIPE SEZ monetizing premium industrial land sales to multinational copper smelters and green tech tenancies.",
+      "Consistent dividend payout exceeding 55% backed by minimal capital expenditure requirements."
+    ],
+    "risks": [
+      "Industrial land sales recognition timing lumpy across quarterly reporting cycles.",
+      "Subsidized diesel quota adjustments by regulatory energy bodies."
+    ]
+  },
+  {
+    "id": "icbp",
+    "ticker": "ICBP.JK",
+    "name": "PT Indofood CBP Sukses Makmur Tbk",
+    "exchange": "IDX",
+    "sector": "Consumer Non-Cyclicals",
+    "industry": "Packaged Food, Instant Noodles & Dairy",
+    "currency": "IDR",
+    "referencePrice": 11200.0,
+    "priceChange1D": -0.25,
+    "priceChangeYTD": 4.8,
+    "sharesOutstanding": 11.66,
+    "totalDebt": 35400.0,
+    "cashAndEquivalents": 18200.0,
+    "lastUpdated": "2026-10-23 09:00 WIB",
+    "analyst": "M. Vance, CFA",
+    "confidence": "High",
+    "description": "Global consumer packaged goods powerhouse producing iconic Indomie instant noodles, dairy products, snack foods, and beverages across Indonesia, the Middle East, and Africa.",
+    "historical": [
+      {
+        "year": "2021A",
+        "revenue": 56800,
+        "ebitda": 12600,
+        "netIncome": 6390,
+        "fcf": 6800,
+        "eps": 548.03,
+        "capex": 2800
+      },
+      {
+        "year": "2022A",
+        "revenue": 64800,
+        "ebitda": 13400,
+        "netIncome": 4580,
+        "fcf": 5900,
+        "eps": 392.8,
+        "capex": 3100
+      },
+      {
+        "year": "2023A",
+        "revenue": 67900,
+        "ebitda": 14900,
+        "netIncome": 6990,
+        "fcf": 8200,
+        "eps": 599.49,
+        "capex": 3400
+      },
+      {
+        "year": "2024A",
+        "revenue": 71500,
+        "ebitda": 15800,
+        "netIncome": 8250,
+        "fcf": 9400,
+        "eps": 707.55,
+        "capex": 3650
+      },
+      {
+        "year": "2025A",
+        "revenue": 76200,
+        "ebitda": 17100,
+        "netIncome": 9120,
+        "fcf": 10400,
+        "eps": 782.16,
+        "capex": 3900
+      }
+    ],
+    "priceHistory": [
+      {
+        "month": "Nov 25",
+        "price": 10800.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Dec 25",
+        "price": 10950.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Jan 26",
+        "price": 11100.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Feb 26",
+        "price": 11050.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Mar 26",
+        "price": 11150.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Apr 26",
+        "price": 11300.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "May 26",
+        "price": 11200.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Jun 26",
+        "price": 11350.0,
+        "intrinsic": 13800.0
+      },
+      {
+        "month": "Jul 26",
+        "price": 11400.0,
+        "intrinsic": 14000.0
+      },
+      {
+        "month": "Aug 26",
+        "price": 11150.0,
+        "intrinsic": 14000.0
+      },
+      {
+        "month": "Sep 26",
+        "price": 11250.0,
+        "intrinsic": 14000.0
+      },
+      {
+        "month": "Oct 26",
+        "price": 11200.0,
+        "intrinsic": 14000.0
+      }
+    ],
+    "defaultAssumptions": {
+      "beta": 0.65,
+      "rf": 6.6,
+      "matureErp": 5.0,
+      "crp": 2.16,
+      "sovereignSpread": 1.5,
+      "kdPre": 6.25,
+      "wd": 22.0,
+      "revGrowthY1": 7.0,
+      "revGrowthY2": 6.5,
+      "revGrowthY3": 6.0,
+      "revGrowthY4": 5.5,
+      "revGrowthY5": 5.0,
+      "ebitdaMargin": 22.5,
+      "taxRate": 22.0,
+      "capexPercentRev": 5.0,
+      "daPercentRev": 4.0,
+      "nwcPercentRevChange": 3.8,
+      "wacc": 9.45,
+      "terminalGrowth": 2.0,
+      "exitEbitdaMultiple": 10.5,
+      "targetPeMultiple": 15.5,
+      "payoutRatio": 50.0,
+      "dcfWeight": 45,
+      "compsWeight": 35,
+      "rimWeight": 10,
+      "ddmWeight": 10
+    },
+    "comps": [
+      {
+        "name": "Mayora Indah",
+        "ticker": "MYOR",
+        "mcap": 58000,
+        "evEbitda": 11.2,
+        "pe": 16.8,
+        "revGrowth": 8.5,
+        "ebitdaMargin": 14.5
+      },
+      {
+        "name": "Unilever Indonesia",
+        "ticker": "UNVR",
+        "mcap": 76000,
+        "evEbitda": 13.5,
+        "pe": 18.2,
+        "revGrowth": 2.1,
+        "ebitdaMargin": 18.0
+      }
+    ],
+    "thesis": [
+      "Inelastic consumer demand and unrivalled brand equity in Indomie defending pricing power.",
+      "Pinehill Middle East acquisition delivering compounding dollar-denominated export revenues.",
+      "Softening global wheat and CPO input costs driving gross margin expansion."
+    ],
+    "risks": [
+      "USD debt translation FX volatility associated with offshore bond obligations.",
+      "Elevated commodity input inflation (wheat, milk powder, sugar)."
+    ]
+  },
+  {
+    "id": "tlkm",
+    "ticker": "TLKM.JK",
+    "name": "PT Telkom Indonesia Tbk",
+    "exchange": "IDX",
+    "sector": "Infrastructure",
+    "industry": "Integrated Telecommunications, Fiber & Data Centers",
+    "currency": "IDR",
+    "referencePrice": 2950.0,
+    "priceChange1D": -0.34,
+    "priceChangeYTD": -7.8,
+    "sharesOutstanding": 99.06,
+    "totalDebt": 68400.0,
+    "cashAndEquivalents": 32100.0,
+    "lastUpdated": "2026-10-23 09:00 WIB",
+    "analyst": "M. Vance, CFA",
+    "confidence": "High",
+    "description": "National telecommunications sovereign champion operating Telkomsel (mobile leader with 160M+ subscribers), IndiHome fiber-to-the-home broadband, and carrier-neutral data centers across Southeast Asia.",
+    "historical": [
+      {
+        "year": "2021A",
+        "revenue": 143210,
+        "ebitda": 75720,
+        "netIncome": 24760,
+        "fcf": 28400,
+        "eps": 249.95,
+        "capex": 28500
+      },
+      {
+        "year": "2022A",
+        "revenue": 147310,
+        "ebitda": 78990,
+        "netIncome": 20750,
+        "fcf": 24100,
+        "eps": 209.47,
+        "capex": 34200
+      },
+      {
+        "year": "2023A",
+        "revenue": 149220,
+        "ebitda": 77580,
+        "netIncome": 24560,
+        "fcf": 27200,
+        "eps": 247.93,
+        "capex": 32800
+      },
+      {
+        "year": "2024A",
+        "revenue": 153400,
+        "ebitda": 78200,
+        "netIncome": 24800,
+        "fcf": 28100,
+        "eps": 250.35,
+        "capex": 31500
+      },
+      {
+        "year": "2025A",
+        "revenue": 158200,
+        "ebitda": 80400,
+        "netIncome": 25600,
+        "fcf": 29800,
+        "eps": 258.43,
+        "capex": 30200
+      }
+    ],
+    "priceHistory": [
+      {
+        "month": "Nov 25",
+        "price": 2850.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Dec 25",
+        "price": 2900.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Jan 26",
+        "price": 2980.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Feb 26",
+        "price": 2920.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Mar 26",
+        "price": 2960.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Apr 26",
+        "price": 3020.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "May 26",
+        "price": 2950.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Jun 26",
+        "price": 3000.0,
+        "intrinsic": 3750.0
+      },
+      {
+        "month": "Jul 26",
+        "price": 3050.0,
+        "intrinsic": 3800.0
+      },
+      {
+        "month": "Aug 26",
+        "price": 2910.0,
+        "intrinsic": 3800.0
+      },
+      {
+        "month": "Sep 26",
+        "price": 2940.0,
+        "intrinsic": 3800.0
+      },
+      {
+        "month": "Oct 26",
+        "price": 2950.0,
+        "intrinsic": 3800.0
+      }
+    ],
+    "defaultAssumptions": {
+      "beta": 0.75,
+      "rf": 6.6,
+      "matureErp": 5.0,
+      "crp": 2.16,
+      "sovereignSpread": 1.5,
+      "kdPre": 6.5,
+      "wd": 25.0,
+      "revGrowthY1": 4.5,
+      "revGrowthY2": 4.0,
+      "revGrowthY3": 4.0,
+      "revGrowthY4": 3.5,
+      "revGrowthY5": 3.0,
+      "ebitdaMargin": 50.8,
+      "taxRate": 22.0,
+      "capexPercentRev": 19.5,
+      "daPercentRev": 18.0,
+      "nwcPercentRevChange": 3.0,
+      "wacc": 9.6,
+      "terminalGrowth": 1.8,
+      "exitEbitdaMultiple": 5.5,
+      "targetPeMultiple": 12.0,
+      "payoutRatio": 70.0,
+      "dcfWeight": 45,
+      "compsWeight": 30,
+      "rimWeight": 15,
+      "ddmWeight": 10
+    },
+    "comps": [
+      {
+        "name": "Indosat Ooredoo Hutchison",
+        "ticker": "ISAT",
+        "mcap": 82000,
+        "evEbitda": 4.8,
+        "pe": 15.5,
+        "revGrowth": 9.2,
+        "ebitdaMargin": 47.5
+      },
+      {
+        "name": "XL Axiata",
+        "ticker": "EXCL",
+        "mcap": 28000,
+        "evEbitda": 4.1,
+        "pe": 16.2,
+        "revGrowth": 6.5,
+        "ebitdaMargin": 49.0
+      }
+    ],
+    "thesis": [
+      "Fixed-Mobile Convergence (FMC) synergy unlocking churn reduction and recurring APRU expansion.",
+      "Carrier-neutral hyper-scale data center spin-off unlocking hidden sum-of-the-parts valuation.",
+      "High dividend payout ratio (70%+) underpinned by robust operating cash flow generation."
+    ],
+    "risks": [
+      "Competitive price war among cellular operators in secondary regional markets.",
+      "Heavy 5G infrastructure CapEx requirements dampening near-term free cash flow."
+    ]
+  },
   {
     "id": "pwon",
     "ticker": "PWON.JK",
@@ -13,7 +939,7 @@ window.INITIAL_COVERAGE = [
     "sharesOutstanding": 48.16,
     "totalDebt": 5580.0,
     "cashAndEquivalents": 5190.0,
-    "lastUpdated": "2026-10-21 09:00 WIB",
+    "lastUpdated": "2026-10-23 09:00 WIB",
     "analyst": "M. Vance, CFA",
     "confidence": "High",
     "description": "Premier Indonesian retail commercial developer operating iconic superblocks including Kota Kasablanka, Gandaria City, Blok M Plaza in Jakarta, and Tunjungan Plaza & Pakuwon Mall in Surabaya.",
@@ -128,11 +1054,11 @@ window.INITIAL_COVERAGE = [
     ],
     "defaultAssumptions": {
       "beta": 0.75,
-      "rf": 6.60,
-      "matureErp": 5.00,
+      "rf": 6.6,
+      "matureErp": 5.0,
       "crp": 2.16,
-      "sovereignSpread": 1.50,
-      "kdPre": 6.50,
+      "sovereignSpread": 1.5,
+      "kdPre": 6.5,
       "wd": 20.0,
       "revGrowthY1": 12.0,
       "revGrowthY2": 14.0,
@@ -172,811 +1098,16 @@ window.INITIAL_COVERAGE = [
         "pe": 4.01,
         "revGrowth": 9.2,
         "ebitdaMargin": 38.5
-      },
-      {
-        "name": "Summarecon Agung",
-        "ticker": "SMRA",
-        "mcap": 9580,
-        "evEbitda": 6.67,
-        "pe": 6.77,
-        "revGrowth": 8.8,
-        "ebitdaMargin": 36.4
-      },
-      {
-        "name": "Alam Sutera Realty",
-        "ticker": "ASRI",
-        "mcap": 3240,
-        "evEbitda": 6.2,
-        "pe": 6.7,
-        "revGrowth": 6.5,
-        "ebitdaMargin": 33.2
-      },
-      {
-        "name": "Lippo Karawaci",
-        "ticker": "LPKR",
-        "mcap": 7800,
-        "evEbitda": 5.8,
-        "pe": 7.5,
-        "revGrowth": 5.4,
-        "ebitdaMargin": 29.8
       }
     ],
     "thesis": [
-      "Dominant retail mall footprint with 96%+ occupancy across Jakarta and Surabaya producing reliable recurring lease cash flows.",
-      "Conservative financial structure with net debt of only IDR 0.39T supporting unhindered hospitality and retail expansions.",
-      "Substantial discount to NAV and peer multiples: stock trades at 5.4x EV/EBITDA vs peer average of 6.9x."
+      "Dominant retail mall footprint with 96%+ occupancy generating predictable recurring rental cash flows.",
+      "Prudent financial structure with net debt under IDR 0.4T supporting ongoing hospitality pipeline.",
+      "Trading at a substantial discount to NAV and historical replacement cost."
     ],
     "risks": [
-      "Prolonged elevated domestic interest rates could soften high-rise condominium presales.",
-      "Retail discretionary spending vulnerability to general consumer sentiment shifts.",
-      "Escalation in land acquisition costs for future mixed-use pipeline development."
-    ]
-  },
-  {
-    "id": "bsde",
-    "ticker": "BSDE.JK",
-    "name": "PT Bumi Serpong Damai Tbk",
-    "exchange": "IDX",
-    "sector": "Real Estate",
-    "industry": "Integrated Township & Land Banking",
-    "currency": "IDR",
-    "referencePrice": 1020.0,
-    "priceChange1D": 0.5,
-    "priceChangeYTD": 8.5,
-    "sharesOutstanding": 21.17,
-    "totalDebt": 12850.0,
-    "cashAndEquivalents": 8420.0,
-    "lastUpdated": "2026-10-21 09:00 WIB",
-    "analyst": "E. Rostova, PhD",
-    "confidence": "High",
-    "description": "Flagship developer of BSD City, the largest master-planned township in Greater Jakarta spanning over 6,000 hectares with extensive residential, commercial, and tech-cluster development.",
-    "historical": [
-      {
-        "year": "2021A",
-        "revenue": 7650,
-        "ebitda": 3120,
-        "netIncome": 1350,
-        "fcf": 1420,
-        "eps": 63.77,
-        "capex": 850
-      },
-      {
-        "year": "2022A",
-        "revenue": 10240,
-        "ebitda": 4350,
-        "netIncome": 2430,
-        "fcf": 2100,
-        "eps": 114.78,
-        "capex": 980
-      },
-      {
-        "year": "2023A",
-        "revenue": 11540,
-        "ebitda": 4980,
-        "netIncome": 2740,
-        "fcf": 2450,
-        "eps": 129.43,
-        "capex": 1100
-      },
-      {
-        "year": "2024A",
-        "revenue": 12890,
-        "ebitda": 5420,
-        "netIncome": 3120,
-        "fcf": 2850,
-        "eps": 147.38,
-        "capex": 1250
-      },
-      {
-        "year": "2025A",
-        "revenue": 13950,
-        "ebitda": 5860,
-        "netIncome": 3410,
-        "fcf": 3100,
-        "eps": 161.08,
-        "capex": 1320
-      }
-    ],
-    "priceHistory": [
-      {
-        "month": "Nov 25",
-        "price": 940.0,
-        "intrinsic": 1350.0
-      },
-      {
-        "month": "Dec 25",
-        "price": 960.0,
-        "intrinsic": 1350.0
-      },
-      {
-        "month": "Jan 26",
-        "price": 980.0,
-        "intrinsic": 1350.0
-      },
-      {
-        "month": "Feb 26",
-        "price": 970.0,
-        "intrinsic": 1350.0
-      },
-      {
-        "month": "Mar 26",
-        "price": 995.0,
-        "intrinsic": 1380.0
-      },
-      {
-        "month": "Apr 26",
-        "price": 1010.0,
-        "intrinsic": 1380.0
-      },
-      {
-        "month": "May 26",
-        "price": 1030.0,
-        "intrinsic": 1380.0
-      },
-      {
-        "month": "Jun 26",
-        "price": 1015.0,
-        "intrinsic": 1380.0
-      },
-      {
-        "month": "Jul 26",
-        "price": 1025.0,
-        "intrinsic": 1420.0
-      },
-      {
-        "month": "Aug 26",
-        "price": 1005.0,
-        "intrinsic": 1420.0
-      },
-      {
-        "month": "Sep 26",
-        "price": 1015.0,
-        "intrinsic": 1420.0
-      },
-      {
-        "month": "Oct 26",
-        "price": 1020.0,
-        "intrinsic": 1420.0
-      }
-    ],
-    "defaultAssumptions": {
-      "beta": 0.85,
-      "rf": 6.60,
-      "matureErp": 5.00,
-      "crp": 2.16,
-      "sovereignSpread": 1.50,
-      "kdPre": 6.50,
-      "wd": 22.0,
-      "revGrowthY1": 10.5,
-      "revGrowthY2": 9.5,
-      "revGrowthY3": 9.0,
-      "revGrowthY4": 8.0,
-      "revGrowthY5": 7.0,
-      "ebitdaMargin": 42.0,
-      "taxRate": 22.0,
-      "capexPercentRev": 9.5,
-      "daPercentRev": 5.5,
-      "nwcPercentRevChange": 7.5,
-      "wacc": 10.85,
-      "terminalGrowth": 1.8,
-      "exitEbitdaMultiple": 7.0,
-      "targetPeMultiple": 7.5,
-      "payoutRatio": 25.0,
-      "dcfWeight": 50,
-      "compsWeight": 30,
-      "rimWeight": 10,
-      "ddmWeight": 10
-    },
-    "comps": [
-      {
-        "name": "Pakuwon Jati",
-        "ticker": "PWON",
-        "mcap": 13000,
-        "evEbitda": 5.4,
-        "pe": 5.53,
-        "revGrowth": 12.0,
-        "ebitdaMargin": 51.5
-      },
-      {
-        "name": "Ciputra Development",
-        "ticker": "CTRA",
-        "mcap": 22550,
-        "evEbitda": 3.04,
-        "pe": 4.01,
-        "revGrowth": 9.2,
-        "ebitdaMargin": 38.5
-      },
-      {
-        "name": "Summarecon Agung",
-        "ticker": "SMRA",
-        "mcap": 9580,
-        "evEbitda": 6.67,
-        "pe": 6.77,
-        "revGrowth": 8.8,
-        "ebitdaMargin": 36.4
-      }
-    ],
-    "thesis": [
-      "Vast low-cost raw land bank exceeding 3,800 hectares ensures decades of development runway with structural gross margin protection.",
-      "Joint-venture partnerships with Mitsubishi Corp and Aeon accelerate high-density transit-oriented commercial zones.",
-      "Robust commercial plot sales to international data center operators unlocking premium lump-sum cash flows."
-    ],
-    "risks": [
-      "Infrastructure execution delays on toll road connectivity to outer BSD phases.",
-      "Large inventory carrying costs in the event of macro mortgage demand contraction."
-    ]
-  },
-  {
-    "id": "ctra",
-    "ticker": "CTRA.JK",
-    "name": "PT Ciputra Development Tbk",
-    "exchange": "IDX",
-    "sector": "Real Estate",
-    "industry": "Geographically Diversified Residential & Commercial",
-    "currency": "IDR",
-    "referencePrice": 1215.0,
-    "priceChange1D": -0.8,
-    "priceChangeYTD": 12.4,
-    "sharesOutstanding": 18.56,
-    "totalDebt": 9650.0,
-    "cashAndEquivalents": 7820.0,
-    "lastUpdated": "2026-10-21 09:00 WIB",
-    "analyst": "D. Thorne, CFA",
-    "confidence": "High",
-    "description": "Pioneering residential property powerhouse with active developments across 33 Indonesian cities, operating low-capital partner-cooperation schemes.",
-    "historical": [
-      {
-        "year": "2021A",
-        "revenue": 9730,
-        "ebitda": 3520,
-        "netIncome": 1730,
-        "fcf": 1850,
-        "eps": 93.21,
-        "capex": 620
-      },
-      {
-        "year": "2022A",
-        "revenue": 9130,
-        "ebitda": 3410,
-        "netIncome": 1860,
-        "fcf": 1920,
-        "eps": 100.21,
-        "capex": 680
-      },
-      {
-        "year": "2023A",
-        "revenue": 9260,
-        "ebitda": 3580,
-        "netIncome": 1850,
-        "fcf": 2010,
-        "eps": 99.68,
-        "capex": 710
-      },
-      {
-        "year": "2024A",
-        "revenue": 10320,
-        "ebitda": 3980,
-        "netIncome": 2180,
-        "fcf": 2340,
-        "eps": 117.45,
-        "capex": 780
-      },
-      {
-        "year": "2025A",
-        "revenue": 11250,
-        "ebitda": 4330,
-        "netIncome": 2420,
-        "fcf": 2580,
-        "eps": 130.38,
-        "capex": 820
-      }
-    ],
-    "priceHistory": [
-      {
-        "month": "Nov 25",
-        "price": 1080.0,
-        "intrinsic": 1580.0
-      },
-      {
-        "month": "Dec 25",
-        "price": 1110.0,
-        "intrinsic": 1580.0
-      },
-      {
-        "month": "Jan 26",
-        "price": 1145.0,
-        "intrinsic": 1580.0
-      },
-      {
-        "month": "Feb 26",
-        "price": 1160.0,
-        "intrinsic": 1580.0
-      },
-      {
-        "month": "Mar 26",
-        "price": 1190.0,
-        "intrinsic": 1620.0
-      },
-      {
-        "month": "Apr 26",
-        "price": 1220.0,
-        "intrinsic": 1620.0
-      },
-      {
-        "month": "May 26",
-        "price": 1205.0,
-        "intrinsic": 1620.0
-      },
-      {
-        "month": "Jun 26",
-        "price": 1230.0,
-        "intrinsic": 1620.0
-      },
-      {
-        "month": "Jul 26",
-        "price": 1245.0,
-        "intrinsic": 1650.0
-      },
-      {
-        "month": "Aug 26",
-        "price": 1195.0,
-        "intrinsic": 1650.0
-      },
-      {
-        "month": "Sep 26",
-        "price": 1210.0,
-        "intrinsic": 1650.0
-      },
-      {
-        "month": "Oct 26",
-        "price": 1215.0,
-        "intrinsic": 1650.0
-      }
-    ],
-    "defaultAssumptions": {
-      "beta": 0.80,
-      "rf": 6.60,
-      "matureErp": 5.00,
-      "crp": 2.16,
-      "sovereignSpread": 1.50,
-      "kdPre": 6.50,
-      "wd": 21.0,
-      "revGrowthY1": 9.2,
-      "revGrowthY2": 8.8,
-      "revGrowthY3": 8.0,
-      "revGrowthY4": 7.5,
-      "revGrowthY5": 6.8,
-      "ebitdaMargin": 38.5,
-      "taxRate": 22.0,
-      "capexPercentRev": 7.3,
-      "daPercentRev": 4.2,
-      "nwcPercentRevChange": 6.0,
-      "wacc": 10.6,
-      "terminalGrowth": 1.6,
-      "exitEbitdaMultiple": 5.5,
-      "targetPeMultiple": 9.0,
-      "payoutRatio": 28.0,
-      "dcfWeight": 50,
-      "compsWeight": 30,
-      "rimWeight": 10,
-      "ddmWeight": 10
-    },
-    "comps": [
-      {
-        "name": "Pakuwon Jati",
-        "ticker": "PWON",
-        "mcap": 13000,
-        "evEbitda": 5.4,
-        "pe": 5.53,
-        "revGrowth": 12.0,
-        "ebitdaMargin": 51.5
-      },
-      {
-        "name": "Bumi Serpong Damai",
-        "ticker": "BSDE",
-        "mcap": 21590,
-        "evEbitda": 6.97,
-        "pe": 5.33,
-        "revGrowth": 10.5,
-        "ebitdaMargin": 42.0
-      },
-      {
-        "name": "Summarecon Agung",
-        "ticker": "SMRA",
-        "mcap": 9580,
-        "evEbitda": 6.67,
-        "pe": 6.77,
-        "revGrowth": 8.8,
-        "ebitdaMargin": 36.4
-      }
-    ],
-    "thesis": [
-      "Unrivaled geographic footprint mitigating single-region economic downturns across Java, Sumatra, Sulawesi, and Kalimantan.",
-      "Joint-operation (KSO) development structure delivers 28%+ ROE with minimal upfront capital expenditure.",
-      "Industry-leading presales execution reaching record annual bookings supported by middle-income housing incentives."
-    ],
-    "risks": [
-      "Regional permitting bottlenecks and infrastructure pacing in tier-2 cities.",
-      "Secondary market supply overhang in select Surabaya suburban clusters."
-    ]
-  },
-  {
-    "id": "smra",
-    "ticker": "SMRA.JK",
-    "name": "PT Summarecon Agung Tbk",
-    "exchange": "IDX",
-    "sector": "Real Estate",
-    "industry": "Integrated Townships & Destination Retail",
-    "currency": "IDR",
-    "referencePrice": 580.0,
-    "priceChange1D": 0.0,
-    "priceChangeYTD": 3.5,
-    "sharesOutstanding": 16.51,
-    "totalDebt": 8920.0,
-    "cashAndEquivalents": 3150.0,
-    "lastUpdated": "2026-10-21 09:00 WIB",
-    "analyst": "L. Chen, CFA",
-    "confidence": "Medium",
-    "description": "Developer of premier integrated townships in Kelapa Gading, Serpong, Bekasi, Bandung, and Karawang, anchored by iconic regional lifestyle retail malls.",
-    "historical": [
-      {
-        "year": "2021A",
-        "revenue": 5560,
-        "ebitda": 1940,
-        "netIncome": 550,
-        "fcf": 680,
-        "eps": 33.31,
-        "capex": 620
-      },
-      {
-        "year": "2022A",
-        "revenue": 5720,
-        "ebitda": 2080,
-        "netIncome": 770,
-        "fcf": 820,
-        "eps": 46.64,
-        "capex": 710
-      },
-      {
-        "year": "2023A",
-        "revenue": 6650,
-        "ebitda": 2420,
-        "netIncome": 1060,
-        "fcf": 1120,
-        "eps": 64.2,
-        "capex": 840
-      },
-      {
-        "year": "2024A",
-        "revenue": 7240,
-        "ebitda": 2640,
-        "netIncome": 1280,
-        "fcf": 1290,
-        "eps": 77.53,
-        "capex": 920
-      },
-      {
-        "year": "2025A",
-        "revenue": 7890,
-        "ebitda": 2870,
-        "netIncome": 1420,
-        "fcf": 1440,
-        "eps": 86.01,
-        "capex": 980
-      }
-    ],
-    "priceHistory": [
-      {
-        "month": "Nov 25",
-        "price": 540.0,
-        "intrinsic": 780.0
-      },
-      {
-        "month": "Dec 25",
-        "price": 555.0,
-        "intrinsic": 780.0
-      },
-      {
-        "month": "Jan 26",
-        "price": 570.0,
-        "intrinsic": 780.0
-      },
-      {
-        "month": "Feb 26",
-        "price": 560.0,
-        "intrinsic": 780.0
-      },
-      {
-        "month": "Mar 26",
-        "price": 585.0,
-        "intrinsic": 800.0
-      },
-      {
-        "month": "Apr 26",
-        "price": 590.0,
-        "intrinsic": 800.0
-      },
-      {
-        "month": "May 26",
-        "price": 575.0,
-        "intrinsic": 800.0
-      },
-      {
-        "month": "Jun 26",
-        "price": 585.0,
-        "intrinsic": 800.0
-      },
-      {
-        "month": "Jul 26",
-        "price": 595.0,
-        "intrinsic": 810.0
-      },
-      {
-        "month": "Aug 26",
-        "price": 570.0,
-        "intrinsic": 810.0
-      },
-      {
-        "month": "Sep 26",
-        "price": 575.0,
-        "intrinsic": 810.0
-      },
-      {
-        "month": "Oct 26",
-        "price": 580.0,
-        "intrinsic": 810.0
-      }
-    ],
-    "defaultAssumptions": {
-      "beta": 0.90,
-      "rf": 6.60,
-      "matureErp": 5.00,
-      "crp": 2.16,
-      "sovereignSpread": 1.50,
-      "kdPre": 6.50,
-      "wd": 28.0,
-      "revGrowthY1": 8.8,
-      "revGrowthY2": 8.4,
-      "revGrowthY3": 7.8,
-      "revGrowthY4": 7.0,
-      "revGrowthY5": 6.5,
-      "ebitdaMargin": 36.4,
-      "taxRate": 22.0,
-      "capexPercentRev": 12.4,
-      "daPercentRev": 6.8,
-      "nwcPercentRevChange": 6.8,
-      "wacc": 11.2,
-      "terminalGrowth": 1.7,
-      "exitEbitdaMultiple": 6.7,
-      "targetPeMultiple": 9.5,
-      "payoutRatio": 25.0,
-      "dcfWeight": 50,
-      "compsWeight": 30,
-      "rimWeight": 10,
-      "ddmWeight": 10
-    },
-    "comps": [
-      {
-        "name": "Pakuwon Jati",
-        "ticker": "PWON",
-        "mcap": 13000,
-        "evEbitda": 5.4,
-        "pe": 5.53,
-        "revGrowth": 12.0,
-        "ebitdaMargin": 51.5
-      },
-      {
-        "name": "Bumi Serpong Damai",
-        "ticker": "BSDE",
-        "mcap": 21590,
-        "evEbitda": 6.97,
-        "pe": 5.33,
-        "revGrowth": 10.5,
-        "ebitdaMargin": 42.0
-      },
-      {
-        "name": "Ciputra Development",
-        "ticker": "CTRA",
-        "mcap": 22550,
-        "evEbitda": 3.04,
-        "pe": 4.01,
-        "revGrowth": 9.2,
-        "ebitdaMargin": 38.5
-      }
-    ],
-    "thesis": [
-      "Expanding recurring revenue base from Summarecon Mall Bandung and Summarecon Villaggio Outlets.",
-      "Master-planned community loyalty commanding pricing premiums over neighboring developments.",
-      "High cash visibility from staggered handover cycles in Serpong and Crown Gading."
-    ],
-    "risks": [
-      "Higher net debt leverage (Net Debt/EBITDA ~2.0x) makes earnings sensitive to interest rate hikes.",
-      "Intense township competition in East Jakarta corridor."
-    ]
-  },
-  {
-    "id": "asii",
-    "ticker": "ASII.JK",
-    "name": "PT Astra International Tbk",
-    "exchange": "IDX",
-    "sector": "Industrials",
-    "industry": "Automotive, Heavy Equipment & Infrastructure Conglomerate",
-    "currency": "IDR",
-    "referencePrice": 5250.0,
-    "priceChange1D": -0.45,
-    "priceChangeYTD": 2.1,
-    "sharesOutstanding": 40.48,
-    "totalDebt": 58200.0,
-    "cashAndEquivalents": 64900.0,
-    "lastUpdated": "2026-10-21 09:00 WIB",
-    "analyst": "M. Vance, CFA",
-    "confidence": "High",
-    "description": "Indonesia's preeminent diversified conglomerate, holding 54%+ market share in national automotive sales alongside heavy mining equipment, financial services, agribusiness, and toll road concessions.",
-    "historical": [
-      {
-        "year": "2021A",
-        "revenue": 233500,
-        "ebitda": 41400,
-        "netIncome": 20200,
-        "fcf": 18200,
-        "eps": 499.01,
-        "capex": 12500
-      },
-      {
-        "year": "2022A",
-        "revenue": 301400,
-        "ebitda": 56300,
-        "netIncome": 28900,
-        "fcf": 25100,
-        "eps": 713.93,
-        "capex": 17800
-      },
-      {
-        "year": "2023A",
-        "revenue": 316500,
-        "ebitda": 58600,
-        "netIncome": 33800,
-        "fcf": 24800,
-        "eps": 834.98,
-        "capex": 19200
-      },
-      {
-        "year": "2024A",
-        "revenue": 312800,
-        "ebitda": 57900,
-        "netIncome": 30100,
-        "fcf": 22100,
-        "eps": 743.58,
-        "capex": 17500
-      },
-      {
-        "year": "2025A",
-        "revenue": 316400,
-        "ebitda": 58500,
-        "netIncome": 31200,
-        "fcf": 22500,
-        "eps": 770.75,
-        "capex": 17400
-      }
-    ],
-    "priceHistory": [
-      {
-        "month": "Nov 25",
-        "price": 5050.0,
-        "intrinsic": 6800.0
-      },
-      {
-        "month": "Dec 25",
-        "price": 5125.0,
-        "intrinsic": 6800.0
-      },
-      {
-        "month": "Jan 26",
-        "price": 5200.0,
-        "intrinsic": 6800.0
-      },
-      {
-        "month": "Feb 26",
-        "price": 5175.0,
-        "intrinsic": 6800.0
-      },
-      {
-        "month": "Mar 26",
-        "price": 5225.0,
-        "intrinsic": 7000.0
-      },
-      {
-        "month": "Apr 26",
-        "price": 5300.0,
-        "intrinsic": 7000.0
-      },
-      {
-        "month": "May 26",
-        "price": 5250.0,
-        "intrinsic": 7000.0
-      },
-      {
-        "month": "Jun 26",
-        "price": 5350.0,
-        "intrinsic": 7000.0
-      },
-      {
-        "month": "Jul 26",
-        "price": 5400.0,
-        "intrinsic": 7100.0
-      },
-      {
-        "month": "Aug 26",
-        "price": 5150.0,
-        "intrinsic": 7100.0
-      },
-      {
-        "month": "Sep 26",
-        "price": 5200.0,
-        "intrinsic": 7100.0
-      },
-      {
-        "month": "Oct 26",
-        "price": 5250.0,
-        "intrinsic": 7100.0
-      }
-    ],
-    "defaultAssumptions": {
-      "beta": 0.85,
-      "rf": 6.60,
-      "matureErp": 5.00,
-      "crp": 2.16,
-      "sovereignSpread": 1.50,
-      "kdPre": 6.50,
-      "wd": 21.5,
-      "revGrowthY1": 6.5,
-      "revGrowthY2": 6.0,
-      "revGrowthY3": 5.5,
-      "revGrowthY4": 5.0,
-      "revGrowthY5": 4.5,
-      "ebitdaMargin": 18.5,
-      "taxRate": 22.0,
-      "capexPercentRev": 5.5,
-      "daPercentRev": 4.5,
-      "nwcPercentRevChange": 5.0,
-      "wacc": 10.15,
-      "terminalGrowth": 2.0,
-      "exitEbitdaMultiple": 6.5,
-      "targetPeMultiple": 8.5,
-      "payoutRatio": 50.0,
-      "dcfWeight": 45,
-      "compsWeight": 35,
-      "rimWeight": 10,
-      "ddmWeight": 10
-    },
-    "comps": [
-      {
-        "name": "United Tractors",
-        "ticker": "UNTR",
-        "mcap": 102000,
-        "evEbitda": 4.2,
-        "pe": 5.1,
-        "revGrowth": 5.2,
-        "ebitdaMargin": 22.5
-      },
-      {
-        "name": "Indomobil Sukses",
-        "ticker": "IMAS",
-        "mcap": 5800,
-        "evEbitda": 6.8,
-        "pe": 8.4,
-        "revGrowth": 4.1,
-        "ebitdaMargin": 11.2
-      }
-    ],
-    "thesis": [
-      "Pristine net cash balance sheet ($64.9T cash vs $58.2T debt) paying generous 7%+ dividend yields.",
-      "Structural proxy for Indonesian middle-class consumerization and mining commodity cycles.",
-      "Aggressive investment into nickel processing, healthcare, and renewable geothermal energy."
-    ],
-    "risks": [
-      "Electric Vehicle (EV) competition from Chinese automotive OEMs pressuring 4W market share.",
-      "Thermal coal volume slowdown impacting mining contracting margins at subsidiary UNTR."
+      "Elevated interest rates softening demand for high-rise residential presales.",
+      "Retail discretionary spending vulnerability to macro consumer sentiment shifts."
     ]
   }
 ];

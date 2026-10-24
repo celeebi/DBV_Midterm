@@ -24,13 +24,13 @@ class RelativeValuationModel:
     @staticmethod
     def calculate_comps(
         peers_data: Optional[List[Dict[str, Any]]] = None,
-        target_ebitda: float = 3.45,  # Rp T
-        target_net_income: float = 2.35,  # Rp T
-        target_equity: float = 22.47,  # Rp T
+        target_ebitda: float = 3.38,  # Rp T (Audited 2024 from IDX XBRL)
+        target_net_income: float = 2.42,  # Rp T
+        target_equity: float = 24.74,  # Rp T
         shares_outstanding: float = 48.16,  # Billions
-        cash: float = 5.19,
-        debt: float = 5.58,
-        minority_interest: float = 4.15,
+        cash: float = 9.20,
+        debt: float = 6.44,
+        minority_interest: float = 4.77,
         stat_method: str = "median",  # 'median', '25th', 'harmonic_mean'
         filter_outliers: bool = True
     ) -> Dict[str, Any]:

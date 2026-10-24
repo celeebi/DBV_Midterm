@@ -29,7 +29,7 @@ class ProFormaModel:
 
     @staticmethod
     def generate_pro_forma(
-        base_revenue: float = 7.11,
+        base_revenue: float = 6.67,
         growth_rates: Optional[List[float]] = None,
         margins: Optional[List[float]] = None,
         wacc: float = 0.102,
@@ -39,7 +39,7 @@ class ProFormaModel:
         capex_pct: float = 0.080,
         expansion_capex_y2: float = 0.0,
         nwc_pct: float = 0.050,
-        depr_pct: float = 0.065,
+        depr_pct: float = 0.072,
         notes: Optional[List[str]] = None,
         start_year: int = 2026
     ) -> Dict[str, Any]:

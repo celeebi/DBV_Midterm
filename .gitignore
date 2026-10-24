@@ -45,3 +45,5 @@ wheels/
 *.xlsx
 *.sqlite3
 *.db
+/data/
+/scratch/

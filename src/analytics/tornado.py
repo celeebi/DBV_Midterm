@@ -12,16 +12,16 @@ class TornadoEngine:
 
     @staticmethod
     def calculate_tornado(
-        base_revenue: float = 7110.0,
+        base_revenue: float = 6670.0,
         base_wacc: float = 0.1042,
         base_terminal_g: float = 0.015,
-        base_ebitda_margin: float = 0.50,
+        base_ebitda_margin: float = 0.507,
         base_rev_growth: float = 0.10,
         base_capex_percent_rev: float = 0.085,
         base_exit_multiple: float = 6.5,
         tax_rate: float = 0.22,
-        da_percent_rev: float = 0.05,
-        net_debt: float = 390.0,
+        da_percent_rev: float = 0.072,
+        net_debt: float = -2760.0,
         shares_outstanding: float = 48.16,
         custom_ranges: Optional[Dict[str, Dict[str, float]]] = None
     ) -> Dict[str, Any]:

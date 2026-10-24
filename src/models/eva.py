@@ -15,18 +15,18 @@ class EVAModel:
 
     @staticmethod
     def calculate_eva(
-        base_revenue: float = 7110.0,
-        ebitda_margin: float = 0.50,
-        da_percent_rev: float = 0.05,
+        base_revenue: float = 6670.0,
+        ebitda_margin: float = 0.507,
+        da_percent_rev: float = 0.072,
         tax_rate: float = 0.22,
         wacc: float = 0.1042,
-        initial_invested_capital: float = 24100.0,
+        initial_invested_capital: float = 21980.0,
         growth_rates: Optional[List[float]] = None,
         terminal_growth: float = 0.015,
         reinvestment_rate: float = 0.20,
-        net_debt: float = 390.0,
+        net_debt: float = -2760.0,
         shares_outstanding: float = 48.16,
-        current_market_price: float = 270.0
+        current_market_price: float = 280.0
     ) -> Dict[str, Any]:
         """
         Calculates 10-year EVA schedule, MVA, and implied equity fair value.

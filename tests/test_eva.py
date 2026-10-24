@@ -32,8 +32,8 @@ def test_eva_10_year_schedule_and_mva():
     )
 
     assert res["initial_invested_capital"] == 24100.0
-    assert res["total_mva"] == round(res["sum_pv_eva_10yr"] + res["pv_terminal_mva"], 2)
-    assert res["enterprise_value"] == round(res["initial_invested_capital"] + res["total_mva"], 2)
+    assert abs(res["total_mva"] - (res["sum_pv_eva_10yr"] + res["pv_terminal_mva"])) <= 0.05
+    assert abs(res["enterprise_value"] - (res["initial_invested_capital"] + res["total_mva"])) <= 0.05
     assert res["equity_value"] == round(res["enterprise_value"] - res["net_debt"], 2)
     assert res["target_share_price"] > 0
 

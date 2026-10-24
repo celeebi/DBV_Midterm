@@ -26,12 +26,12 @@ class DuPontEngine:
 
     @staticmethod
     def calculate_5stage(
-        revenue: float = 7110.0,
-        ebit: float = 3199.5,
-        ebt: float = 2750.0,
-        net_income: float = 2350.0,
-        total_assets: float = 33800.0,
-        total_equity: float = 22800.0,
+        revenue: float = 6670.0,
+        ebit: float = 2900.0,
+        ebt: float = 2440.0,
+        net_income: float = 2420.0,
+        total_assets: float = 34610.0,
+        total_equity: float = 24740.0,
         ticker: str = "PWON.JK"
     ) -> Dict[str, Any]:
         """
