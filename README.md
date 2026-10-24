@@ -24,6 +24,104 @@ The platform pairs a high-performance **Python Starlette/Uvicorn backend** with 
 
 ---
 
+## 🚀 Quick Start: Installation & Launch (Under 60 Seconds)
+
+### Prerequisites
+- **Python 3.10+** (tested on Python 3.10, 3.11, 3.12, and 3.14).
+- Modern web browser (Chrome, Edge, Firefox, Safari).
+- **Zero Node.js / npm installation required**: The React 18 interface compiles and renders natively in the browser via CDN.
+
+### Option 1: 1-Click Launch (Windows)
+Double-click [`run_app.bat`](run_app.bat) in the project directory. The automated launcher will:
+1. Detect or initialize your local Python virtual environment (`.venv`).
+2. Install any missing package dependencies from `requirements.txt`.
+3. Launch the asynchronous Starlette valuation server at `http://localhost:8000`.
+4. Open the VALUEX Terminal automatically in your default browser.
+
+### Option 2: Command-Line Installation (Cross-Platform)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/celeebi/DBV_Midterm.git
+cd DBV_Midterm
+
+# 2. Check out the latest production branch
+git checkout develop_further
+
+# 3. Create and activate a Python virtual environment
+python -m venv .venv
+# On Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+# On macOS / Linux:
+source .venv/bin/activate
+
+# 4. Install dependencies
+pip install -r requirements.txt
+
+# 5. Start the VALUEX Terminal server (Port 8000)
+python server.py
+```
+Open **`http://localhost:8000`** in your browser.
+
+*(Optional Companion UI)*: Run `streamlit run app.py` for the auxiliary Streamlit analytics dashboard at `http://localhost:8501`.
+
+### Verifying Installation (Run Automated Tests)
+To verify that all 92 mathematical models, balance check identities, and REST API endpoints are fully operational:
+```bash
+pytest tests/ -v
+```
+**Expected output**: `92 passed in ~7s` (100% pass rate).
+
+---
+
+## 💡 How to Use: 5-Step Analyst Workflow
+
+```mermaid
+flowchart LR
+    S1["1. Search Emiten\n(Header / ⌘2 Screener)"] --> S2["2. Inspect Valuation\n(Cone / Football Field ⌘3)"]
+    S2 --> S3["3. Review 3-Statements\n(Audit vs Forecast ⌘4)"]
+    S3 --> S4["4. Tune Assumptions\n(Sliders / WACC ⌘5)"]
+    S4 --> S5["5. Export Memo\n(PDF / Live Excel ⌘8)"]
+```
+
+### Step 1: Search or Pick an Indonesian Emiten
+- Click the search bar in the top navigation or navigate to **`⌘2 Screener`**.
+- Type any IDX ticker (e.g., `PWON`, `ASII`, `ICBP`, `TLKM`, `ADRO`, `UNVR`, `GOTO`) or click one of the quick discovery pills.
+- The platform loads from the **110 pre-cached universe in ~5 milliseconds** or seamlessly harmonizes filings on the fly.
+- *(Scope Guard)*: Searching a commercial bank (e.g. `BBCA`, `BBRI`, `BMRI`) displays an educational modal explaining corporate non-financial DCF scope vs banking ALM mechanics.
+
+### Step 2: Analyze Multi-Model Valuation & Scenario Trajectory
+- Navigate to **`⌘3 Valuation`**.
+- Click the **Toggle Chart** button in the header to switch between:
+  - **12-Month Target Price Cone**: 5-year historical price trajectory against the JCI index with forward shaded Bull, Base, and Bear scenario cone ($\text{Bear} < \text{Base} < \text{Bull}$).
+  - **Valuation Methodology Football Field**: Side-by-side intrinsic value ranges across DCF, Comps, RIM, DDM, RNAV, Monte Carlo, and EVA.
+- Explore the **10 Methodology Sub-Tabs** below the chart (DCF pro forma schedule, peer multiples, RNAV property breakdown, 10,000-run Monte Carlo histogram, EVA economic profits, Tornado sensitivity, 5-stage DuPont ROE, and step-by-step KaTeX LaTeX mathematical proofs).
+
+### Step 3: Inspect Dynamic 3-Statement Articulation & Data Provenance
+- Navigate to **`⌘4 3-Statement Model`**.
+- Switch tabs across **Balance Sheet**, **Income Statement**, **Cash Flow Statement**, and **Operational Drivers**.
+- Toggle between **10-Year Forecast (2026E–2035E)** and **Audited Multi-Year Actuals (2021A–2025A)** via `🏛️ Show Historical Actuals`.
+- Observe the **Data Provenance Mark**:
+  - `SOURCE: IDX.CO.ID (XBRL)` (emerald badge) for official exchange filings.
+  - `SOURCE: YAHOO FINANCE` (amber badge) for harmonized audited statements.
+- Verify the green **ZERO-BALANCE: ASSETS ≡ LIAB + EQUITY** badge proving exact mathematical accounting identity ($\text{balance\_check} = 0.00$).
+
+### Step 4: Calibrate Assumptions & Trigger Live Recalculation
+- Navigate to **`⌘5 Assumptions`**.
+- Adjust **Phase 1 High Growth (Years 1–5)** and **Phase 2 Transition (Years 6–10)** growth and margin sliders.
+- Click **⚡ Auto-Fade (Y6–Y10)** to automatically fade growth toward macroeconomic terminal GDP ($1.5\%$).
+- Adjust the **Fundamental CAPM Modeler** (Beta $\beta$, Risk-Free Rate $R_f$, Mature Market ERP, Damodaran Country Risk Premium CRP, Cost of Debt $K_d$, and Capital Structure Weight $W_d$).
+- Adjust the **Model Weight Donut Chart** (supports setting any method to `0%` without errors, or click one-click presets like `50/50 DCF & RIM` or `100% DCF`).
+- Click **⚡ Recalculate Pro Forma** to cascade changes in real-time across all 3 statements, DCF bridge, and valuation outputs.
+
+### Step 5: Generate Institutional Research Reports
+- Navigate to **`⌘8 Tear Sheet`**.
+- Review the complete investment banking equity research report layout.
+- Click **🖨️ Print / Save PDF** to trigger a clean, print-optimized document view.
+- Click **📊 Download Excel Model (.xlsx)** to export a dynamic, formula-active 6-sheet Microsoft Excel workbook that preserves all custom assumptions and uppercase formulas (`=SUM()`, `=NPV()`).
+
+---
+
 ## 📑 Table of Contents
 - [Executive Overview](#-executive-overview)
 - [System Architecture](#-system-architecture)
@@ -45,12 +143,7 @@ The platform pairs a high-performance **Python Starlette/Uvicorn backend** with 
 - [Pre-Cached 110 IDX Universe Breakdown](#-pre-cached-110-idx-universe-breakdown)
 - [Author Profile & Engineering Pedigree](#-author-profile--engineering-pedigree)
 - [Repository Structure](#-repository-structure)
-- [Quick Start Guide](#-quick-start-guide)
-  - [Prerequisites](#prerequisites)
-  - [1-Click Launch (Windows)](#1-click-launch-windows)
-  - [Command-Line Execution](#command-line-execution)
-  - [Running Automated Unit Tests](#running-automated-unit-tests)
-  - [Re-Running Pre-Caching Utility](#re-running-pre-caching-utility)
+- [Quick Start Guide](#-quick-start-installation--launch-under-60-seconds)
 - [Git Branching & Safety Policy](#-git-branching--safety-policy)
 - [License & Academic Disclosure](#-license--academic-disclosure)
 
@@ -437,58 +530,11 @@ Project BA/
 
 ---
 
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- **Python 3.10+** (tested on Python 3.10, 3.11, 3.12, 3.14).
-- Standard web browser (Chrome, Edge, Firefox, Safari).
-- **Zero Node.js / npm installation required**: The React 18 interface compiles and renders natively in the browser.
-
-### 1-Click Launch (Windows)
-Double-click [`run_app.bat`](run_app.bat) in the project directory. The script will:
-1. Detect or initialize your local Python virtual environment (`.venv`).
-2. Install any missing package dependencies from `requirements.txt`.
-3. Launch the asynchronous Starlette valuation server at `http://localhost:8000`.
-4. Open the VALUEX Terminal automatically in your default browser.
-
-### Command-Line Execution
-```powershell
-# 1. Clone repository and navigate to folder
-git clone https://github.com/celeebi/DBV_Midterm.git
-cd "DBV_Midterm"
-
-# 2. Activate Python virtual environment
-.\.venv\Scripts\Activate.ps1
-
-# 3. Start the VALUEX Terminal server (Port 8000)
-python server.py
-
-# 4. (Optional) Run the companion Streamlit interface (Port 8501)
-streamlit run app.py
-```
-Open your browser to `http://localhost:8000`.
-
-### Running Automated Unit Tests
-To verify all valuation engines, 3-statement balance identities, scenario monotonicity, and REST API endpoints:
-```powershell
-.\.venv\Scripts\pytest.exe -v
-```
-Expected output: **92 passed in ~7.0s** (100% pass rate).
-
-### Re-Running Pre-Caching Utility
-To refresh or expand the pre-cached universe across all 110 prominent equities:
-```powershell
-python scripts/precache_universe.py
-```
-Statements will be harmonized, verified for zero-balance identity, and written to `data/idx_cache/`.
-
----
-
 ## 🛡️ Git Branching & Safety Policy
 
 | Branch / Tag | Status | Description | Anchor Commit |
 | :--- | :--- | :--- | :--- |
-| **`develop_further`** ⭐ | **Active Production** | Current development branch: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `c74c0f9` |
+| **`develop_further`** ⭐ | **Active Production** | Current development branch: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `20ec5f9` |
 | **`latest`** | **Release Milestone** | Pre-caching baseline checkpoint with initial 34 unit tests. | `019212c` |
 | **`main`** | **Stable Backup** | Safe anchor checkpoint containing verified baseline 4-way valuation models and Excel exporter. | `36a99e3` |
 | **`develop`** | **Historical Baseline** | Prior development baseline containing initial VALUEX Terminal. | `67dd6d9` |
