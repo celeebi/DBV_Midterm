@@ -137,3 +137,34 @@ def test_provenance_marking_idx_vs_yfinance():
     assert "source" in icbp
     assert "yahoo" in icbp["source"].lower()
 
+
+def test_dual_horizon_sourcing_policy():
+    """
+    Verify Dual-Horizon Sourcing Policy:
+    1. IDX XBRL retains full 5 years (2021-2025).
+    2. Yahoo Finance fallback strictly takes 4 authentic years (2022-2025).
+    """
+    # 1. IDX XBRL verification
+    pwon = FinancialDataLoader.fetch_company_data("PWON.JK", source="idx")
+    assert pwon["historical"]["years"] == [2021, 2022, 2023, 2024, 2025]
+    assert pwon["data_availability"]["status"] == "complete"
+    assert pwon["data_availability"]["years_count"] == 5
+
+    # 2. Yahoo Finance fallback verification
+    mlbi = FinancialDataLoader.fetch_company_data("MLBI.JK", source="idx")
+    assert "yahoo" in mlbi["source"].lower()
+    assert mlbi["historical"]["years"] == [2022, 2023, 2024, 2025]
+    assert 2021 not in mlbi["historical"]["years"]
+    assert mlbi["data_availability"]["status"] == "partial"
+    assert mlbi["data_availability"]["years_count"] == 4
+    assert mlbi["data_availability"]["missing_years"] == [2021]
+    assert "Yahoo Finance" in mlbi["data_availability"]["title"]
+
+    # Verify 4-year statements articulate cleanly
+    bs_rows = mlbi["historical_statements"]["balance_sheet"]
+    assert len(bs_rows) == 4
+    for r in bs_rows:
+        assert abs(r["balance_check"]) < 0.02
+        assert r["year"] in [2022, 2023, 2024, 2025]
+
+

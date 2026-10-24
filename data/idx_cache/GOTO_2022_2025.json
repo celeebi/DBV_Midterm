@@ -32,8 +32,8 @@
       2021
     ],
     "notice_level": "warning",
-    "title": "Limited Historical Depth on IDX (4 Years Available: 2022A-2025A (4 Years))",
-    "message": "Official IDX repository contains 4 year(s) of audited statements (2022A-2025A (4 Years)). Limited historical filing depth on the digital exchange repository (missing 2021). Valuation schedules, pro forma projections, and audit checks are calibrated using the available 4-year audited actuals."
+    "title": "Limited Historical Depth on Yahoo Finance (4 Years Available: 2022A-2025A (4 Years))",
+    "message": "Yahoo Finance fallback repository contains 4 year(s) of audited statements (2022A-2025A (4 Years)). Earlier filings (2021) are unarchived on the digital portal. Valuation schedules, pro forma projections, and audit checks are calibrated using the available 4-year audited actuals."
   },
   "historical": {
     "years": [

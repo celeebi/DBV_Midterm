@@ -267,10 +267,10 @@ HISTORICAL_USD_IDR: Dict[int, float] = {
 DEFAULT_USD_IDR: float = 16_400.0
 
 
-def compute_data_availability(clean_ticker: str, available_years: List[int], requested_years: Optional[List[int]] = None) -> Dict[str, Any]:
+def compute_data_availability(clean_ticker: str, available_years: List[int], requested_years: Optional[List[int]] = None, source_name: str = "IDX") -> Dict[str, Any]:
     """
     Generates institutional provenance and professional notice metadata for data availability.
-    Gracefully explains limited filing horizons (e.g. recent IPOs like AADI) vs complete history.
+    Gracefully explains limited filing horizons (e.g. recent IPOs or Yahoo Finance 4-year depth) vs complete history.
     """
     if not requested_years:
         requested_years = [2021, 2022, 2023, 2024, 2025]
@@ -278,6 +278,8 @@ def compute_data_availability(clean_ticker: str, available_years: List[int], req
     available_years_sorted = sorted(available_years)
     missing_years = [y for y in requested_years if y not in available_years_sorted]
     count = len(available_years_sorted)
+    is_yahoo = "yahoo" in source_name.lower()
+    platform_name = "Yahoo Finance" if is_yahoo else "IDX"
 
     if count == 0:
         return {
@@ -287,8 +289,8 @@ def compute_data_availability(clean_ticker: str, available_years: List[int], req
             "years_count": 0,
             "missing_years": requested_years,
             "notice_level": "error",
-            "title": "No Audited Filings Found on IDX",
-            "message": f"No audited annual financial statements were found in the official IDX repository for ticker '{clean_ticker}'. Please verify that the emiten code is active and listed on the Indonesia Stock Exchange."
+            "title": f"No Audited Filings Found on {platform_name}",
+            "message": f"No audited annual financial statements were found in the {platform_name} repository for ticker '{clean_ticker}'."
         }
     elif count < len(requested_years) or count < 5:
         start_avail = available_years_sorted[0]
@@ -296,11 +298,12 @@ def compute_data_availability(clean_ticker: str, available_years: List[int], req
         horizon_label = f"{start_avail}A-{end_avail}A ({count} Year{'s' if count > 1 else ''})"
         
         missing_str = ", ".join(str(y) for y in missing_years)
-        reason_note = (
-            f"Annual filings for {missing_str} are not archived on the exchange portal (common for recent IPOs, corporate spin-offs, or unarchived periods)."
-            if count <= 2 else
-            f"Limited historical filing depth on the digital exchange repository (missing {missing_str})."
-        )
+        if is_yahoo:
+            reason_note = f"Yahoo Finance fallback repository contains {count} year(s) of audited statements ({horizon_label}). Earlier filings ({missing_str}) are unarchived on the digital portal."
+        elif count <= 2:
+            reason_note = f"Annual filings for {missing_str} are not archived on the exchange portal (common for recent IPOs, corporate spin-offs, or unarchived periods)."
+        else:
+            reason_note = f"Limited historical filing depth on the digital exchange repository (missing {missing_str})."
         
         return {
             "status": "partial",
@@ -309,8 +312,8 @@ def compute_data_availability(clean_ticker: str, available_years: List[int], req
             "years_count": count,
             "missing_years": missing_years,
             "notice_level": "warning",
-            "title": f"Limited Historical Depth on IDX ({count} Years Available: {horizon_label})",
-            "message": f"Official IDX repository contains {count} year(s) of audited statements ({horizon_label}). {reason_note} Valuation schedules, pro forma projections, and audit checks are calibrated using the available {count}-year audited actuals."
+            "title": f"Limited Historical Depth on {platform_name} ({count} Years Available: {horizon_label})",
+            "message": f"{reason_note} Valuation schedules, pro forma projections, and audit checks are calibrated using the available {count}-year audited actuals."
         }
     else:
         start_avail = available_years_sorted[0]
@@ -323,7 +326,7 @@ def compute_data_availability(clean_ticker: str, available_years: List[int], req
             "missing_years": [],
             "notice_level": "info",
             "title": f"Complete {count}-Year Audited Filing History",
-            "message": f"Full {count}-year audited financial history ({start_avail}A-{end_avail}A) verified with zero-balance accounting articulation directly from official IDX XBRL filings."
+            "message": f"Full {count}-year audited financial history ({start_avail}A-{end_avail}A) verified with zero-balance accounting articulation directly from official {platform_name} XBRL filings."
         }
 
 class IDXAdapter:
@@ -364,7 +367,7 @@ class IDXAdapter:
         clean = cls.clean_ticker(ticker)
         cache_file = cls.get_cache_path(clean, start_year, end_year)
 
-        # 1. Check local cache (exact match or any multi-year cached filing for ticker)
+        # 1. Check local cache (prioritizing 5-year official IDX XBRL filings first)
         if use_cache:
             target_file = None
             if os.path.isfile(cache_file):
@@ -376,7 +379,9 @@ class IDXAdapter:
                     if f.startswith(f"{clean}_") and f.endswith(".json")
                 ]
                 if candidates:
-                    target_file = candidates[0]
+                    # Prefer official 5-year IDX XBRL filing (_2021_2025.json) if available
+                    c_5y = [f for f in candidates if "2021_2025" in f]
+                    target_file = c_5y[0] if c_5y else candidates[0]
 
             if target_file and os.path.isfile(target_file):
                 try:
@@ -586,10 +591,12 @@ class IDXAdapter:
         sector = meta.get("sector", "General Corporate")
         industry = meta.get("industry", "Operating Business")
 
+        source_name = idx_result.get("source_name", "IDX")
         data_avail = compute_data_availability(
             clean_ticker,
             available_years=years,
-            requested_years=idx_result.get("years_requested") or list(range(2021, latest_yr + 1))
+            requested_years=idx_result.get("years_requested") or list(range(2021, latest_yr + 1)),
+            source_name=source_name
         )
 
         return {

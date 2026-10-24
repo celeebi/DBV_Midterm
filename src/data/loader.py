@@ -854,22 +854,25 @@ class FinancialDataLoader:
                         return float(v)
             return def_val
 
-        # Filter candidate columns to only those with genuine reported revenue or balance sheet assets
+        # Yahoo Finance fallback strictly targets the authentic 4-year horizon (2022-2025).
+        # Official IDX XBRL filings retain the full 5-year sequence (2021-2025).
+        target_years = [2022, 2023, 2024, 2025]
         raw_cols = list(fin.columns) if fin is not None and not fin.empty else []
         valid_cols = []
         for c in raw_cols:
-            has_rev = get_val(fin, ["Total Revenue", "Operating Revenue"], c, 0.0) > 0
-            has_assets = (bs is not None and c in bs.columns and get_val(bs, ["Total Assets"], c, 0.0) > 0)
-            if has_rev or has_assets:
-                valid_cols.append(c)
+            yr = c.year if hasattr(c, "year") else int(str(c)[:4])
+            if yr in target_years:
+                has_rev = get_val(fin, ["Total Revenue", "Operating Revenue"], c, 0.0) > 0
+                has_assets = (bs is not None and c in bs.columns and get_val(bs, ["Total Assets"], c, 0.0) > 0)
+                if has_rev or has_assets:
+                    valid_cols.append(c)
 
         if not valid_cols:
-            valid_cols = raw_cols[:5]
-        else:
-            valid_cols = valid_cols[:5]
+            valid_cols = [c for c in raw_cols if (c.year if hasattr(c, "year") else int(str(c)[:4])) in target_years]
 
+        # Chronological sort strictly within 2022-2025
+        valid_cols.sort(key=lambda c: c.year if hasattr(c, "year") else int(str(c)[:4]))
         cols = valid_cols
-        cols.reverse()  # chronological
         years = [c.year if hasattr(c, "year") else int(str(c)[:4]) for c in cols]
 
         is_dict = {}
@@ -1059,63 +1062,11 @@ class FinancialDataLoader:
                 ending_cash=round(end_cash, 2)
             )
 
-        # Comprehensive backfill for initial year if missing or zero across statements
-        if len(years) >= 2 and (is_dict[years[0]].revenue == 0.0 or bs_dict[years[0]].total_assets == 0.0):
-            y0, y1 = years[0], years[1]
-            ratio = 0.90
-            is_dict[y0].revenue = round(is_dict[y1].revenue * ratio, 2)
-            is_dict[y0].cogs = round(is_dict[y1].cogs * ratio, 2)
-            is_dict[y0].gross_profit = round(is_dict[y0].revenue - is_dict[y0].cogs, 2)
-            is_dict[y0].sgna_opex = round(is_dict[y1].sgna_opex * ratio, 2)
-            is_dict[y0].operating_income_ebit = round(is_dict[y0].gross_profit - is_dict[y0].sgna_opex, 2)
-            is_dict[y0].depreciation_amortization = round(is_dict[y1].depreciation_amortization * ratio, 2)
-            is_dict[y0].ebitda = round(is_dict[y0].operating_income_ebit + is_dict[y0].depreciation_amortization, 2)
-            is_dict[y0].tax_expense = round(is_dict[y1].tax_expense * ratio, 2)
-            is_dict[y0].net_income = round(is_dict[y1].net_income * ratio, 2)
-            is_dict[y0].net_income_parent = is_dict[y0].net_income
-
-            # Backfill balance sheet child accounts
-            bs_dict[y0].cash_and_equivalents = round(bs_dict[y1].cash_and_equivalents * ratio, 2)
-            bs_dict[y0].accounts_receivable = round(bs_dict[y1].accounts_receivable * ratio, 2)
-            bs_dict[y0].inventories = round(bs_dict[y1].inventories * ratio, 2)
-            bs_dict[y0].other_current_assets = round(bs_dict[y1].other_current_assets * ratio, 2)
-            bs_dict[y0].total_current_assets = round(bs_dict[y0].cash_and_equivalents + bs_dict[y0].accounts_receivable + bs_dict[y0].inventories + bs_dict[y0].other_current_assets, 2)
-
-            bs_dict[y0].net_ppe = round(bs_dict[y1].net_ppe * ratio, 2)
-            bs_dict[y0].other_non_current_assets = round(bs_dict[y1].other_non_current_assets * ratio, 2)
-            bs_dict[y0].total_non_current_assets = round(bs_dict[y0].net_ppe + bs_dict[y0].other_non_current_assets, 2)
-            bs_dict[y0].total_assets = round(bs_dict[y0].total_current_assets + bs_dict[y0].total_non_current_assets, 2)
-
-            bs_dict[y0].accounts_payable = round(bs_dict[y1].accounts_payable * ratio, 2)
-            bs_dict[y0].short_term_debt = round(bs_dict[y1].short_term_debt * ratio, 2)
-            bs_dict[y0].other_current_liabilities = round(bs_dict[y1].other_current_liabilities * ratio, 2)
-            bs_dict[y0].total_current_liabilities = round(bs_dict[y0].accounts_payable + bs_dict[y0].short_term_debt + bs_dict[y0].other_current_liabilities, 2)
-
-            bs_dict[y0].long_term_debt = round(bs_dict[y1].long_term_debt * ratio, 2)
-            bs_dict[y0].other_non_current_liabilities = round(bs_dict[y1].other_non_current_liabilities * ratio, 2)
-            bs_dict[y0].total_non_current_liabilities = round(bs_dict[y0].long_term_debt + bs_dict[y0].other_non_current_liabilities, 2)
-            bs_dict[y0].total_liabilities = round(bs_dict[y0].total_current_liabilities + bs_dict[y0].total_non_current_liabilities, 2)
-
-            bs_dict[y0].minority_interest = round(bs_dict[y1].minority_interest * ratio, 2)
-            bs_dict[y0].total_equity = round(bs_dict[y0].total_assets - bs_dict[y0].total_liabilities - bs_dict[y0].minority_interest, 2)
-            bs_dict[y0].share_capital = round(bs_dict[y0].total_equity * 0.40, 2)
-            bs_dict[y0].retained_earnings = round(bs_dict[y0].total_equity * 0.60, 2)
-            bs_dict[y0].total_liabilities_and_equity = bs_dict[y0].total_assets
-            bs_dict[y0].balance_check = 0.0
-
-            # Backfill cash flow accounts
-            cf_dict[y0].operating_cash_flow = round(cf_dict[y1].operating_cash_flow * ratio, 2)
-            cf_dict[y0].capex = round(cf_dict[y1].capex * ratio, 2)
-            cf_dict[y0].investing_cash_flow = round(cf_dict[y1].investing_cash_flow * ratio, 2)
-            cf_dict[y0].dividends_paid = round(cf_dict[y1].dividends_paid * ratio, 2)
-            cf_dict[y0].financing_cash_flow = round(cf_dict[y1].financing_cash_flow * ratio, 2)
-            cf_dict[y0].net_change_in_cash = round(cf_dict[y0].operating_cash_flow + cf_dict[y0].investing_cash_flow + cf_dict[y0].financing_cash_flow, 2)
-            cf_dict[y0].beginning_cash = round(bs_dict[y0].cash_and_equivalents * 0.9, 2)
-            cf_dict[y0].ending_cash = round(bs_dict[y0].cash_and_equivalents, 2)
-
         drivers_by_year = DriverCalculator.calculate_drivers(years, is_dict, bs_dict, cf_dict)
         idx_res = {
             "years": years,
+            "years_requested": [2021, 2022, 2023, 2024, 2025],
+            "source_name": "Yahoo Finance",
             "currency": "IDR",
             "is_dict": is_dict,
             "bs_dict": bs_dict,
@@ -1163,11 +1114,20 @@ class FinancialDataLoader:
             "tax_rate": 22.0
         }
 
-        # Save to local cache so subsequent loads execute in 5ms
+        # Save to local cache as {clean}_2022_2025.json (4 authentic years)
         try:
-            IDXAdapter.save_to_cache(clean, mapped, 2021, 2025)
-            if min(years) != 2021 or max(years) != 2025:
-                IDXAdapter.save_to_cache(clean, mapped, min(years), max(years))
+            IDXAdapter.save_to_cache(clean, mapped, min(years), max(years))
+            # Cleanly remove any legacy Yahoo-sourced 2021_2025 cache file
+            import json as _json
+            stale_2021 = IDXAdapter.get_cache_path(clean, 2021, 2025)
+            if os.path.isfile(stale_2021):
+                try:
+                    with open(stale_2021, "r", encoding="utf-8") as sf:
+                        stale_data = _json.load(sf)
+                    if "yahoo" in str(stale_data.get("source", "")).lower():
+                        os.remove(stale_2021)
+                except Exception:
+                    pass
         except Exception as cache_err:
             logger.warning(f"Failed to auto-cache {clean}: {cache_err}")
 
