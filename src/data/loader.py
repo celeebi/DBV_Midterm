@@ -844,10 +844,6 @@ class FinancialDataLoader:
         if fin is None or fin.empty:
             raise RuntimeError(f"No financials found on yfinance for {symbol}")
 
-        cols = list(fin.columns)[:5]
-        cols.reverse()  # chronological
-        years = [c.year if hasattr(c, "year") else int(str(c)[:4]) for c in cols]
-
         def get_val(df, names, col, def_val=0.0):
             if df is None or df.empty or col not in df.columns:
                 return def_val
@@ -857,6 +853,24 @@ class FinancialDataLoader:
                     if v is not None and not (isinstance(v, float) and (v != v)):
                         return float(v)
             return def_val
+
+        # Filter candidate columns to only those with genuine reported revenue or balance sheet assets
+        raw_cols = list(fin.columns) if fin is not None and not fin.empty else []
+        valid_cols = []
+        for c in raw_cols:
+            has_rev = get_val(fin, ["Total Revenue", "Operating Revenue"], c, 0.0) > 0
+            has_assets = (bs is not None and c in bs.columns and get_val(bs, ["Total Assets"], c, 0.0) > 0)
+            if has_rev or has_assets:
+                valid_cols.append(c)
+
+        if not valid_cols:
+            valid_cols = raw_cols[:5]
+        else:
+            valid_cols = valid_cols[:5]
+
+        cols = valid_cols
+        cols.reverse()  # chronological
+        years = [c.year if hasattr(c, "year") else int(str(c)[:4]) for c in cols]
 
         is_dict = {}
         bs_dict = {}
@@ -973,11 +987,66 @@ class FinancialDataLoader:
                 balance_check=round(tot_assets - (tot_liab + tot_eq + mi), 2)
             )
 
-            cfo = (get_val(cf, ["Operating Cash Flow"], c, 0.0) * fx) / scale
-            capex = abs((get_val(cf, ["Capital Expenditure"], c, 0.0) * fx) / scale)
-            cfi = (get_val(cf, ["Investing Cash Flow"], c, -capex) * fx) / scale
-            cff = (get_val(cf, ["Financing Cash Flow"], c, 0.0) * fx) / scale
-            div = abs((get_val(cf, ["Cash Dividends Paid"], c, 0.0) * fx) / scale)
+            cfo = (get_val(cf, [
+                "Operating Cash Flow",
+                "Cash Flowsfromusedin Operating Activities Direct",
+                "Cash Flows from Operating Activities Direct",
+                "Cash Flowsfromusedin Operating Activities",
+                "Cash Flow From Continuing Operating Activities",
+                "Operating Cash Flow Direct",
+                "Cash Generated From Operating Activities"
+            ], c, 0.0) * fx) / scale
+
+            capex = abs((get_val(cf, [
+                "Capital Expenditure",
+                "Capital Expenditure Reported",
+                "Purchase Of PPE",
+                "Net PPE Purchase And Sale"
+            ], c, 0.0) * fx) / scale)
+
+            # If CFO not matched, use Free Cash Flow + CapEx (since FCF = CFO - CapEx)
+            if cfo == 0.0 and cf is not None and c in cf.columns:
+                fcf = (get_val(cf, ["Free Cash Flow"], c, 0.0) * fx) / scale
+                if fcf != 0.0:
+                    cfo = round(fcf + capex, 2)
+
+            # If still 0.0 and revenue is positive, estimate via Net Income + Depreciation
+            if cfo == 0.0 and rev > 0:
+                cfo = round(ni + depr, 2)
+
+            cfi = (get_val(cf, [
+                "Investing Cash Flow",
+                "Cash Flowsfromusedin Investing Activities",
+                "Cash Flows From Investing Activities",
+                "Cash Flow From Continuing Investing Activities",
+                "Net Cash Used In Investing Activities"
+            ], c, -capex) * fx) / scale
+
+            cff = (get_val(cf, [
+                "Financing Cash Flow",
+                "Cash Flowsfromusedin Financing Activities",
+                "Cash Flows From Financing Activities",
+                "Cash Flow From Continuing Financing Activities",
+                "Net Cash Used In Financing Activities"
+            ], c, 0.0) * fx) / scale
+
+            div = abs((get_val(cf, [
+                "Cash Dividends Paid",
+                "Common Stock Dividend Paid",
+                "Payment Of Dividends & Other Cash Distributions",
+                "Payment Of Dividends"
+            ], c, 0.0) * fx) / scale)
+
+            beg_cash = (get_val(cf, ["Beginning Cash Position", "Cash At Beginning Of Period"], c, 0.0) * fx) / scale
+            end_cash = (get_val(cf, ["End Cash Position", "Cash At End Of Period"], c, 0.0) * fx) / scale
+            if end_cash == 0.0:
+                end_cash = cash
+            if beg_cash == 0.0:
+                prev_yr = yr - 1
+                if prev_yr in cf_dict:
+                    beg_cash = cf_dict[prev_yr].ending_cash
+                else:
+                    beg_cash = round(end_cash - (cfo + cfi + cff), 2)
 
             cf_dict[yr] = NormalizedCF(
                 operating_cash_flow=round(cfo, 2),
@@ -986,12 +1055,12 @@ class FinancialDataLoader:
                 dividends_paid=round(-div, 2),
                 financing_cash_flow=round(cff, 2),
                 net_change_in_cash=round(cfo + cfi + cff, 2),
-                beginning_cash=round(cash * 0.9, 2),
-                ending_cash=round(cash, 2)
+                beginning_cash=round(beg_cash, 2),
+                ending_cash=round(end_cash, 2)
             )
 
-        # Backfill initial year if missing or zero
-        if len(years) >= 2 and is_dict[years[0]].revenue == 0.0:
+        # Comprehensive backfill for initial year if missing or zero across statements
+        if len(years) >= 2 and (is_dict[years[0]].revenue == 0.0 or bs_dict[years[0]].total_assets == 0.0):
             y0, y1 = years[0], years[1]
             ratio = 0.90
             is_dict[y0].revenue = round(is_dict[y1].revenue * ratio, 2)
@@ -1001,18 +1070,48 @@ class FinancialDataLoader:
             is_dict[y0].operating_income_ebit = round(is_dict[y0].gross_profit - is_dict[y0].sgna_opex, 2)
             is_dict[y0].depreciation_amortization = round(is_dict[y1].depreciation_amortization * ratio, 2)
             is_dict[y0].ebitda = round(is_dict[y0].operating_income_ebit + is_dict[y0].depreciation_amortization, 2)
+            is_dict[y0].tax_expense = round(is_dict[y1].tax_expense * ratio, 2)
             is_dict[y0].net_income = round(is_dict[y1].net_income * ratio, 2)
+            is_dict[y0].net_income_parent = is_dict[y0].net_income
 
-            bs_dict[y0].total_assets = round(bs_dict[y1].total_assets * ratio, 2)
-            bs_dict[y0].total_current_assets = round(bs_dict[y1].total_current_assets * ratio, 2)
-            bs_dict[y0].total_non_current_assets = round(bs_dict[y1].total_non_current_assets * ratio, 2)
-            bs_dict[y0].total_liabilities = round(bs_dict[y1].total_liabilities * ratio, 2)
-            bs_dict[y0].total_current_liabilities = round(bs_dict[y1].total_current_liabilities * ratio, 2)
-            bs_dict[y0].total_non_current_liabilities = round(bs_dict[y1].total_non_current_liabilities * ratio, 2)
-            bs_dict[y0].total_equity = round(bs_dict[y1].total_equity * ratio, 2)
+            # Backfill balance sheet child accounts
+            bs_dict[y0].cash_and_equivalents = round(bs_dict[y1].cash_and_equivalents * ratio, 2)
+            bs_dict[y0].accounts_receivable = round(bs_dict[y1].accounts_receivable * ratio, 2)
+            bs_dict[y0].inventories = round(bs_dict[y1].inventories * ratio, 2)
+            bs_dict[y0].other_current_assets = round(bs_dict[y1].other_current_assets * ratio, 2)
+            bs_dict[y0].total_current_assets = round(bs_dict[y0].cash_and_equivalents + bs_dict[y0].accounts_receivable + bs_dict[y0].inventories + bs_dict[y0].other_current_assets, 2)
+
+            bs_dict[y0].net_ppe = round(bs_dict[y1].net_ppe * ratio, 2)
+            bs_dict[y0].other_non_current_assets = round(bs_dict[y1].other_non_current_assets * ratio, 2)
+            bs_dict[y0].total_non_current_assets = round(bs_dict[y0].net_ppe + bs_dict[y0].other_non_current_assets, 2)
+            bs_dict[y0].total_assets = round(bs_dict[y0].total_current_assets + bs_dict[y0].total_non_current_assets, 2)
+
+            bs_dict[y0].accounts_payable = round(bs_dict[y1].accounts_payable * ratio, 2)
+            bs_dict[y0].short_term_debt = round(bs_dict[y1].short_term_debt * ratio, 2)
+            bs_dict[y0].other_current_liabilities = round(bs_dict[y1].other_current_liabilities * ratio, 2)
+            bs_dict[y0].total_current_liabilities = round(bs_dict[y0].accounts_payable + bs_dict[y0].short_term_debt + bs_dict[y0].other_current_liabilities, 2)
+
+            bs_dict[y0].long_term_debt = round(bs_dict[y1].long_term_debt * ratio, 2)
+            bs_dict[y0].other_non_current_liabilities = round(bs_dict[y1].other_non_current_liabilities * ratio, 2)
+            bs_dict[y0].total_non_current_liabilities = round(bs_dict[y0].long_term_debt + bs_dict[y0].other_non_current_liabilities, 2)
+            bs_dict[y0].total_liabilities = round(bs_dict[y0].total_current_liabilities + bs_dict[y0].total_non_current_liabilities, 2)
+
             bs_dict[y0].minority_interest = round(bs_dict[y1].minority_interest * ratio, 2)
+            bs_dict[y0].total_equity = round(bs_dict[y0].total_assets - bs_dict[y0].total_liabilities - bs_dict[y0].minority_interest, 2)
+            bs_dict[y0].share_capital = round(bs_dict[y0].total_equity * 0.40, 2)
+            bs_dict[y0].retained_earnings = round(bs_dict[y0].total_equity * 0.60, 2)
             bs_dict[y0].total_liabilities_and_equity = bs_dict[y0].total_assets
             bs_dict[y0].balance_check = 0.0
+
+            # Backfill cash flow accounts
+            cf_dict[y0].operating_cash_flow = round(cf_dict[y1].operating_cash_flow * ratio, 2)
+            cf_dict[y0].capex = round(cf_dict[y1].capex * ratio, 2)
+            cf_dict[y0].investing_cash_flow = round(cf_dict[y1].investing_cash_flow * ratio, 2)
+            cf_dict[y0].dividends_paid = round(cf_dict[y1].dividends_paid * ratio, 2)
+            cf_dict[y0].financing_cash_flow = round(cf_dict[y1].financing_cash_flow * ratio, 2)
+            cf_dict[y0].net_change_in_cash = round(cf_dict[y0].operating_cash_flow + cf_dict[y0].investing_cash_flow + cf_dict[y0].financing_cash_flow, 2)
+            cf_dict[y0].beginning_cash = round(bs_dict[y0].cash_and_equivalents * 0.9, 2)
+            cf_dict[y0].ending_cash = round(bs_dict[y0].cash_and_equivalents, 2)
 
         drivers_by_year = DriverCalculator.calculate_drivers(years, is_dict, bs_dict, cf_dict)
         idx_res = {
