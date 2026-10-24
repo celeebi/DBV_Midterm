@@ -182,13 +182,21 @@ function TargetPriceConeChart({
     ? Number(basePrice)
     : Math.round(currentPrice * 1.15);
 
-  const effBull = (bullPrice !== null && bullPrice !== undefined && Number(bullPrice) > 0)
+  let effBull = (bullPrice !== null && bullPrice !== undefined && Number(bullPrice) > 0)
     ? Number(bullPrice)
-    : Math.round(effBase * 1.30);
+    : Math.round(effBase * 1.25);
 
-  const effBear = (bearPrice !== null && bearPrice !== undefined && Number(bearPrice) > 0)
+  let effBear = (bearPrice !== null && bearPrice !== undefined && Number(bearPrice) > 0)
     ? Number(bearPrice)
-    : Math.round(effBase * 0.70);
+    : Math.round(effBase * 0.75);
+
+  // Invariant assertion: Bear < Base < Bull
+  if (effBear >= effBase) {
+    effBear = Math.round(effBase * 0.85);
+  }
+  if (effBull <= effBase) {
+    effBull = Math.round(effBase * 1.20);
+  }
 
   // Scenario Upside Percentages
   const bullUpside = +(((effBull / currentPrice) - 1) * 100).toFixed(1);
@@ -3014,6 +3022,8 @@ function App() {
         }));
 
         setCustomAssumptionsMap(prev => ({ ...prev, [slug]: defAssumptions }));
+
+        setBackendData(null);
 
         setSelectedCompanyId(slug);
 
@@ -6968,13 +6978,26 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
   const displayUpside = +(((displayComposite / (company.referencePrice || 1)) - 1) * 100).toFixed(1);
   const displayRec = displayUpside >= 15.0 ? 'BUY' : displayUpside <= -10.0 ? 'SELL' : 'HOLD';
 
-  const bullPrice = backendData?.scenarios?.bull?.price !== undefined
-    ? Math.round(backendData.scenarios.bull.price)
-    : (company.bullCase || Math.round((displaySharePrice || 1000) * 1.30));
+  const isBackendCurrent = Boolean(backendData && backendData.company?.ticker === company.ticker);
 
-  const bearPrice = backendData?.scenarios?.bear?.price !== undefined
+  const rawBasePrice = displaySharePrice || displayComposite || Math.round((company.referencePrice || 1000) * 1.15);
+  let rawBullPrice = (isBackendCurrent && backendData.scenarios?.bull?.price !== undefined)
+    ? Math.round(backendData.scenarios.bull.price)
+    : (company.bullCase || Math.round(rawBasePrice * 1.25));
+  let rawBearPrice = (isBackendCurrent && backendData.scenarios?.bear?.price !== undefined)
     ? Math.round(backendData.scenarios.bear.price)
-    : (company.bearCase || Math.round((displaySharePrice || 1000) * 0.70));
+    : (company.bearCase || Math.round(rawBasePrice * 0.75));
+
+  if (rawBearPrice >= rawBasePrice) {
+    rawBearPrice = Math.round(rawBasePrice * 0.85);
+  }
+  if (rawBullPrice <= rawBasePrice) {
+    rawBullPrice = Math.round(rawBasePrice * 1.20);
+  }
+
+  const basePrice = rawBasePrice;
+  const bullPrice = rawBullPrice;
+  const bearPrice = rawBearPrice;
 
   // Football Field Range Setup
 
@@ -7258,7 +7281,7 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
                     Bear: {bearPrice ? `${+(((bearPrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}
                   </span>
                   <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-xs border border-blue-200 font-semibold">
-                    Base: {displaySharePrice ? `${+(((displaySharePrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}
+                    Base: {basePrice ? `${+(((basePrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}
                   </span>
                   <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-xs border border-emerald-200">
                     Bull: {bullPrice ? `+${+(((bullPrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}

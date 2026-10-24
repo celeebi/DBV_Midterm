@@ -36,6 +36,11 @@ def is_valid_archive(file_path: str) -> bool:
     return zipfile.is_zipfile(file_path)
 
 
+class IDXCloudflareChallengeError(RuntimeError):
+    """Raised when IDX portal is intercepted by Cloudflare WAF / CAPTCHA challenge."""
+    pass
+
+
 class IDXClient:
     """Session-based HTTP client for IDX with anti-bot handling and retries."""
 
@@ -82,15 +87,13 @@ class IDXClient:
                     wait = (2 ** attempt) + random.uniform(0.5, 1.5)
                     logger.warning(f"HTTP {resp.status_code} received from {url}. Retrying in {wait:.1f}s (Attempt {attempt}/{self.max_retries})...")
                     time.sleep(wait)
-                elif resp.status_code == 403:
-                    # Cloudflare challenge or forbidden
-                    wait = (2 ** attempt) + random.uniform(1.0, 2.0)
-                    logger.warning(f"HTTP 403 Forbidden on {url}. Renewing session and retrying in {wait:.1f}s...")
-                    self.session = requests.Session(impersonate=self.impersonate)
-                    self.session.headers.update(DEFAULT_HEADERS)
-                    time.sleep(wait)
+                elif resp.status_code == 403 or (resp.text and ("Just a moment..." in resp.text or "cf-turnstile" in resp.text)):
+                    logger.warning(f"HTTP 403 / Cloudflare WAF challenge on {url}. Circuit breaker tripped; aborting live scraper for instant fallback.")
+                    raise IDXCloudflareChallengeError(f"Cloudflare WAF / CAPTCHA challenge on {url}")
                 else:
                     resp.raise_for_status()
+            except IDXCloudflareChallengeError:
+                raise
             except Exception as e:
                 if attempt == self.max_retries:
                     logger.error(f"Failed to fetch {url} after {self.max_retries} attempts: {e}")

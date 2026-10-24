@@ -4,7 +4,7 @@ Typed API wrappers for IDX primary endpoints.
 
 from typing import List, Dict, Any, Optional
 import logging
-from .client import IDXClient
+from .client import IDXClient, IDXCloudflareChallengeError
 
 logger = logging.getLogger("idx_scraper.api")
 
@@ -150,6 +150,9 @@ class IDXApi:
                     history.append(record)
                 else:
                     logger.info(f"No filing found for {ticker} in year {year} ({period}).")
+            except IDXCloudflareChallengeError:
+                logger.warning(f"Cloudflare challenge intercepted {ticker} year {year}. Aborting further year iterations.")
+                raise
             except Exception as e:
                 logger.error(f"Error querying {ticker} year {year}: {e}")
 

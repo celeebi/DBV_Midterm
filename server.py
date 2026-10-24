@@ -506,7 +506,17 @@ async def recalculate(request):
 
             minority_interest=mi,
 
-            shares_outstanding=shares_b
+            shares_outstanding=shares_b,
+
+            tax_rate=tax_rate,
+
+            has_tax_holiday=has_tax_holiday,
+
+            capex_pct=capex_pct,
+
+            nwc_pct=nwc_pct,
+
+            exit_multiple=exit_multiple
 
         )
 
