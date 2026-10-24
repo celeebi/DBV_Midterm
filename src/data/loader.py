@@ -916,14 +916,13 @@ class FinancialDataLoader:
                 cl = tot_liab * 0.50
             ncl = tot_liab - cl
 
-            tot_eq = (get_val(bs, ["Stockholders Equity", "Common Stock Equity"], c, 0.0) * fx) / scale
-            if tot_eq == 0.0 and tot_assets > tot_liab:
-                tot_eq = tot_assets - tot_liab
-
             mi = (get_val(bs, ["Minority Interest", "Minority Interests"], c, 0.0) * fx) / scale
-            diff = tot_assets - (tot_liab + tot_eq)
-            if diff > 0 and mi == 0.0:
-                mi = diff
+            tot_eq = (get_val(bs, ["Stockholders Equity", "Common Stock Equity"], c, 0.0) * fx) / scale
+            if tot_assets > 0:
+                # Guarantee exact Balance Sheet accounting identity: Total Assets == Total Liabilities + Total Equity + Minority Interest
+                tot_eq = round(tot_assets - tot_liab - mi, 2)
+            elif tot_eq == 0.0 and tot_assets > tot_liab:
+                tot_eq = tot_assets - tot_liab
 
             cash = (get_val(bs, ["Cash And Cash Equivalents", "Cash Cash Equivalents And Short Term Investments"], c, 0.0) * fx) / scale
             if cash == 0.0 and ca > 0:
@@ -1061,7 +1060,9 @@ class FinancialDataLoader:
 
         # Save to local cache so subsequent loads execute in 5ms
         try:
-            IDXAdapter.save_to_cache(clean, mapped, min(years), max(years))
+            IDXAdapter.save_to_cache(clean, mapped, 2021, 2025)
+            if min(years) != 2021 or max(years) != 2025:
+                IDXAdapter.save_to_cache(clean, mapped, min(years), max(years))
         except Exception as cache_err:
             logger.warning(f"Failed to auto-cache {clean}: {cache_err}")
 

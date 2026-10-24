@@ -45,5 +45,6 @@ wheels/
 *.xlsx
 *.sqlite3
 *.db
-/data/
+/data/*
+!/data/idx_cache/
 /scratch/

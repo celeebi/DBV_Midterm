@@ -1,0 +1,353 @@
+{
+  "ticker": "AADI.JK",
+  "clean_ticker": "AADI",
+  "name": "PT AADI Tbk",
+  "sector": "General Corporate",
+  "industry": "Operating Business",
+  "currency": "IDR",
+  "reporting_currency": "USD",
+  "presentation_currency": "IDR",
+  "fx_conversion_applied": true,
+  "fx_rate_applied": 16400.0,
+  "source": "IDX Official XBRL (idx.co.id)",
+  "reporting_standard": "PSAK / IFRS Audited",
+  "archetype": "CORPORATE",
+  "data_availability": {
+    "status": "partial",
+    "years_requested": [
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "years_available": [
+      2023,
+      2024,
+      2025
+    ],
+    "years_count": 3,
+    "missing_years": [
+      2021,
+      2022
+    ],
+    "notice_level": "warning",
+    "title": "Limited Historical Depth on IDX (3 Years Available: 2023A-2025A (3 Years))",
+    "message": "Official IDX repository contains 3 year(s) of audited statements (2023A-2025A (3 Years)). Limited historical filing depth on the digital exchange repository (missing 2021, 2022). Valuation schedules, pro forma projections, and audit checks are calibrated using the available 3-year audited actuals."
+  },
+  "historical": {
+    "years": [
+      2023,
+      2024,
+      2025
+    ],
+    "revenue": [
+      91.09,
+      86.44,
+      80.53
+    ],
+    "ebit": [
+      21.08,
+      17.78,
+      15.49
+    ],
+    "depr": [
+      0.74,
+      0.91,
+      1.15
+    ],
+    "ebitda": [
+      21.82,
+      18.69,
+      16.64
+    ],
+    "nopat": [
+      16.44,
+      13.87,
+      12.08
+    ],
+    "capex": [
+      3.83,
+      5.7,
+      5.1
+    ],
+    "fcff": [
+      13.35,
+      9.08,
+      8.13
+    ],
+    "net_income": [
+      19.8,
+      21.56,
+      13.93
+    ],
+    "total_assets": [
+      108.76,
+      97.38,
+      93.58
+    ],
+    "total_liabilities": [
+      34.99,
+      42.72,
+      33.73
+    ],
+    "total_equity": [
+      73.77,
+      54.66,
+      59.85
+    ],
+    "cash_and_equivalents": 15.18,
+    "total_debt": 6.21,
+    "minority_interest": 0.0
+  },
+  "drivers": {
+    "dso_days": 15.0,
+    "dio_days": 521.0,
+    "dpo_days": 72.0,
+    "operating_margin_pct": 0.2,
+    "capex_pct_rev": 9.0
+  },
+  "historical_statements": {
+    "years": [
+      2023,
+      2024,
+      2025
+    ],
+    "balance_sheet": [
+      {
+        "year": 2023,
+        "period": "2023A",
+        "cash": 39.03,
+        "ar": 6.41,
+        "inventory": 1.0,
+        "other_current_assets": 3.92,
+        "total_current_assets": 50.36,
+        "net_ppe": 8.2,
+        "other_non_current_assets": 50.2,
+        "total_non_current_assets": 58.4,
+        "total_assets": 108.76,
+        "ap": 5.94,
+        "short_term_debt": 11.64,
+        "other_current_liabilities": 10.12,
+        "total_current_liabilities": 27.69,
+        "long_term_debt": 1.88,
+        "other_non_current_liabilities": 5.42,
+        "total_debt": 13.51,
+        "total_non_current_liabilities": 7.3,
+        "total_liabilities": 34.99,
+        "share_capital": 0.0,
+        "retained_earnings": 28.37,
+        "other_equity": 45.39,
+        "total_equity": 73.77,
+        "total_liabilities_equity": 108.76,
+        "balance_check": 0.0
+      },
+      {
+        "year": 2024,
+        "period": "2024A",
+        "cash": 24.68,
+        "ar": 6.52,
+        "inventory": 1.11,
+        "other_current_assets": 3.66,
+        "total_current_assets": 35.98,
+        "net_ppe": 15.84,
+        "other_non_current_assets": 45.56,
+        "total_non_current_assets": 61.4,
+        "total_assets": 97.38,
+        "ap": 7.61,
+        "short_term_debt": 0.66,
+        "other_current_liabilities": 5.91,
+        "total_current_liabilities": 14.18,
+        "long_term_debt": 10.49,
+        "other_non_current_liabilities": 18.05,
+        "total_debt": 11.16,
+        "total_non_current_liabilities": 28.54,
+        "total_liabilities": 42.72,
+        "share_capital": 0.0,
+        "retained_earnings": 7.15,
+        "other_equity": 47.51,
+        "total_equity": 54.66,
+        "total_liabilities_equity": 97.38,
+        "balance_check": 0.0
+      },
+      {
+        "year": 2025,
+        "period": "2025A",
+        "cash": 15.18,
+        "ar": 8.23,
+        "inventory": 1.4,
+        "other_current_assets": 4.65,
+        "total_current_assets": 29.46,
+        "net_ppe": 21.38,
+        "other_non_current_assets": 42.75,
+        "total_non_current_assets": 64.12,
+        "total_assets": 93.58,
+        "ap": 8.58,
+        "short_term_debt": 0.6,
+        "other_current_liabilities": 5.95,
+        "total_current_liabilities": 15.13,
+        "long_term_debt": 5.61,
+        "other_non_current_liabilities": 12.99,
+        "total_debt": 6.21,
+        "total_non_current_liabilities": 18.6,
+        "total_liabilities": 33.73,
+        "share_capital": 0.0,
+        "retained_earnings": 13.34,
+        "other_equity": 46.51,
+        "total_equity": 59.85,
+        "total_liabilities_equity": 93.58,
+        "balance_check": 0.0
+      }
+    ],
+    "income_statement": [
+      {
+        "year": 2023,
+        "period": "2023A",
+        "revenue": 91.09,
+        "cogs": 64.47,
+        "gross_profit": 26.62,
+        "sga": 4.8,
+        "ebitda": 21.82,
+        "depr": 0.74,
+        "ebit": 21.08,
+        "finance_income": 1.71,
+        "finance_costs": 1.15,
+        "net_finance_costs": -0.57,
+        "other_non_operating": 2.38,
+        "ebt": 24.02,
+        "tax": 4.22,
+        "net_income": 19.8,
+        "net_income_parent": 17.61
+      },
+      {
+        "year": 2024,
+        "period": "2024A",
+        "revenue": 86.44,
+        "cogs": 62.62,
+        "gross_profit": 23.82,
+        "sga": 5.13,
+        "ebitda": 18.69,
+        "depr": 0.91,
+        "ebit": 17.78,
+        "finance_income": 1.39,
+        "finance_costs": 1.26,
+        "net_finance_costs": -0.13,
+        "other_non_operating": 7.12,
+        "ebt": 25.03,
+        "tax": 3.47,
+        "net_income": 21.56,
+        "net_income_parent": 19.68
+      },
+      {
+        "year": 2025,
+        "period": "2025A",
+        "revenue": 80.53,
+        "cogs": 59.84,
+        "gross_profit": 20.69,
+        "sga": 4.05,
+        "ebitda": 16.64,
+        "depr": 1.15,
+        "ebit": 15.49,
+        "finance_income": 0.89,
+        "finance_costs": 0.96,
+        "net_finance_costs": 0.07,
+        "other_non_operating": 1.9,
+        "ebt": 17.31,
+        "tax": 3.38,
+        "net_income": 13.93,
+        "net_income_parent": 12.47
+      }
+    ],
+    "cash_flow": [
+      {
+        "year": 2023,
+        "period": "2023A",
+        "cfo": 9.17,
+        "capex": -3.83,
+        "investment_prop_capex": -0.0,
+        "cfi": -1.22,
+        "dividends_paid": -16.04,
+        "delta_debt": 0.0,
+        "cff": -21.03,
+        "net_change_cash": -13.08,
+        "beginning_cash": 0.0,
+        "ending_cash": 39.03
+      },
+      {
+        "year": 2024,
+        "period": "2024A",
+        "cfo": 19.48,
+        "capex": -5.7,
+        "investment_prop_capex": -0.0,
+        "cfi": 3.21,
+        "dividends_paid": -45.27,
+        "delta_debt": 0.0,
+        "cff": -38.84,
+        "net_change_cash": -16.16,
+        "beginning_cash": 41.19,
+        "ending_cash": 24.68
+      },
+      {
+        "year": 2025,
+        "period": "2025A",
+        "cfo": 14.09,
+        "capex": -5.1,
+        "investment_prop_capex": -0.0,
+        "cfi": -6.25,
+        "dividends_paid": -6.07,
+        "delta_debt": 0.0,
+        "cff": -17.4,
+        "net_change_cash": -9.56,
+        "beginning_cash": 24.91,
+        "ending_cash": 15.18
+      }
+    ],
+    "drivers": [
+      {
+        "year": 2023,
+        "period": "2023A",
+        "growth_pct": null,
+        "gross_margin_pct": 29.2,
+        "sga_pct": 0.0,
+        "ebitda_margin_pct": 24.0,
+        "operating_margin_pct": 23.1,
+        "net_margin_pct": 21.7,
+        "effective_tax_rate_pct": 17.6,
+        "dso_days": 0.0,
+        "dio_days": 0.0,
+        "dpo_days": 0.0,
+        "capex_pct_rev": 4.2
+      },
+      {
+        "year": 2024,
+        "period": "2024A",
+        "growth_pct": -10.1,
+        "gross_margin_pct": 27.6,
+        "sga_pct": 0.0,
+        "ebitda_margin_pct": 21.6,
+        "operating_margin_pct": 20.6,
+        "net_margin_pct": 24.9,
+        "effective_tax_rate_pct": 13.9,
+        "dso_days": 0.0,
+        "dio_days": 0.0,
+        "dpo_days": 0.0,
+        "capex_pct_rev": 6.6
+      },
+      {
+        "year": 2025,
+        "period": "2025A",
+        "growth_pct": -7.7,
+        "gross_margin_pct": 25.7,
+        "sga_pct": 0.0,
+        "ebitda_margin_pct": 20.7,
+        "operating_margin_pct": 19.2,
+        "net_margin_pct": 17.3,
+        "effective_tax_rate_pct": 19.5,
+        "dso_days": 0.0,
+        "dio_days": 0.0,
+        "dpo_days": 0.0,
+        "capex_pct_rev": 6.3
+      }
+    ]
+  }
+}

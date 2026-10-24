@@ -364,16 +364,29 @@ class IDXAdapter:
         clean = cls.clean_ticker(ticker)
         cache_file = cls.get_cache_path(clean, start_year, end_year)
 
-        # 1. Check local cache
-        if use_cache and os.path.isfile(cache_file):
-            try:
-                with open(cache_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if clean != "PWON" or "ebitda" in data.get("historical", {}):
-                        logger.info(f"Loaded {clean} financials from cache: {cache_file}")
-                        return data
-            except Exception as e:
-                logger.warning(f"Error reading cache file {cache_file}: {e}. Re-fetching...")
+        # 1. Check local cache (exact match or any multi-year cached filing for ticker)
+        if use_cache:
+            target_file = None
+            if os.path.isfile(cache_file):
+                target_file = cache_file
+            elif os.path.isdir(CACHE_DIR):
+                candidates = [
+                    os.path.join(CACHE_DIR, f)
+                    for f in os.listdir(CACHE_DIR)
+                    if f.startswith(f"{clean}_") and f.endswith(".json")
+                ]
+                if candidates:
+                    target_file = candidates[0]
+
+            if target_file and os.path.isfile(target_file):
+                try:
+                    with open(target_file, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if clean != "PWON" or "ebitda" in data.get("historical", {}):
+                            logger.info(f"Loaded {clean} financials from cache: {target_file}")
+                            return data
+                except Exception as e:
+                    logger.warning(f"Error reading cache file {target_file}: {e}. Re-fetching...")
 
         # 2. Check built-in verified seed for primary benchmark
         if clean == "PWON" and start_year == 2021 and end_year == 2025:
