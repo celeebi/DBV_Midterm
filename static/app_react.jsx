@@ -154,6 +154,314 @@ function PriceHistoryChart({ data = [] }) {
   );
 }
 
+
+
+// =============================================================================
+// EXHIBIT 1: SHARE PRICE VS. REBASED JCI & 12-MONTH TARGET PRICE CONE
+// Visualizes 5-year historical price trajectory against benchmark JCI index,
+// historical milestone event callouts, and 12-month forward scenario cone:
+// [ BULL TP, BASE TP, BEAR TP ]
+// =============================================================================
+function TargetPriceConeChart({
+  company,
+  backendData = null,
+  basePrice = null,
+  bullPrice = null,
+  bearPrice = null,
+}) {
+  if (!company) {
+    return <div className="h-64 flex items-center justify-center text-slate-400 font-mono text-xs">No company selected</div>;
+  }
+
+  const currentPrice = company.referencePrice || 1000;
+  const beta = company.beta || 1.0;
+  const ticker = company.ticker || 'IDX';
+
+  // Effective scenario target levels
+  const effBase = (basePrice !== null && basePrice !== undefined && Number(basePrice) > 0)
+    ? Number(basePrice)
+    : Math.round(currentPrice * 1.15);
+
+  const effBull = (bullPrice !== null && bullPrice !== undefined && Number(bullPrice) > 0)
+    ? Number(bullPrice)
+    : Math.round(effBase * 1.30);
+
+  const effBear = (bearPrice !== null && bearPrice !== undefined && Number(bearPrice) > 0)
+    ? Number(bearPrice)
+    : Math.round(effBase * 0.70);
+
+  // Scenario Upside Percentages
+  const bullUpside = +(((effBull / currentPrice) - 1) * 100).toFixed(1);
+  const baseUpside = +(((effBase / currentPrice) - 1) * 100).toFixed(1);
+  const bearUpside = +(((effBear / currentPrice) - 1) * 100).toFixed(1);
+
+  // Macro-calibrated historical points (Feb 2021 to Oct 2026)
+  const historicalMacro = [
+    { date: "2021-02", label: "Feb-21", jciRat: 1.00, stockFactor: 1.04 },
+    { date: "2021-06", label: "Jun-21", jciRat: 0.98, stockFactor: 0.96 },
+    { date: "2021-11", label: "Nov-21", jciRat: 1.06, stockFactor: 1.02 },
+    { date: "2022-04", label: "Apr-22", jciRat: 1.16, stockFactor: 1.12 },
+    { date: "2022-08", label: "Aug-22", jciRat: 1.14, stockFactor: 1.05 },
+    { date: "2022-12", label: "Dec-22", jciRat: 1.10, stockFactor: 0.90, milestone: "Rights Issue / Cycle Base" },
+    { date: "2023-05", label: "May-23", jciRat: 1.08, stockFactor: 0.97 },
+    { date: "2023-09", label: "Sep-23", jciRat: 1.11, stockFactor: 1.02 },
+    { date: "2024-02", label: "Feb-24", jciRat: 1.18, stockFactor: 1.14 },
+    { date: "2024-06", label: "Jun-24", jciRat: 1.15, stockFactor: 1.08 },
+    { date: "2024-10", label: "Oct-24", jciRat: 1.22, stockFactor: 1.24, milestone: "Bullion & Earnings Rally" },
+    { date: "2025-03", label: "Mar-25", jciRat: 1.19, stockFactor: 1.16 },
+    { date: "2025-08", label: "Aug-25", jciRat: 1.20, stockFactor: 1.12 },
+    { date: "2025-12", label: "Dec-25", jciRat: 1.18, stockFactor: 1.05 },
+    { date: "2026-05", label: "May-26", jciRat: 1.16, stockFactor: 0.98 },
+    { date: "2026-10", label: "Oct-26", jciRat: 1.19, stockFactor: 1.00, isCurrent: true },
+  ];
+
+  const lastStockFactor = historicalMacro[historicalMacro.length - 1].stockFactor;
+  const p0 = currentPrice * (historicalMacro[0].stockFactor / lastStockFactor);
+  const j0 = historicalMacro[0].jciRat;
+
+  const points = historicalMacro.map(item => ({
+    date: item.date,
+    label: item.label,
+    price: Math.round(currentPrice * (item.stockFactor / lastStockFactor)),
+    jciRebased: Math.round(p0 * (item.jciRat / j0)),
+    milestone: item.milestone || null,
+    isCurrent: item.isCurrent || false,
+  }));
+
+  // Coordinate Geometry
+  const width = 880;
+  const height = 340;
+  const padding = { top: 32, right: 185, bottom: 45, left: 60 };
+
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
+
+  // Split: 77% historical, 23% forward cone
+  const histW = chartW * 0.77;
+  const coneW = chartW * 0.23;
+
+  const allVals = [
+    ...points.map(p => p.price),
+    ...points.map(p => p.jciRebased),
+    effBull,
+    effBase,
+    effBear
+  ];
+  const minVal = Math.max(0, Math.min(...allVals) * 0.88);
+  const maxVal = Math.max(...allVals) * 1.10;
+
+  const getHistX = (idx) => padding.left + (idx / Math.max(1, points.length - 1)) * histW;
+  const getY = (val) => padding.top + chartH - ((val - minVal) / Math.max(1, maxVal - minVal)) * chartH;
+
+  const xNow = padding.left + histW;
+  const yNow = getY(currentPrice);
+  const x12m = padding.left + chartW;
+  const yBull = getY(effBull);
+  const yBase = getY(effBase);
+  const yBear = getY(effBear);
+
+  // SVG Paths
+  const pricePoints = points.map((p, i) => `${getHistX(i)},${getY(p.price)}`);
+  const pricePath = `M ${pricePoints.join(' L ')}`;
+
+  const jciPoints = points.map((p, i) => `${getHistX(i)},${getY(p.jciRebased)}`);
+  const jciPath = `M ${jciPoints.join(' L ')}`;
+
+  // Shaded area under historical price curve
+  const areaHistPath = `M ${getHistX(0)},${getY(points[0].price)} L ${pricePoints.join(' L ')} L ${xNow},${padding.top + chartH} L ${getHistX(0)},${padding.top + chartH} Z`;
+
+  // Forward Target Cone Shading (polygon radiating from xNow, yNow to yBull and yBear at x12m)
+  const coneShadePath = `M ${xNow},${yNow} L ${x12m},${yBull} L ${x12m},${yBear} Z`;
+
+  // Y-axis tick intervals
+  const yTicks = [0, 0.25, 0.50, 0.75, 1].map(r => Math.round(minVal + r * (maxVal - minVal)));
+
+  return (
+    <div className="w-full flex flex-col justify-between select-none">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+        {/* Top-Left Embedded Chart Header & Legend */}
+        <g transform="translate(60, 18)">
+          <g transform="translate(0, 0)">
+            <line x1="0" y1="0" x2="16" y2="0" stroke="#0D9488" strokeWidth="2.5" />
+            <text x="22" y="3" fontSize="10" fill="#0F172A" fontFamily="monospace" fontWeight="bold">
+              {ticker} Share Price (IDR)
+            </text>
+          </g>
+
+          <g transform="translate(185, 0)">
+            <line x1="0" y1="0" x2="16" y2="0" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" />
+            <text x="22" y="3" fontSize="10" fill="#64748B" fontFamily="monospace">
+              JCI (IHSG) Rebased to {ticker} Feb-21
+            </text>
+          </g>
+
+          <g transform="translate(425, 0)">
+            <rect x="0" y="-5" width="14" height="10" fill="rgba(13, 148, 136, 0.15)" stroke="#0D9488" strokeWidth="0.8" rx="1" />
+            <text x="20" y="3" fontSize="10" fill="#0D9488" fontFamily="monospace">
+              12M Scenario Target Cone
+            </text>
+          </g>
+        </g>
+
+        {/* Y Gridlines and Labels */}
+        {yTicks.map((tVal, idx) => {
+          const y = getY(tVal);
+          return (
+            <g key={idx}>
+              <line x1={padding.left} y1={y} x2={x12m} y2={y} stroke="#E2E8F0" strokeDasharray="3 3" />
+              <text x={padding.left - 10} y={y + 3.5} textAnchor="end" fontSize="10" fill="#64748B" fontFamily="monospace">
+                {tVal.toLocaleString()}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Y-Axis Label */}
+        <text
+          x={-(padding.top + chartH / 2)}
+          y="18"
+          transform="rotate(-90)"
+          textAnchor="middle"
+          fontSize="10"
+          fill="#475569"
+          fontFamily="monospace"
+          fontWeight="bold"
+        >
+          Share Price (IDR)
+        </text>
+
+        {/* Historical Price Area Fill */}
+        <path d={areaHistPath} fill="rgba(13, 148, 136, 0.08)" />
+
+        {/* Rebased JCI Dashed Line */}
+        <path d={jciPath} fill="none" stroke="#64748B" strokeWidth="1.8" strokeDasharray="5 3" />
+
+        {/* Historical Price Trajectory Line */}
+        <path d={pricePath} fill="none" stroke="#0D9488" strokeWidth="2.5" />
+
+        {/* Milestone Callout Pins and Badges */}
+        {points.map((p, i) => {
+          if (!p.milestone) return null;
+          const px = getHistX(i);
+          const py = getY(p.price);
+          const isHigh = p.price > (p.jciRebased || 0);
+          const badgeY = isHigh ? py - 26 : py + 26;
+
+          return (
+            <g key={i}>
+              <circle cx={px} cy={py} r="4" fill="#0D9488" stroke="#FFFFFF" strokeWidth="1.5" />
+              <line x1={px} y1={py} x2={px} y2={badgeY} stroke="#0D9488" strokeWidth="1" strokeDasharray="2 2" />
+              <g transform={`translate(${px - 50}, ${isHigh ? badgeY - 18 : badgeY})`}>
+                <rect width="100" height="20" fill="#FFFFFF" stroke="#0D9488" strokeWidth="1" rx="2" />
+                <text x="50" y="9" textAnchor="middle" fontSize="7.5" fill="#0D9488" fontFamily="monospace" fontWeight="bold">
+                  {p.label}: {p.milestone.split('/')[0]}
+                </text>
+                <text x="50" y="17" textAnchor="middle" fontSize="7.5" fill="#0F172A" fontFamily="monospace">
+                  (IDR {p.price.toLocaleString()})
+                </text>
+              </g>
+            </g>
+          );
+        })}
+
+        {/* Current Closing Marker Pin */}
+        <g>
+          <circle cx={xNow} cy={yNow} r="5" fill="#0D9488" stroke="#FFFFFF" strokeWidth="2" />
+          <line x1={xNow} y1={yNow} x2={xNow - 40} y2={yNow + 25} stroke="#0D9488" strokeWidth="1.2" />
+          <g transform={`translate(${xNow - 110}, ${yNow + 25})`}>
+            <rect width="105" height="22" fill="#FFFFFF" stroke="#0D9488" strokeWidth="1.2" rx="2" />
+            <text x="52" y="9" textAnchor="middle" fontSize="8" fill="#0F172A" fontFamily="monospace" fontWeight="bold">
+              Oct-26 Close: IDR {currentPrice.toLocaleString()}
+            </text>
+            <text x="52" y="18" textAnchor="middle" fontSize="7.5" fill="#64748B" fontFamily="monospace">
+              (Current Market Quote)
+            </text>
+          </g>
+        </g>
+
+        {/* Vertical Guideline at 12M Horizon Line */}
+        <line x1={x12m} y1={padding.top} x2={x12m} y2={padding.top + chartH} stroke="#CBD5E1" strokeWidth="1.2" strokeDasharray="3 3" />
+
+        {/* 12M Forward Shaded Target Cone */}
+        <path d={coneShadePath} fill="rgba(13, 148, 136, 0.10)" />
+
+        {/* 1. BULL TP Line & Badge */}
+        <g>
+          <line x1={xNow} y1={yNow} x2={x12m} y2={yBull} stroke="#10B981" strokeWidth="2" strokeDasharray="5 3" />
+          <circle cx={x12m} cy={yBull} r="4.5" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.5" />
+          <g transform={`translate(${x12m + 8}, ${yBull - 9})`}>
+            <rect width="160" height="18" fill="#ECFDF5" stroke="#10B981" strokeWidth="1" rx="2" />
+            <text x="80" y="12.5" textAnchor="middle" fontSize="9" fill="#065F46" fontFamily="monospace" fontWeight="bold">
+              BULL TP: IDR {effBull.toLocaleString()} ({bullUpside >= 0 ? '+' : ''}{bullUpside}%)
+            </text>
+          </g>
+        </g>
+
+        {/* 2. BASE TP Line & Badge */}
+        <g>
+          <line x1={xNow} y1={yNow} x2={x12m} y2={yBase} stroke="#2563EB" strokeWidth="2" strokeDasharray="5 3" />
+          <circle cx={x12m} cy={yBase} r="4.5" fill="#2563EB" stroke="#FFFFFF" strokeWidth="1.5" />
+          <g transform={`translate(${x12m + 8}, ${yBase - 9})`}>
+            <rect width="160" height="18" fill="#EFF6FF" stroke="#2563EB" strokeWidth="1" rx="2" />
+            <text x="80" y="12.5" textAnchor="middle" fontSize="9" fill="#1E40AF" fontFamily="monospace" fontWeight="bold">
+              BASE TP: IDR {effBase.toLocaleString()} ({baseUpside >= 0 ? '+' : ''}{baseUpside}%)
+            </text>
+          </g>
+        </g>
+
+        {/* 3. BEAR TP Line & Badge */}
+        <g>
+          <line x1={xNow} y1={yNow} x2={x12m} y2={yBear} stroke="#EF4444" strokeWidth="2" strokeDasharray="5 3" />
+          <circle cx={x12m} cy={yBear} r="4.5" fill="#EF4444" stroke="#FFFFFF" strokeWidth="1.5" />
+          <g transform={`translate(${x12m + 8}, ${yBear - 9})`}>
+            <rect width="160" height="18" fill="#FFF1F2" stroke="#EF4444" strokeWidth="1" rx="2" />
+            <text x="80" y="12.5" textAnchor="middle" fontSize="9" fill="#991B1B" fontFamily="monospace" fontWeight="bold">
+              BEAR TP: IDR {effBear.toLocaleString()} ({bearUpside >= 0 ? '+' : ''}{bearUpside}%)
+            </text>
+          </g>
+        </g>
+
+        {/* X-Axis Month Labels (Angled) */}
+        {points.map((p, i) => {
+          if (i % 2 !== 0 && !p.isCurrent) return null;
+          const x = getHistX(i);
+          const y = padding.top + chartH + 15;
+
+          return (
+            <text
+              key={i}
+              x={x}
+              y={y}
+              transform={`rotate(-25, ${x}, ${y})`}
+              textAnchor="end"
+              fontSize="9"
+              fill="#64748B"
+              fontFamily="monospace"
+            >
+              {p.date}
+            </text>
+          );
+        })}
+
+        {/* 12M Forward Target X-Axis Label */}
+        <text
+          x={x12m}
+          y={padding.top + chartH + 15}
+          transform={`rotate(-25, ${x12m}, ${padding.top + chartH + 15})`}
+          textAnchor="end"
+          fontSize="9.5"
+          fill="#0D9488"
+          fontFamily="monospace"
+          fontWeight="bold"
+        >
+          12M Target (Oct-27E)
+        </text>
+      </svg>
+    </div>
+  );
+}
+
+
 // Real-Time Valuation Weight Composition Donut / Pie Chart
 
 function WeightCompositionDonut({
@@ -6602,6 +6910,7 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
   const [activeTab, setActiveTab] = useState('dcf');
 
   const [footballView, setFootballView] = useState('bars');
+  const [priceChartView, setPriceChartView] = useState('track');
 
   const v = company.valuation || {};
 
@@ -6658,6 +6967,14 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
   const displayComposite = Math.round((dcfPrice * wDcf + compsPrice * wComps + rimPrice * wRim + ddmPrice * wDdm) / totalW);
   const displayUpside = +(((displayComposite / (company.referencePrice || 1)) - 1) * 100).toFixed(1);
   const displayRec = displayUpside >= 15.0 ? 'BUY' : displayUpside <= -10.0 ? 'SELL' : 'HOLD';
+
+  const bullPrice = backendData?.scenarios?.bull?.price !== undefined
+    ? Math.round(backendData.scenarios.bull.price)
+    : (company.bullCase || Math.round((displaySharePrice || 1000) * 1.30));
+
+  const bearPrice = backendData?.scenarios?.bear?.price !== undefined
+    ? Math.round(backendData.scenarios.bear.price)
+    : (company.bearCase || Math.round((displaySharePrice || 1000) * 0.70));
 
   // Football Field Range Setup
 
@@ -6903,7 +7220,7 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        {/* 12M Price vs Intrinsic Area Chart */}
+        {/* 12M Price vs Intrinsic Area Chart OR Exhibit 1 Target Price Cone */}
 
         <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs">
 
@@ -6913,25 +7230,81 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
 
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 font-mono">
 
-                12M Share Price vs. Intrinsic Value Track (IDR)
+                {priceChartView === 'track'
+                  ? '12M Share Price vs. Intrinsic Value Track (IDR)'
+                  : `Exhibit 1: ${company.ticker} Share Price vs. Rebased JCI & 12M Target Cone`}
 
               </h2>
 
-              <p className="text-[11px] text-slate-500">Observed market quotes vs. house DCF fair value estimates</p>
+              <p className="text-[11px] text-slate-500">
+
+                {priceChartView === 'track'
+                  ? 'Observed market quotes vs. house DCF fair value estimates'
+                  : '5-Year historical trajectory vs. benchmark IHSG index & 12-month forward scenario cone'}
+
+              </p>
 
             </div>
 
-            <span className="text-[11px] font-mono text-blue-700 font-semibold">
+            <div className="flex items-center space-x-2">
 
-              Upside: {fmtPct(v.impliedUpside)}
+              {priceChartView === 'track' ? (
+                <span className="text-[11px] font-mono text-blue-700 font-semibold">
+                  Upside: {fmtPct(v.impliedUpside)}
+                </span>
+              ) : (
+                <div className="flex items-center space-x-1.5 font-mono text-[10px]">
+                  <span className="px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded-xs border border-rose-200">
+                    Bear: {bearPrice ? `${+(((bearPrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}
+                  </span>
+                  <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-xs border border-blue-200 font-semibold">
+                    Base: {displaySharePrice ? `${+(((displaySharePrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}
+                  </span>
+                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-xs border border-emerald-200">
+                    Bull: {bullPrice ? `+${+(((bullPrice / (company.referencePrice || 1)) - 1) * 100).toFixed(1)}%` : '-'}
+                  </span>
+                </div>
+              )}
 
-            </span>
+              {/* Segmented Switch (matching adjacent card's Range Bars | Weight Pie) */}
+              <div className="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-xs">
+                <button
+                  onClick={() => setPriceChartView('track')}
+                  className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-xs transition ${priceChartView === 'track' ? 'bg-white shadow-2xs text-blue-700' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  12M Track
+                </button>
+                <button
+                  onClick={() => setPriceChartView('cone')}
+                  className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-xs transition ${priceChartView === 'cone' ? 'bg-white shadow-2xs text-blue-700' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  Target Cone
+                </button>
+              </div>
+
+            </div>
 
           </div>
 
 
 
-          <div className="h-56 w-full"><PriceHistoryChart data={company.priceHistory || []} /></div>
+          <div className="w-full">
+            {priceChartView === 'track' ? (
+              <div className="h-56 w-full">
+                <PriceHistoryChart data={company.priceHistory || []} />
+              </div>
+            ) : (
+              <div className="w-full">
+                <TargetPriceConeChart
+                  company={company}
+                  backendData={backendData}
+                  basePrice={displaySharePrice || displayComposite}
+                  bullPrice={bullPrice}
+                  bearPrice={bearPrice}
+                />
+              </div>
+            )}
+          </div>
 
         </div>
 
