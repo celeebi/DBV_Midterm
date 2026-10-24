@@ -1,3 +1,5 @@
+import os
+import json
 import logging
 logger = logging.getLogger('valuex.loader')
 """
@@ -564,7 +566,7 @@ class FinancialDataLoader:
 
                     return FALLBACK_ASII_DATA
 
-                logger.warning(f"IDX scraper unavailable for {symbol} ({e}). Seamlessly engaging Universal Harmonized Fallback...")
+                logger.warning(f"IDX scraper unavailable for {symbol} after 1-minute attempt ({e}). Seamlessly engaging Universal Harmonized Fallback...")
 
                 try:
 
@@ -826,6 +828,28 @@ class FinancialDataLoader:
         from src.data.adapters.idx_scraper.proforma.drivers import DriverCalculator
 
         clean = symbol.replace(".JK", "").strip().upper()
+        fallback_dir = os.path.join("data", "fallback_cache")
+        os.makedirs(fallback_dir, exist_ok=True)
+        fallback_cache_file = os.path.join(fallback_dir, f"{clean}_2022_2025.json")
+
+        # Check fallback cache first to avoid redundant remote yfinance queries
+        if os.path.isfile(fallback_cache_file):
+            try:
+                import json as _fb_json
+                with open(fallback_cache_file, "r", encoding="utf-8") as _fbf:
+                    cached_fb = _fb_json.load(_fbf)
+                if cached_fb.get("historical", {}).get("years"):
+                    if live_price is not None and live_price > 0:
+                        cached_fb["current_price"] = live_price
+                        sh = cached_fb.get("shares_outstanding") or shares_b or 10.0
+                        cached_fb["market_cap"] = round((live_price * sh) / 1000.0, 2)
+                    if beta is not None and beta > 0:
+                        cached_fb["beta"] = round(beta, 2)
+                    logger.info(f"Loaded {clean} fallback statements from fallback_cache: {fallback_cache_file}")
+                    return cached_fb
+            except Exception as e:
+                logger.warning(f"Error reading fallback cache {fallback_cache_file}: {e}")
+
         ytick = yf.Ticker(symbol)
         info = ytick.info or {}
 
@@ -1114,22 +1138,30 @@ class FinancialDataLoader:
             "tax_rate": 22.0
         }
 
-        # Save to local cache as {clean}_2022_2025.json (4 authentic years)
+        # Save to fallback cache as data/fallback_cache/{clean}_2022_2025.json (4 authentic years)
         try:
-            IDXAdapter.save_to_cache(clean, mapped, min(years), max(years))
-            # Cleanly remove any legacy Yahoo-sourced 2021_2025 cache file
+            fallback_dir = os.path.join("data", "fallback_cache")
+            os.makedirs(fallback_dir, exist_ok=True)
+            fb_path = os.path.join(fallback_dir, f"{clean}_{min(years)}_{max(years)}.json")
+            with open(fb_path, "w", encoding="utf-8") as f:
+                json.dump(mapped, f, indent=2)
+
+            # Cleanly purge any legacy Yahoo files from idx_cache to preserve idx_cache purity
             import json as _json
-            stale_2021 = IDXAdapter.get_cache_path(clean, 2021, 2025)
-            if os.path.isfile(stale_2021):
-                try:
-                    with open(stale_2021, "r", encoding="utf-8") as sf:
-                        stale_data = _json.load(sf)
-                    if "yahoo" in str(stale_data.get("source", "")).lower():
-                        os.remove(stale_2021)
-                except Exception:
-                    pass
+            from src.data.adapters.idx_adapter import CACHE_DIR
+            if os.path.isdir(CACHE_DIR):
+                for f_name in os.listdir(CACHE_DIR):
+                    if f_name.startswith(f"{clean}_") and f_name.endswith(".json"):
+                        stale_p = os.path.join(CACHE_DIR, f_name)
+                        try:
+                            with open(stale_p, "r", encoding="utf-8") as sf:
+                                sdata = _json.load(sf)
+                            if "yahoo" in str(sdata.get("source", "")).lower():
+                                os.remove(stale_p)
+                        except Exception:
+                            pass
         except Exception as cache_err:
-            logger.warning(f"Failed to auto-cache {clean}: {cache_err}")
+            logger.warning(f"Failed to auto-cache {clean} in fallback_cache: {cache_err}")
 
         return mapped
 

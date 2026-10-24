@@ -1,7 +1,7 @@
 """
 HTTP client for communicating with IDX endpoints with anti-bot evasion and extended retry budget.
 Uses curl_cffi to match browser TLS and HTTP/2 fingerprints, rotating across modern browsers
-and backing off across an extended (~3 minutes) time window before yielding to fallback.
+and backing off across a focused (~1 minute) time window before yielding to fallback.
 """
 
 import os
@@ -52,14 +52,14 @@ class IDXCloudflareChallengeError(RuntimeError):
 class IDXClient:
     """
     Session-based HTTP client for IDX with anti-bot handling, session rotation,
-    and extended ~3-minute retry window to maximize direct exchange data acquisition.
+    and focused ~1-minute retry window to prioritize direct exchange data acquisition.
     """
 
     def __init__(
         self,
         request_delay: float = 0.6,
-        max_retries: int = 8,
-        max_duration_sec: float = 180.0,
+        max_retries: int = 5,
+        max_duration_sec: float = 60.0,
         impersonate: str = "chrome131"
     ):
         self.request_delay = request_delay
@@ -86,7 +86,7 @@ class IDXClient:
     ) -> requests.Response:
         """
         Perform a GET request with automatic session rotation, rate-limiting,
-        and up to ~3 minutes retry budget before falling back.
+        and up to ~1 minute retry budget before falling back.
         """
         if not url.startswith("http"):
             url = BASE_URL + ("/" if not url.startswith("/") else "") + url
@@ -106,7 +106,7 @@ class IDXClient:
             self._throttle()
             elapsed = time.time() - start_time
             if attempt > 1 and elapsed >= self.max_duration_sec:
-                logger.warning(f"Total time budget ({self.max_duration_sec:.0f}s / ~3 min) expired fetching {url}.")
+                logger.warning(f"Total time budget ({self.max_duration_sec:.0f}s / ~1 min) expired fetching {url}.")
                 raise IDXCloudflareChallengeError(f"IDX fetch timed out after {elapsed:.1f}s across {attempt-1} attempts on {url}")
 
             try:
@@ -118,7 +118,7 @@ class IDXClient:
                     logger.info(f"IDX request succeeded for {url} on attempt {attempt} ({elapsed:.1f}s)")
                     return resp
                 elif resp.status_code in (429, 500, 502, 503, 504):
-                    wait = min(30.0, (2 ** attempt) + random.uniform(1.0, 3.0))
+                    wait = min(15.0, (2 ** attempt) + random.uniform(1.0, 2.0))
                     if elapsed + wait > self.max_duration_sec:
                         raise IDXCloudflareChallengeError(f"HTTP {resp.status_code} on {url}: budget exhausted")
                     logger.warning(f"HTTP {resp.status_code} received from {url}. Retrying in {wait:.1f}s (Attempt {attempt}/{self.max_retries}, elapsed {elapsed:.1f}s)...")
@@ -140,8 +140,8 @@ class IDXClient:
                     self.session = requests.Session(impersonate=self.impersonate)
                     self.session.headers.update(DEFAULT_HEADERS)
 
-                    # Progressive backoff for 3-minute window (e.g. ~5s, 10s, 15s, 20s, 25s, 30s...)
-                    wait = min(35.0, (5.0 * attempt) + random.uniform(0.5, 2.5))
+                    # Progressive backoff for 1-minute window (e.g. ~3s, 6s, 9s, 12s...)
+                    wait = min(12.0, (2.5 * attempt) + random.uniform(0.5, 1.5))
                     logger.info(
                         f"Cloudflare WAF challenge on {url} (Attempt {attempt}/{self.max_retries}, elapsed {elapsed:.1f}s / {self.max_duration_sec:.0f}s). "
                         f"Rotating TLS fingerprint to {next_imp} and waiting {wait:.1f}s for IDX challenge window..."
@@ -157,7 +157,7 @@ class IDXClient:
                 if attempt >= self.max_retries or elapsed >= self.max_duration_sec:
                     logger.error(f"Failed to fetch {url} after {attempt} attempts ({elapsed:.1f}s): {e}")
                     raise IDXCloudflareChallengeError(f"Failed to fetch {url} after {elapsed:.1f}s: {e}")
-                wait = min(30.0, (2 ** attempt) + random.uniform(1.0, 3.0))
+                wait = min(15.0, (2 ** attempt) + random.uniform(1.0, 2.0))
                 logger.warning(f"Request error: {e}. Retrying in {wait:.1f}s (Attempt {attempt}/{self.max_retries}, elapsed {elapsed:.1f}s)...")
                 time.sleep(wait)
 

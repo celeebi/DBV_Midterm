@@ -367,40 +367,38 @@ class IDXAdapter:
         clean = cls.clean_ticker(ticker)
         cache_file = cls.get_cache_path(clean, start_year, end_year)
 
-        # 1. Check local cache (prioritizing 5-year official IDX XBRL filings first)
-        if use_cache:
-            target_file = None
-            if os.path.isfile(cache_file):
-                target_file = cache_file
-            elif os.path.isdir(CACHE_DIR):
-                candidates = [
-                    os.path.join(CACHE_DIR, f)
-                    for f in os.listdir(CACHE_DIR)
-                    if f.startswith(f"{clean}_") and f.endswith(".json")
-                ]
-                if candidates:
-                    # Prefer official 5-year IDX XBRL filing (_2021_2025.json) if available
-                    c_5y = [f for f in candidates if "2021_2025" in f]
-                    target_file = c_5y[0] if c_5y else candidates[0]
-
-            if target_file and os.path.isfile(target_file):
+        # 1. Check local cache (STRICTLY Official IDX XBRL filings only)
+        if use_cache and os.path.isdir(CACHE_DIR):
+            candidates = [
+                os.path.join(CACHE_DIR, f)
+                for f in os.listdir(CACHE_DIR)
+                if f.startswith(f"{clean}_") and f.endswith(".json")
+            ]
+            for cand in candidates:
                 try:
-                    with open(target_file, "r", encoding="utf-8") as f:
+                    with open(cand, "r", encoding="utf-8") as f:
                         data = json.load(f)
+                    src = str(data.get("source", "")).lower()
+                    # Only accept genuine official IDX filings; reject Yahoo fallback files
+                    if "idx" in src and "yahoo" not in src:
                         if clean != "PWON" or "ebitda" in data.get("historical", {}):
-                            logger.info(f"Loaded {clean} financials from cache: {target_file}")
+                            logger.info(f"Loaded official IDX XBRL filing for {clean} from cache: {cand}")
                             return data
                 except Exception as e:
-                    logger.warning(f"Error reading cache file {target_file}: {e}. Re-fetching...")
+                    logger.warning(f"Error reading cache candidate {cand}: {e}")
 
         # 2. Check built-in verified seed for primary benchmark
         if clean == "PWON" and start_year == 2021 and end_year == 2025:
             cls.save_to_cache(clean, PWON_AUDITED_SEED, start_year, end_year)
             return PWON_AUDITED_SEED
 
-        # 3. Invoke Scraper
+        # 3. Invoke Scraper (Focused 1-minute timeout budget)
         os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-        scraper = IDXFinancialScraper(output_dir=DOWNLOAD_DIR)
+        from src.data.adapters.idx_scraper.client import IDXClient
+        scraper = IDXFinancialScraper(
+            output_dir=DOWNLOAD_DIR,
+            client=IDXClient(max_duration_sec=60.0, max_retries=5)
+        )
         
         try:
             logger.info(f"Querying IDX for {clean} ({start_year}-{end_year})...")

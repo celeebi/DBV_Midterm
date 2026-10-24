@@ -47,4 +47,5 @@ wheels/
 *.db
 /data/*
 !/data/idx_cache/
+!/data/fallback_cache/
 /scratch/
