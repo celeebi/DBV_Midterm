@@ -534,18 +534,19 @@ Project BA/
 
 | Branch / Tag | Status | Description | Anchor Commit |
 | :--- | :--- | :--- | :--- |
-| **`Valuex-v1.2`** ⭐ | **Active Production** | Current production release branch: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `78730d5` |
+| **`Valuex-v1.2`** ⭐ | **Active Production** | Current production release: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `03a3e6e` |
+| **`Valuex-v1.1`** | **Milestone Release** | Expanded 10Y pro-forma 3-statement model, Excel formula assumption parity, RNAV, 10k Monte Carlo, EVA, and 34 passed tests. | `ad7e0bf` |
+| **`Valuex-v1.0`** | **Foundation Release** | Verified baseline 4-way valuation models (DCF, Comps, RIM, DDM), Excel exporter, and core valuation architecture. | `36a99e3` |
 | **`develop_further`** | **Development Anchor** | Preserved development branch with universal harmonizer milestones. | `c74c0f9` |
-| **`latest`** | **Release Milestone** | Pre-caching baseline checkpoint with initial 34 unit tests. | `019212c` |
-| **`main`** | **Stable Backup** | Safe anchor checkpoint containing verified baseline 4-way valuation models and Excel exporter. | `36a99e3` |
-| **`develop`** | **Historical Baseline** | Prior development baseline containing initial VALUEX Terminal. | `67dd6d9` |
-| **`v1.0-checkpoint`** (Tag) | Fixed Tag | Checkpoint tag anchored to `36a99e3` for instant rollback safety. | `36a99e3` |
+| **`v1.2`** (Tag) | Release Tag | Official Version 1.2 release tag. | `03a3e6e` |
+| **`v1.1`** (Tag) | Release Tag | Official Version 1.1 release tag. | `ad7e0bf` |
+| **`v1.0`** (Tag) | Release Tag | Official Version 1.0 release tag. | `36a99e3` |
 
-To switch back to a previous stable checkpoint at any time:
+To switch back to a previous milestone release at any time:
 ```powershell
-git checkout main
+git checkout Valuex-v1.1
 # or
-git checkout v1.0-checkpoint
+git checkout Valuex-v1.0
 ```
 
 ---
