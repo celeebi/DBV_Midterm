@@ -8,7 +8,7 @@
 [![Tests: 92 Passed](https://img.shields.io/badge/Tests-92%20Passed-brightgreen.svg)](tests/)
 [![Architecture: Clean Modular](https://img.shields.io/badge/Architecture-Clean%20Modular-orange.svg)](src/)
 [![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Universe-110%20Pre--Cached%20Emiten-informational.svg)](data/idx_cache/)
-[![Git Branch: develop_further](https://img.shields.io/badge/Branch-develop__further-blueviolet.svg)](https://github.com/celeebi/DBV_Midterm/tree/develop_further)
+[![Git Branch: Valuex-v1.2](https://img.shields.io/badge/Branch-Valuex--v1.2-blueviolet.svg)](https://github.com/celeebi/DBV_Midterm/tree/Valuex-v1.2)
 
 An institutional-grade equity research, multi-model valuation triangulation, and 10-year 3-statement financial modeling platform engineered specifically for companies listed on the Indonesia Stock Exchange (**IDX**).
 
@@ -46,7 +46,7 @@ git clone https://github.com/celeebi/DBV_Midterm.git
 cd DBV_Midterm
 
 # 2. Check out the latest production branch
-git checkout develop_further
+git checkout Valuex-v1.2
 
 # 3. Create and activate a Python virtual environment
 python -m venv .venv
@@ -534,7 +534,8 @@ Project BA/
 
 | Branch / Tag | Status | Description | Anchor Commit |
 | :--- | :--- | :--- | :--- |
-| **`develop_further`** ⭐ | **Active Production** | Current development branch: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `20ec5f9` |
+| **`Valuex-v1.2`** ⭐ | **Active Production** | Current production release branch: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `78730d5` |
+| **`develop_further`** | **Development Anchor** | Preserved development branch with universal harmonizer milestones. | `c74c0f9` |
 | **`latest`** | **Release Milestone** | Pre-caching baseline checkpoint with initial 34 unit tests. | `019212c` |
 | **`main`** | **Stable Backup** | Safe anchor checkpoint containing verified baseline 4-way valuation models and Excel exporter. | `36a99e3` |
 | **`develop`** | **Historical Baseline** | Prior development baseline containing initial VALUEX Terminal. | `67dd6d9` |
