@@ -49,3 +49,7 @@ wheels/
 !/data/idx_cache/
 !/data/fallback_cache/
 /scratch/
+
+# Presentations & Deliverables (Isolated from Git)
+*.pptx
+/deliverables/
