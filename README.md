@@ -363,9 +363,9 @@ Project BA/
 The **VALUEX Institutional Digital Business Valuation Platform** was conceptualized, architected, and calibrated by:
 
 ### **Ahmad Farhan (Abas)**
-*B.Eng. in Engineering Physics (ITS) • MBA Candidate in Finance (SBM ITB)*
+*B.Eng. in Engineering Physics (ITS) • MBA Candidate in Digital Finance & Financial Technology (SBM ITB)*
 
-Operating at the intersection of quantitative physical systems engineering and institutional corporate finance, Ahmad Farhan engineered VALUEX to transform theoretical valuation methodologies—multi-stage discounted cash flows, clean-surplus residual income, stochastic Monte Carlo simulations, and 10-year articulated financial statements—into an interactive, transparent, and auditable decision-support terminal for equity analysts, finance practitioners, and business school researchers.
+Operating at the intersection of quantitative physical systems engineering, digital finance, and financial technology, Ahmad Farhan engineered VALUEX to transform theoretical valuation methodologies—multi-stage discounted cash flows, clean-surplus residual income, stochastic Monte Carlo simulations, and 10-year articulated financial statements—into an interactive, transparent, and auditable decision-support terminal for equity analysts, finance practitioners, and business school researchers.
 
 #### 🔗 Connect & Research Channels
 - **LinkedIn**: [linkedin.com/in/afenterprisefarhan](https://www.linkedin.com/in/afenterprisefarhan)
