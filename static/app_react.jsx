@@ -2665,6 +2665,18 @@ function App() {
 
   const [activeHeadlineIdx, setActiveHeadlineIdx] = useState(0);
 
+  // Authentic IDX Market Clock & Real-Life Yahoo Finance State
+  const [marketClock, setMarketClock] = useState({
+    is_open: false,
+    status: 'CLOSED',
+    session: 'WEEKEND',
+    label: 'Market Closed (Weekend)',
+    next_open: 'Monday 09:00 WIB',
+    time_wib: '--:-- WIB',
+    day_name: 'Sunday'
+  });
+  const [demoSimulationMode, setDemoSimulationMode] = useState(false);
+
 
 
   // Custom assumption state per security
@@ -2755,6 +2767,21 @@ function App() {
         }
       })
       .catch(e => console.warn('Could not pre-load universe catalog:', e));
+
+    const syncMarketClock = () => {
+      fetch('/api/market/status')
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.status) {
+            setMarketClock(d);
+          }
+        })
+        .catch(e => console.warn('Market clock sync error:', e));
+    };
+
+    syncMarketClock();
+    const clockInterval = setInterval(syncMarketClock, 15000);
+    return () => clearInterval(clockInterval);
   }, []);
 
 
@@ -3041,6 +3068,24 @@ function App() {
           }
         }));
 
+        // Immediately sync authentic market quote from Yahoo Finance feed
+        fetch(`/api/market/quote?ticker=${encodeURIComponent(formatted)}`)
+          .then(r => r.json())
+          .then(q => {
+            if (q && q.price && q.price > 0) {
+              setLivePricesMap(prev => ({
+                ...prev,
+                [slug]: {
+                  price: q.price,
+                  change1D: q.change_pct !== undefined ? q.change_pct : priceChange1D,
+                  lastDirection: null,
+                  lastTickTime: Date.now()
+                }
+              }));
+            }
+          })
+          .catch(e => console.warn('Initial quote fetch failed:', e));
+
         setCustomAssumptionsMap(prev => ({ ...prev, [slug]: defAssumptions }));
 
         setBackendData(null);
@@ -3243,105 +3288,94 @@ function App() {
 
 
 
-  // Live price tick simulation loop
-
+  // Real-Life Market Price Sync:
+  // Polls live Yahoo Finance quote every 20 seconds when IDX is open.
+  // When market is closed, synchronizes once to anchor Friday's official close with zero random ticks.
   useEffect(() => {
+    if (!isLiveFeedActive || !activeCompany?.ticker) return;
 
-    if (!isLiveFeedActive || !coverageCompanies.length) return;
+    const syncLiveQuote = () => {
+      fetch(`/api/market/quote?ticker=${encodeURIComponent(activeCompany.ticker)}`)
+        .then(r => r.json())
+        .then(q => {
+          if (q && q.price && q.price > 0) {
+            setLivePricesMap(prev => {
+              const curr = prev[activeCompany.id] || { price: activeCompany.referencePrice };
+              const dir = q.price > curr.price ? 'up' : q.price < curr.price ? 'down' : null;
+              return {
+                ...prev,
+                [activeCompany.id]: {
+                  price: q.price,
+                  change1D: q.change_pct !== undefined ? q.change_pct : (curr.change1D || 0),
+                  lastDirection: dir,
+                  lastTickTime: Date.now()
+                }
+              };
+            });
+          }
+        })
+        .catch(e => console.warn('Live quote sync error:', e));
+    };
 
+    syncLiveQuote();
 
+    if (marketClock.is_open) {
+      const pollInterval = setInterval(syncLiveQuote, 20000);
+      return () => clearInterval(pollInterval);
+    }
+  }, [activeCompany?.ticker, marketClock.is_open, isLiveFeedActive]);
+
+  // Micro-tick simulation loop: STRICTLY guarded by demoSimulationMode
+  // Outside market hours or in real mode, prices strictly freeze with ZERO random movement.
+  useEffect(() => {
+    if (!demoSimulationMode || !isLiveFeedActive || !coverageCompanies.length) return;
 
     const tickInterval = setInterval(() => {
-
       // Pick 2 random equities to micro-tick
-
       const randomIds = [...coverageCompanies]
-
         .sort(() => 0.5 - Math.random())
-
         .slice(0, 2)
-
         .map(c => c.id);
 
-
-
       setLivePricesMap(prev => {
-
         const next = { ...prev };
-
         coverageCompanies.forEach(c => {
-
           if (randomIds.includes(c.id)) {
-
             const currentObj = prev[c.id] || { price: c.referencePrice, change1D: c.priceChange1D };
-
             const pctDelta = (Math.random() - 0.485) * 0.85;
-
             const newPrice = Math.max(50, Math.round(currentObj.price * (1 + pctDelta / 100)));
-
             const newChange1D = +(currentObj.change1D + pctDelta * 0.4).toFixed(2);
-
             const direction = newPrice > currentObj.price ? 'up' : newPrice < currentObj.price ? 'down' : null;
 
-
-
             next[c.id] = {
-
               price: newPrice,
-
               change1D: newChange1D,
-
               lastDirection: direction,
-
               lastTickTime: Date.now()
-
             };
-
           } else if (prev[c.id]?.lastDirection) {
-
             next[c.id] = { ...prev[c.id], lastDirection: null };
-
           }
-
         });
-
         return next;
-
       });
 
-
-
       // Micro-tick one macro benchmark
-
       setMacroBenchmarks(prev =>
-
         prev.map((b, idx) => {
-
           if (idx === Math.floor(Math.random() * prev.length)) {
-
             const delta = (Math.random() - 0.49) * 0.15;
-
             const newPrice = +(b.price * (1 + delta / 100)).toFixed(2);
-
             const newChange = +(b.changePct + delta * 0.5).toFixed(2);
-
             return { ...b, price: newPrice, changePct: newChange, flash: delta >= 0 ? 'up' : 'down' };
-
           }
-
           return { ...b, flash: null };
-
         })
-
       );
-
     }, 2200);
 
-
-
     return () => clearInterval(tickInterval);
-
-  }, [isLiveFeedActive, coverageCompanies]);
+  }, [demoSimulationMode, isLiveFeedActive, coverageCompanies]);
 
 
 
@@ -4060,42 +4094,84 @@ function App() {
         <div className="min-h-[44px] h-11 flex items-center border-b border-slate-800/80 overflow-hidden py-1 relative bg-[#050912]">
 
           {/* Pinned Unified Interactive Beacon */}
+          <div className="flex items-center h-full bg-[#0A1120] border-r border-slate-800 shrink-0 z-20 select-none">
+            <button
+              onClick={() => setIsLiveFeedActive(!isLiveFeedActive)}
+              className="flex items-center space-x-2 px-3 h-full cursor-pointer hover:bg-slate-900 transition group"
+              title={
+                !isLiveFeedActive
+                  ? "Market tape paused — Click to resume"
+                  : marketClock.is_open
+                  ? `IDX Live Market Trading (15m delay) — Time: ${marketClock.time_wib} WIB`
+                  : `IDX Market Closed (${marketClock.label}) — Next Session: ${marketClock.next_open}`
+              }
+            >
+              <span className="relative flex h-2 w-2">
+                {isLiveFeedActive && marketClock.is_open && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                )}
+                <span
+                  className={`relative inline-flex rounded-full h-2 w-2 ${
+                    !isLiveFeedActive
+                      ? 'bg-slate-500'
+                      : marketClock.is_open
+                      ? 'bg-emerald-500'
+                      : marketClock.status === 'BREAK'
+                      ? 'bg-amber-400'
+                      : marketClock.status === 'PRE_OPEN'
+                      ? 'bg-cyan-400'
+                      : 'bg-rose-500/80'
+                  }`}
+                />
+              </span>
 
-          <button
+              <div className="flex flex-col text-left">
+                <div className="flex items-center space-x-1.5">
+                  <span className="font-mono text-[10px] font-bold tracking-wider uppercase text-slate-200">
+                    {!isLiveFeedActive
+                      ? 'FEED PAUSED'
+                      : marketClock.is_open
+                      ? 'IDX LIVE (15M)'
+                      : marketClock.status === 'BREAK'
+                      ? 'MID-DAY BREAK'
+                      : marketClock.status === 'PRE_OPEN'
+                      ? 'PRE-OPENING'
+                      : 'MARKET CLOSED'}
+                  </span>
+                  <span className="text-[9px] font-mono text-slate-500 group-hover:text-slate-300 transition">
+                    {isLiveFeedActive ? '❚❚' : '▶'}
+                  </span>
+                </div>
+                <span className="font-mono text-[9px] text-slate-400 tracking-tight">
+                  {marketClock.time_wib || 'WIB'} • {marketClock.day_name || (marketClock.is_open ? 'Open' : 'Closed')}
+                </span>
+              </div>
+            </button>
 
-            onClick={() => setIsLiveFeedActive(!isLiveFeedActive)}
-
-            className="flex items-center space-x-2 px-3.5 h-full bg-[#0A1120] border-r border-slate-800 shrink-0 z-20 cursor-pointer hover:bg-slate-900 transition group select-none"
-
-            title={isLiveFeedActive ? "Live market tape active — Click to pause" : "Market tape paused — Click to resume"}
-
-          >
-
-            <span className="relative flex h-2 w-2">
-
-              {isLiveFeedActive && (
-
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-
-              )}
-
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isLiveFeedActive ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-
-            </span>
-
-            <span className="font-mono text-[10px] font-bold tracking-wider uppercase text-slate-200">
-
-              {isLiveFeedActive ? 'IDX LIVE FEED' : 'TAPE PAUSED'}
-
-            </span>
-
-            <span className="text-[10px] font-mono text-slate-500 group-hover:text-slate-300 transition">
-
-              {isLiveFeedActive ? '❚❚' : '▶'}
-
-            </span>
-
-          </button>
+            {/* Demo Simulation Mode Toggle */}
+            <button
+              onClick={() => {
+                const next = !demoSimulationMode;
+                setDemoSimulationMode(next);
+                if (typeof triggerToast === 'function') {
+                  triggerToast(
+                    next
+                      ? 'Presentation Demo Mode ENABLED (Simulated micro-ticks active for weekend demonstration)'
+                      : 'Presentation Demo Mode DISABLED (Authentic Yahoo Finance real-time & official close active)'
+                  );
+                }
+              }}
+              className={`px-2.5 h-full flex items-center space-x-1.5 text-[9px] font-mono border-l border-slate-800 transition cursor-pointer ${
+                demoSimulationMode
+                  ? 'bg-purple-950/60 text-purple-300 border-purple-500/40 hover:bg-purple-900/70 font-semibold'
+                  : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
+              }`}
+              title="Toggle Demo Simulation Mode: Use when presenting outside market hours to demonstrate price movement"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${demoSimulationMode ? 'bg-purple-400 animate-pulse' : 'bg-slate-600'}`} />
+              <span>{demoSimulationMode ? 'DEMO SIM ON' : 'DEMO OFF'}</span>
+            </button>
+          </div>
 
 
 

@@ -46,6 +46,8 @@ from src.data.country_data import INDONESIA_MACRO
 from src.data.coverage import COVERAGE_UNIVERSE
 from src.data.peers import PeerUniverseService
 from src.data.news_service import InstitutionalNewsService
+from src.data.market_clock import IDXMarketClock
+from src.data.market_stream import LiveMarketPriceService
 
 from src.rules.sanity_checks import ModelSanityChecker
 
@@ -198,6 +200,29 @@ async def get_coverage(request):
 
     return JSONResponse({"status": "success", "data": COVERAGE_UNIVERSE})
 
+
+
+
+async def get_market_status(request):
+    """Returns the current IDX exchange market status, active session, and timestamps."""
+    status = IDXMarketClock.get_status()
+    return JSONResponse(status)
+
+
+async def get_market_quote(request):
+    """Returns authentic live quote and market session information for a given ticker or list of tickers."""
+    tickers_str = request.query_params.get("tickers")
+    ticker = request.query_params.get("ticker")
+    refresh = request.query_params.get("refresh", "false").lower() == "true"
+    
+    if tickers_str:
+        ticker_list = [t.strip() for t in tickers_str.split(",") if t.strip()]
+        result = LiveMarketPriceService.get_quotes(ticker_list, force_refresh=refresh)
+        return JSONResponse(result)
+    
+    target_ticker = ticker or "ANTM.JK"
+    quote = LiveMarketPriceService.get_quote(target_ticker, force_refresh=refresh)
+    return JSONResponse(quote)
 
 async def get_peers(request):
     """Returns recommended authentic peers and universe catalog for a given ticker."""
@@ -1580,6 +1605,8 @@ routes = [
     Route("/api/dupont", endpoint=get_dupont, methods=["GET"]),
 
     Route("/api/wacc", endpoint=get_wacc, methods=["GET", "POST"]),
+    Route("/api/market/status", endpoint=get_market_status, methods=["GET"]),
+    Route("/api/market/quote", endpoint=get_market_quote, methods=["GET"]),
     Route("/api/news", endpoint=get_live_news, methods=["GET"]),
 
 ]
