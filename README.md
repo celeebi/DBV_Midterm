@@ -194,12 +194,14 @@ Located in [`src/models/three_statement.py`](src/models/three_statement.py):
   $$\text{Total Assets}_t - (\text{Total Liabilities}_t + \text{Total Equity}_t + \text{Minority Interest}_t) \equiv 0.00$$
 
 ### 5. Specialized Valuation & Risk Engines
-- **Residual Income Model (`src/models/rim.py`)**: Clean-surplus valuation anchored on book value plus discounted excess ROE spreads: $\text{RI}_t = (\text{ROE}_t - K_e) \times B_{t-1}$.
+- **Residual Income Model (`src/models/rim.py`)**: Clean-surplus valuation anchored on book value plus discounted excess ROE spreads:
+  $$\text{RI}_t = (\text{ROE}_t - K_e) \times B_{t-1}$$
 - **Multi-Stage DDM (`src/models/ddm.py`)**: 10-year explicit dividend cash flows discounted at Cost of Equity ($K_e$).
 - **Property RNAV (`src/models/rnav.py`)**: Direct capitalization of retail/hotel Net Operating Income (NOI), undeveloped land bank mark-to-market ($\text{IDR/m}^2$), and holding company conglomerate discounts.
 - **10,000-Run Vectorized Monte Carlo (`src/models/monte_carlo.py`)**: Correlated normal/triangular sampling of revenue growth, EBITDA margin, WACC, and terminal growth, outputting P10/P50/P90 percentiles, probability of undervaluation, and 95% Value at Risk (VaR).
-- **Stern Stewart EVA® & MVA (`src/models/eva.py`)**: $\text{EVA}_t = \text{NOPAT}_t - (\text{WACC} \times \text{Invested Capital}_{t-1})$.
-- **Tornado & 5-Stage DuPont ROE (`src/analytics/tornado.py`, `src/analytics/dupont.py`)**: Ranks two-sided $\pm 100\text{ bps}$ parameter swings and decomposes ROE into Tax Burden, Interest Burden, EBIT Margin, Asset Turnover, and Leverage.
+- **Stern Stewart EVA® & MVA (`src/models/eva.py`)**: Economic profit framework measuring value creation above capital costs:
+  $$\text{EVA}_t = \text{NOPAT}_t - (\text{WACC} \times \text{Invested Capital}_{t-1})$$
+- **Tornado & 5-Stage DuPont ROE (`src/analytics/tornado.py`, `src/analytics/dupont.py`)**: Ranks two-sided ±100 bps parameter swings and decomposes ROE into Tax Burden, Interest Burden, EBIT Margin, Asset Turnover, and Leverage.
 
 ### 6. Corporate Finance Scope vs. Banking ALM Guard
 Located in [`src/data/loader.py`](src/data/loader.py):
