@@ -3,74 +3,119 @@
 **School of Business and Management, Institut Teknologi Bandung (SBM ITB)**  
 *Engineered for Indonesian Equities Listed on the Indonesia Stock Exchange (IDX)*
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests: 92 Passed](https://img.shields.io/badge/Tests-92%20Passed-brightgreen.svg)](tests/)
-[![Architecture: Clean Modular](https://img.shields.io/badge/Architecture-Clean%20Modular-orange.svg)](src/)
-[![Indonesian IDX Benchmark](https://img.shields.io/badge/IDX%20Universe-110%20Pre--Cached%20Emiten-informational.svg)](data/idx_cache/)
-[![Git Branch: Valuex-v1.2](https://img.shields.io/badge/Branch-Valuex--v1.2-blueviolet.svg)](https://github.com/celeebi/DBV_Midterm/tree/Valuex-v1.2)
-
-An institutional-grade equity research, multi-model valuation triangulation, and 10-year 3-statement financial modeling platform engineered specifically for companies listed on the Indonesia Stock Exchange (**IDX**).
-
-The platform pairs a high-performance **Python Starlette/Uvicorn backend** with a **zero-Node.js/npm React 18 frontend** (the **VALUEX Terminal**). Default benchmarked to **PT Pakuwon Jati Tbk (`PWON.JK`)** and a curated universe of **110 top non-financial IDX equities across 11 industry sectors**, the platform features:
-- **Universal Ticker Search & Fast Ingestion** from IDX XBRL and Yahoo Finance with intelligent banking ALM scope guards.
-- **Pre-Cached 110 Non-Financial Universe** with instant **~5ms response times** and guaranteed zero-balance identity.
-- **Explicit Data Provenance Markings** distinguishing official IDX XBRL filings from harmonized Yahoo Finance data.
-- **12-Month Target Price Cone & Football Field Toggle** with strict monotonic scenario ordering ($\text{BEAR} < \text{BASE} < \text{BULL}$).
-- **Dynamic 10-Year 3-Statement Financial Modeling** with live cascading recalculations and exact zero-balance checks ($\text{Assets} \equiv \text{Liabilities} + \text{Equity}$).
-- **Multi-Model Valuation Triangulation** with an interactive SVG Weight Donut supporting 0% weight allocations and dynamic KaTeX mathematical proofs.
-- **Advanced Institutional Models**: Revalued Net Asset Value (**RNAV**), 10,000-run **Monte Carlo Simulation** with 95% VaR, Economic Value Added (**EVA®**) & MVA, **Tornado Sensitivity Analysis**, and **5-Stage DuPont ROE Decomposition**.
-- **Formula-Active 6-Sheet Microsoft Excel Export (`.xlsx`)** with dynamic uppercase Excel formulas and complete assumption parity.
+[![Live on Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Spaces-Live%20Cloud%20Terminal-yellow?style=for-the-badge)](https://celeebi-valuex.hf.space)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Tests: 118 Passed](https://img.shields.io/badge/Tests-118%20Automated-brightgreen.svg?style=for-the-badge)](tests/)
+[![IDX Universe: 112 Emiten](https://img.shields.io/badge/IDX%20Universe-112%20Audited%20Emiten-informational.svg?style=for-the-badge)](data/idx_cache/)
+[![Market Feed: Real-Time IDX Clock](https://img.shields.io/badge/Market%20Feed-Live%20Yahoo%20%2B%20WIB%20Clock-10b981.svg?style=for-the-badge)](src/data/market_clock.py)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 ---
 
-## 🚀 Quick Start: Installation & Launch (Under 60 Seconds)
+> ### 🌐 Try VALUEX Instantly in Your Browser (Zero Installation Required)
+> You do not need to install anything locally to explore the platform. Launch the live cloud deployment hosted on **Hugging Face Spaces**:
+>
+> 👉 **Live Application**: **[https://celeebi-valuex.hf.space](https://celeebi-valuex.hf.space)**  
+> 📦 **Hugging Face Space Repository**: **[huggingface.co/spaces/celeebi/valuex](https://huggingface.co/spaces/celeebi/valuex)**
 
-### Prerequisites
-- **Python 3.10+** (tested on Python 3.10, 3.11, 3.12, and 3.14).
-- Modern web browser (Chrome, Edge, Firefox, Safari).
-- **Zero Node.js / npm installation required**: The React 18 interface compiles and renders natively in the browser via CDN.
+---
 
-### Option 1: 1-Click Launch (Windows)
-Double-click [`run_app.bat`](run_app.bat) in the project directory. The automated launcher will:
-1. Detect or initialize your local Python virtual environment (`.venv`).
-2. Install any missing package dependencies from `requirements.txt`.
-3. Launch the asynchronous Starlette valuation server at `http://localhost:8000`.
-4. Open the VALUEX Terminal automatically in your default browser.
+## 📑 Table of Contents
+1. [Introduction & Executive Overview](#-introduction--executive-overview)
+2. [What VALUEX Is Capable Of (Core Features)](#-what-valuex-is-capable-of-core-features)
+3. [Quick Start: Cloud Access & Local Installation](#-quick-start-cloud-access--local-installation)
+4. [How to Use: 5-Step Analyst Workflow](#-how-to-use-5-step-analyst-workflow)
+5. [The 8 Institutional Workflow Tabs](#-the-8-institutional-workflow-tabs)
+6. [Deep-Dive: Analytical & Modeling Capabilities](#-deep-dive-analytical--modeling-capabilities)
+7. [System Architecture & Data Pipeline](#-system-architecture--data-pipeline)
+8. [Pre-Cached 112 IDX Universe Breakdown](#-pre-cached-112-idx-universe-breakdown)
+9. [Repository Structure](#-repository-structure)
+10. [Git Branching & Release Milestones](#-git-branching--release-milestones)
+11. [Author Profile & Engineering Pedigree](#-author-profile--engineering-pedigree)
+12. [License, Academic AI Disclosure & Disclaimer](#-license-academic-ai-disclosure--disclaimer)
 
-### Option 2: Command-Line Installation (Cross-Platform)
+---
+
+## 🌟 Introduction & Executive Overview
+
+**VALUEX** is an institutional-grade corporate finance, equity research, multi-model valuation triangulation, and 10-year 3-statement financial modeling platform engineered specifically for non-financial companies listed on the **Indonesia Stock Exchange (IDX)**.
+
+Developed as a flagship project for **MM6026 Digital Business Valuation** at **SBM ITB**, VALUEX bridges the gap between static academic spreadsheets and professional Bloomberg/Refinitiv-style equity research terminals. Every figure displayed on screen is computed by deterministic, textbook-reconciled pure-Python mathematical engines—with **zero mock placeholders, zero runtime LLM hallucinations, and 100% accounting identity compliance**.
+
+### Why VALUEX Stands Out
+- **Search-First Universal Terminal**: Starts in a clean discovery workspace where analysts can search and ingest any IDX-listed non-financial company on demand (`ANTM`, `PWON`, `ASII`, `TLKM`, `ICBP`, `ADRO`, `UNVR`, `KLBF`, etc.).
+- **Pre-Cached 112-Company Audited Universe**: Ships with **112 top IDX non-financial equities across 11 sectors** pre-cached from official audited filings, delivering **~5ms load latency** out of the box.
+- **Authentic Real-Life Market Feed & IDX Session Clock**: Synchronizes live market quotes via Yahoo Finance (`yfinance.fast_info`) paired with an institutional **Jakarta Time (`Asia/Jakarta`, UTC+7) Market Clock**—updating dynamically during official IDX trading hours and deterministically freezing at the official closing price on weekends and after-hours.
+- **Automated & Flexible Relative Valuation Engine**: Automatically discovers comparable IDX peers by sector and market-cap proximity, while allowing analysts to add/remove custom peers, switch statistical benchmarks (`Median`, `Mean`, `Harmonic Mean`, `25th Percentile`), and adjust multiple weights in real time.
+- **Zero Node.js / Zero npm Architecture**: Combines an asynchronous **Python Starlette/Uvicorn backend** with a self-contained **React 18 Single-Page Application (SPA)** that compiles natively in the browser via CDN.
+
+---
+
+## ⚡ What VALUEX Is Capable Of (Core Features)
+
+| Capability Pillar | What It Does | Key Highlights |
+| :--- | :--- | :--- |
+| **1. Real-Life IDX Market Feed & Session Clock** | Tracks official IDX trading sessions in Jakarta Time (`WIB / UTC+7`) and syncs real market quotes. | Live 20s polling during **Session 1** & **Session 2** (`● IDX LIVE (15M)`); strict close freeze during **Lunch Break**, **After-Hours**, and **Weekends** (`● MARKET CLOSED`), plus an optional **Classroom Demo Simulator** (`DEMO SIM ON/OFF`). |
+| **2. Automated & Custom Peer Comps Engine** | Eliminates static peer placeholders by indexing all 112 IDX companies by sector and size. | Instant peer auto-selection + interactive **Peer Group Manager** to add/remove any IDX ticker, toggle `Median` / `Average` / `Harmonic Mean` / `25th Percentile`, and re-weight `EV/EBITDA`, `P/E`, and `P/B`. |
+| **3. 10 Valuation & Risk Methodologies** | Computes intrinsic fair value across fundamental, asset-based, and stochastic frameworks. | **Multi-Stage FCFF DCF**, **Relative Comps**, **Residual Income (RIM)**, **Dividend Discount (DDM)**, **Property RNAV**, **10,000-Run Monte Carlo (VaR 95%)**, **Stern Stewart EVA® & MVA**, **5x5 WACC/$g$ Matrix**, **Tornado Sensitivity**, and **5-Stage DuPont ROE**. |
+| **4. Dynamic 10-Year 3-Statement Model** | Full mathematical articulation across Income Statement, Balance Sheet, and Cash Flow Statement. | Toggle between **10-Year Forecast (2026E–2035E)** and **Audited Actuals (2021A–2025A)** with verified **Zero-Balance Check** ($\text{Assets} \equiv \text{Liabilities} + \text{Equity}, \text{Discrepancy} = 0.00$). |
+| **5. Explicit Data Provenance & Banking Guard** | Guarantees institutional data transparency and corporate finance methodology boundaries. | Badges explicitly mark `SOURCE: IDX.CO.ID (XBRL)` vs `SOURCE: YAHOO FINANCE`. Searching commercial banks (`BBCA`, `BBRI`, `BMRI`) triggers an educational **Banking ALM Scope Guard**. |
+| **6. Live KaTeX Proofs & Active Excel Export** | Exposes every underlying formula and exports institutional deliverables. | Slide-out **KaTeX Mathematical Inspector** with substituted numbers + **6-Sheet Formula-Active Excel Exporter (`.xlsx`)** with live uppercase Excel formulas (`=SUM()`, `=NPV()`). |
+
+---
+
+## 🚀 Quick Start: Cloud Access & Local Installation
+
+### Option 1: Instant Cloud Terminal (Recommended — 0 Seconds)
+Simply open **[https://celeebi-valuex.hf.space](https://celeebi-valuex.hf.space)** in any modern desktop or mobile web browser. All 112 pre-cached IDX companies, live Yahoo Finance quotes, and valuation models are ready to use immediately.
+
+---
+
+### Option 2: 1-Click Local Launch (Windows — Under 60 Seconds)
+**Prerequisites**: **Python 3.10+** installed (zero Node.js or npm required).
+
+Double-click [`run_app.bat`](run_app.bat) in the project root folder. The automated launcher will:
+1. Detect or create a local Python virtual environment (`.venv`).
+2. Install all required packages from [`requirements.txt`](requirements.txt).
+3. Start the asynchronous Starlette valuation server at **`http://localhost:8000`**.
+4. Automatically open the VALUEX Terminal in your default browser.
+
+---
+
+### Option 3: Command-Line Installation (Windows / macOS / Linux)
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/celeebi/DBV_Midterm.git
 cd DBV_Midterm
 
-# 2. Check out the latest production branch
+# 2. Check out the active production branch
 git checkout Valuex-v1.2
 
 # 3. Create and activate a Python virtual environment
 python -m venv .venv
-# On Windows PowerShell:
+
+# Activate on Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
-# On macOS / Linux:
+# Activate on macOS / Linux:
 source .venv/bin/activate
 
-# 4. Install dependencies
+# 4. Install Python dependencies
 pip install -r requirements.txt
 
-# 5. Start the VALUEX Terminal server (Port 8000)
+# 5. Launch the VALUEX Terminal server (Port 8000)
 python server.py
 ```
-Open **`http://localhost:8000`** in your browser.
 
-*(Optional Companion UI)*: Run `streamlit run app.py` for the auxiliary Streamlit analytics dashboard at `http://localhost:8501`.
+Then navigate to **`http://localhost:8000`** in your browser.  
+*(Optional Companion UI)*: Run `streamlit run app.py` to launch the auxiliary Streamlit dashboard at `http://localhost:8501`.
 
-### Verifying Installation (Run Automated Tests)
-To verify that all 92 mathematical models, balance check identities, and REST API endpoints are fully operational:
+### Verifying Your Local Setup (Automated Test Suite)
+Run the comprehensive `pytest` suite covering all valuation models, market clock sessions, peer discovery, balance sheet identities, and REST API endpoints:
+
 ```bash
-pytest tests/ -v
+pytest -v
 ```
-**Expected output**: `92 passed in ~7s` (100% pass rate).
 
 ---
 
@@ -78,483 +123,269 @@ pytest tests/ -v
 
 ```mermaid
 flowchart LR
-    S1["1. Search Emiten\n(Header / ⌘2 Screener)"] --> S2["2. Inspect Valuation\n(Cone / Football Field ⌘3)"]
-    S2 --> S3["3. Review 3-Statements\n(Audit vs Forecast ⌘4)"]
-    S3 --> S4["4. Tune Assumptions\n(Sliders / WACC ⌘5)"]
-    S4 --> S5["5. Export Memo\n(PDF / Live Excel ⌘8)"]
+    S1["1. Search Emiten\n(Header / ⌘2 Screener)"] --> S2["2. Inspect Valuation\n(Cone / 10 Models ⌘3)"]
+    S2 --> S3["3. Review 3-Statements\n(Actuals vs 10Y Forecast ⌘4)"]
+    S3 --> S4["4. Tune Assumptions\n(Sliders / WACC / Weights ⌘5)"]
+    S4 --> S5["5. Export Deliverables\n(PDF Memo / Live Excel ⌘8)"]
 ```
 
-### Step 1: Search or Pick an Indonesian Emiten
-- Click the search bar in the top navigation or navigate to **`⌘2 Screener`**.
-- Type any IDX ticker (e.g., `PWON`, `ASII`, `ICBP`, `TLKM`, `ADRO`, `UNVR`, `GOTO`) or click one of the quick discovery pills.
-- The platform loads from the **110 pre-cached universe in ~5 milliseconds** or seamlessly harmonizes filings on the fly.
-- *(Scope Guard)*: Searching a commercial bank (e.g. `BBCA`, `BBRI`, `BMRI`) displays an educational modal explaining corporate non-financial DCF scope vs banking ALM mechanics.
-
-### Step 2: Analyze Multi-Model Valuation & Scenario Trajectory
-- Navigate to **`⌘3 Valuation`**.
-- Click the **Toggle Chart** button in the header to switch between:
-  - **12-Month Target Price Cone**: 5-year historical price trajectory against the JCI index with forward shaded Bull, Base, and Bear scenario cone ($\text{Bear} < \text{Base} < \text{Bull}$).
-  - **Valuation Methodology Football Field**: Side-by-side intrinsic value ranges across DCF, Comps, RIM, DDM, RNAV, Monte Carlo, and EVA.
-- Explore the **10 Methodology Sub-Tabs** below the chart (DCF pro forma schedule, peer multiples, RNAV property breakdown, 10,000-run Monte Carlo histogram, EVA economic profits, Tornado sensitivity, 5-stage DuPont ROE, and step-by-step KaTeX LaTeX mathematical proofs).
-
-### Step 3: Inspect Dynamic 3-Statement Articulation & Data Provenance
-- Navigate to **`⌘4 3-Statement Model`**.
-- Switch tabs across **Balance Sheet**, **Income Statement**, **Cash Flow Statement**, and **Operational Drivers**.
-- Toggle between **10-Year Forecast (2026E–2035E)** and **Audited Multi-Year Actuals (2021A–2025A)** via `🏛️ Show Historical Actuals`.
-- Observe the **Data Provenance Mark**:
-  - `SOURCE: IDX.CO.ID (XBRL)` (emerald badge) for official exchange filings.
-  - `SOURCE: YAHOO FINANCE` (amber badge) for harmonized audited statements.
-- Verify the green **ZERO-BALANCE: ASSETS ≡ LIAB + EQUITY** badge proving exact mathematical accounting identity (`balance_check == 0.00`).
-
-### Step 4: Calibrate Assumptions & Trigger Live Recalculation
-- Navigate to **`⌘5 Assumptions`**.
-- Adjust **Phase 1 High Growth (Years 1–5)** and **Phase 2 Transition (Years 6–10)** growth and margin sliders.
-- Click **⚡ Auto-Fade (Y6–Y10)** to automatically fade growth toward macroeconomic terminal GDP ($1.5\%$).
-- Adjust the **Fundamental CAPM Modeler** (Beta $\beta$, Risk-Free Rate $R_f$, Mature Market ERP, Damodaran Country Risk Premium CRP, Cost of Debt $K_d$, and Capital Structure Weight $W_d$).
-- Adjust the **Model Weight Donut Chart** (supports setting any method to `0%` without errors, or click one-click presets like `50/50 DCF & RIM` or `100% DCF`).
-- Click **⚡ Recalculate Pro Forma** to cascade changes in real-time across all 3 statements, DCF bridge, and valuation outputs.
-
-### Step 5: Generate Institutional Research Reports
-- Navigate to **`⌘8 Tear Sheet`**.
-- Review the complete investment banking equity research report layout.
-- Click **🖨️ Print / Save PDF** to trigger a clean, print-optimized document view.
-- Click **📊 Download Excel Model (.xlsx)** to export a dynamic, formula-active 6-sheet Microsoft Excel workbook that preserves all custom assumptions and uppercase formulas (`=SUM()`, `=NPV()`).
-
----
-
-## 📑 Table of Contents
-- [Executive Overview](#-executive-overview)
-- [System Architecture](#-system-architecture)
-- [The 8 Institutional Workflow Tabs](#-the-8-institutional-workflow-tabs)
-- [Key Analytical & Modeling Capabilities](#-key-analytical--modeling-capabilities)
-  - [1. Universal Ingestion & Pre-Cached 110 Universe](#1-universal-ingestion--pre-cached-110-universe)
-  - [2. Explicit Data Provenance Markings (IDX vs Yahoo Finance)](#2-explicit-data-provenance-markings-idx-vs-yahoo-finance)
-  - [3. 12-Month Target Price Cone & Milestone Trajectory](#3-12-month-target-price-cone--milestone-trajectory)
-  - [4. Dynamic 10-Year 3-Statement Financial Model](#4-dynamic-10-year-3-statement-financial-model)
-  - [5. Corporate Finance Scope vs Banking ALM Guard](#5-corporate-finance-scope-vs-banking-alm-guard)
-  - [6. Multi-Model Valuation Triangulation & Weight Donut](#6-multi-model-valuation-triangulation--weight-donut)
-  - [7. Fundamental CAPM & Cost of Capital Modeler](#7-fundamental-capm--cost-of-capital-modeler)
-  - [8. Institutional RNAV for Real Estate Developers](#8-institutional-rnav-for-real-estate-developers)
-  - [9. 10,000-Run Vectorized Monte Carlo Simulation & VaR](#9-10000-run-vectorized-monte-carlo-simulation--var)
-  - [10. Economic Value Added (EVA®) & MVA Engine](#10-economic-value-added-eva--mva-engine)
-  - [11. Tornado Sensitivity & 5-Stage DuPont ROE](#11-tornado-sensitivity--5-stage-dupont-roe)
-  - [12. Formula-Active 6-Sheet Excel Exporter](#12-formula-active-6-sheet-excel-exporter)
-  - [13. Step-by-Step KaTeX LaTeX Mathematical Proofs](#13-step-by-step-katex-latex-mathematical-proofs)
-- [Pre-Cached 110 IDX Universe Breakdown](#-pre-cached-110-idx-universe-breakdown)
-- [Author Profile & Engineering Pedigree](#-author-profile--engineering-pedigree)
-- [Repository Structure](#-repository-structure)
-- [Quick Start Guide](#-quick-start-installation--launch-under-60-seconds)
-- [Git Branching & Safety Policy](#-git-branching--safety-policy)
-- [License & Academic Disclosure](#-license--academic-disclosure)
-
----
-
-## 🌟 Executive Overview
-
-```mermaid
-flowchart TD
-    subgraph Data_Layer ["Data Ingestion & Normalization Layer"]
-        IDX["Official IDX XBRL Scraper\n(idx.co.id/primary/ListedCompany)"]
-        CB["Cloudflare Fast-Fail\nCircuit Breaker (<300ms)"]
-        YF["Universal Statement Harmonizer\n(yfinance Fallback Ingestion)"]
-        FX["Bank Indonesia Historical FX Engine\n(USD to IDR Conversion)"]
-        Cache[("Pre-Cached Universe Cache\n110 Emiten / 151 Files (data/idx_cache/)")]
-        
-        IDX -->|Cloudflare 403 Challenge| CB
-        CB -->|Instant Fallback| YF
-        YF --> FX
-        FX --> Cache
-        IDX -->|Audit Filing Parsed| Cache
-    end
-
-    subgraph Modeling_Layer ["Quantitative Modeling & Valuation Engines"]
-        PF["10-Year Pro Forma Roll-Forward\n(Years 1-5 Explicit, Years 6-10 Fade)"]
-        ThreeStmt["10-Year 3-Statement Model\n(IS, BS, CFS with Zero-Balance Check)"]
-        CAPM["Fundamental CAPM & WACC Modeler\n(Rf, Beta, Mature ERP, Damodaran CRP, Kd, Wd)"]
-        
-        DCF["Multi-Stage DCF / FCFF Engine\n(Gordon Growth & Exit Multiple TV)"]
-        Comps["Relative Comps Matrix\n(EV/EBITDA, P/E, P/B)"]
-        RIM["Residual Income Model (RIM)\n(Clean Surplus ROE Spread)"]
-        DDM["Dividend Discount Model (DDM)\n(10-Year Dividend Schedule)"]
-        RNAV["Revalued Net Asset Value (RNAV)\n(GAV, Land Bank MTM, Conglomerate Discount)"]
-        MC["Monte Carlo Simulation\n(10,000 Runs, VaR 95%, Frequency Histogram)"]
-        EVA["Economic Value Added (EVA®) & MVA\n(NOPAT - Capital Charge 10Y Schedule)"]
-        Tornado["Tornado Sensitivity Analysis\n(Two-Sided Impact Swing Ranking)"]
-        DuPont["5-Stage DuPont ROE Decomposition\n(Operating, Financing, Tax Decomposed)"]
-        Scenarios["Scenario Forecaster\n(Monotonic BEAR < BASE < BULL)"]
-        
-        Cache --> PF
-        PF --> ThreeStmt
-        ThreeStmt --> CAPM
-        CAPM --> DCF & Comps & RIM & DDM & RNAV & MC & EVA & Tornado & DuPont & Scenarios
-    end
-
-    subgraph Presentation_Layer ["VALUEX React 18 Terminal (Zero npm/Node.js)"]
-        UI1["⌘1 Dashboard\n(Market Dislocation Bar Chart & Signals)"]
-        UI2["⌘2 Screener\n(Universal Search & Liquidity Presets)"]
-        UI3["⌘3 Valuation Workspace\n(Target Price Cone Toggle & 10 Methodology Subtabs)"]
-        UI4["⌘4 3-Statement Model\n(Forecast vs Audited Actuals Toggle & Provenance Marks)"]
-        UI5["⌘5 Assumptions\n(10-Yr Sliders, Auto-Fade, Interactive Weight Donut)"]
-        UI6["⌘6 Order Ticket (EMS)\n(100-Share IDX Lots & Investment Memo)"]
-        UI7["⌘7 Watchlist & Comps\n(Peer Multiples & Fundamental Comparison)"]
-        UI8["⌘8 Research Tear Sheet\n(Print PDF & Active Formula Excel Export)"]
-        UI9["⌘9 About Platform & ⌘0 Contact Author"]
-        
-        DCF & Comps & RIM & DDM & RNAV & MC & EVA & Tornado & DuPont & Scenarios --> Presentation_Layer
-    end
-```
-
-Every number shown across the VALUEX Terminal is backed by rigorous pure-Python mathematical routines. There is zero mock data, zero financial hallucination, and full accounting consistency.
-
----
-
-## 🏛 System Architecture
-
-The project adheres to a clean, decoupled architecture:
-
-```
-[ External Data Providers ]
-  ├── Indonesia Stock Exchange (IDX XBRL API)
-  ├── Bank Indonesia (10Y Sovereign Yield, BI-Rate, Historical FX)
-  └── Yahoo Finance (Audited Filings, Equity Beta, Live Market Prices)
-                    ↓
-[ Ingestion & Harmonization Pipeline (src/data/) ]
-  ├── loader.py              → Universal statement normalizer & loader
-  ├── adapters/idx_adapter.py → Official IDX XBRL adapter & cache router
-  └── adapters/idx_scraper/  → Multi-year XBRL scraper with fast-fail circuit breaker
-                    ↓
-[ Core Valuation & Financial Modeling Engines (src/models/) ]
-  ├── three_statement.py     → 10-year articulated IS, BS, CFS with zero-balance checks
-  ├── pro_forma.py           → Explicit growth schedules & linear auto-fade
-  ├── parameters.py          → Capital structure WACC & fundamental CAPM
-  ├── dcf.py                 → Multi-stage FCFF discounted cash flow engine
-  ├── multiples.py           → Relative peer multiple valuation (EV/EBITDA, P/E, P/B)
-  ├── rim.py                 → Residual Income Model (clean surplus framework)
-  ├── ddm.py                 → Multi-stage Dividend Discount Model
-  ├── rnav.py                → Property Revalued Net Asset Value (GAV + Land MTM)
-  ├── monte_carlo.py         → 10,000-run vectorized Monte Carlo simulation
-  ├── eva.py                 → Stern Stewart EVA® & Market Value Added (MVA)
-  ├── ensemble.py            → Configurable multi-model triangulation
-  └── scenarios.py           → Monotonic Bear / Base / Bull scenario forecaster
-                    ↓
-[ Analytics, Risk & Exporters (src/analytics/, src/rules/) ]
-  ├── tornado.py             → Two-sided parameter sensitivity swing ranking
-  ├── dupont.py              → 5-stage DuPont ROE decomposition
-  ├── exporter.py            → 6-sheet formula-active Microsoft Excel exporter
-  ├── recommendations.py     → Margin-of-safety recommendation engine (BUY/HOLD/SELL)
-  └── sanity_checks.py       → Damodaran boundary enforcement (g < GDP, WACC constraints)
-                    ↓
-[ Asynchronous REST API (server.py) ]
-  ├── /api/recalculate       → Real-time full-model recalculation
-  ├── /api/company           → Single ticker ingestion & metadata extraction
-  ├── /api/coverage          → Universe coverage overview
-  └── /api/export/excel      → Live custom assumption Excel export
-                    ↓
-[ VALUEX Terminal (static/app_react.jsx, static/index.html) ]
-  └── Zero Node.js / zero npm React 18 frontend with Tailwind CSS, Lucide & KaTeX
-```
+1. **Step 1 — Search or Select an Indonesian Emiten**:
+   - Use the top search bar or open **`⌘2 Screener`** and type any IDX ticker (e.g., `ANTM`, `PWON`, `TLKM`, `ASII`, `ICBP`, `INDF`, `UNVR`, `ADRO`).
+   - Pre-cached companies load in **~5 milliseconds**; uncached tickers are harmonized on the fly from audited filings.
+2. **Step 2 — Analyze Multi-Model Valuation & Customize Peers**:
+   - Open **`⌘3 Valuation`** to inspect the **12-Month Target Price Cone** ($\text{Bear} < \text{Base} < \text{Bull}$) or toggle to the **Valuation Methodology Football Field**.
+   - Explore the **10 Methodology Sub-Tabs** below the chart. In **Tab 2 (Relative Comps)**, customize your peer group from the 112-company catalog and switch between `Median`, `Mean`, `Harmonic Mean`, or `25th Percentile`.
+3. **Step 3 — Audit the 10-Year 3-Statement Model**:
+   - Open **`⌘4 3-Statement Model`** to inspect the articulated Balance Sheet, Income Statement, Cash Flow Statement, and Operational Drivers.
+   - Toggle `🏛️ Show Historical Actuals` to compare **2021A–2025A audited filings** against **2026E–2035E pro forma projections**, and verify the green `ZERO-BALANCE: ASSETS ≡ LIAB + EQUITY` badge.
+4. **Step 4 — Calibrate Growth, WACC & Triangulation Weights**:
+   - Open **`⌘5 Assumptions`** to tune Phase 1 High-Growth (Y1–Y5) and Phase 2 Fade (Y6–Y10) sliders, or click **⚡ Auto-Fade (Y6–Y10)**.
+   - Adjust the **Fundamental CAPM Modeler** ($\beta$, $R_f$, Mature ERP, Damodaran CRP, $K_d$, $W_d$) and the **Interactive SVG Weight Donut**, then click **⚡ Recalculate Pro Forma**.
+5. **Step 5 — Export Institutional Reports**:
+   - Open **`⌘8 Tear Sheet`** to print a formatted **Investment Banking Equity Research PDF** or click **📊 Download Excel Model (.xlsx)** to generate a 6-sheet workbook with live Excel formulas.
 
 ---
 
 ## 🖥️ The 8 Institutional Workflow Tabs
 
-1. **Top Live Market Ribbon & Real Estate Wire**:
-   - Real-time ticker tape displaying `PWON.JK` and property peers (`BSDE`, `CTRA`, `SMRA`, `ASII`) alongside macroeconomic benchmarks: `IHSG (7,785)`, `ID 10Y Yield (6.60%)`, `USD/IDR (16,400)`, `BI 7-Day Repo (6.00%)`, and `IDX Property Index (824.50)`.
-   - Streaming wire toggle (`[● LIVE FEED] / [❚❚ PAUSED]`) with rotating research bulletins.
-2. **`⌘1` Executive Dashboard**:
-   - Coverage market capitalization summary, average upside, and recommendation distribution.
-   - **Market Dislocation Chart**: Horizontal bar chart comparing current market price against composite fair value with BUY hurdle reference line (+15%).
-3. **`⌘2` Company Screener (Discovery)**:
-   - Filter by recommendation signal (`BUY`, `HOLD`, `SELL`) and sort by upside, market cap, or ticker.
-   - **Universal Ticker Search & Ingestion Card**: Input any IDX ticker (e.g. `ICBP`, `TLKM`, `ASII`, `ADRO`, `BBCA`) with instant sector and scope feedback.
-4. **`⌘3` Valuation Workspace**:
-   - **Target Price Cone Toggle**: Instant switch between the **12-Month Target Price Cone** (with historical 5-year trajectory and shaded Bull/Base/Bear scenarios) and the **Valuation Methodology Football Field**.
-   - **10 Methodology Sub-Tabs**:
-     - **Tab 1: Multi-Stage DCF**: 10-year FCFF pro forma schedule ($\Delta\text{NWC}$, Discount Factors, PV of FCFF) + Enterprise-to-Equity bridge.
-     - **Tab 2: Peer Comps**: EV/EBITDA, P/E, P/B peer matrix with subject comparisons.
-     - **Tab 3: Residual Income Model (RIM)**: Book value equity + PV of economic profits schedule.
-     - **Tab 4: Dividend Discount Model (DDM)**: 10-year explicit dividend schedule + Gordon Growth terminal value.
-     - **Tab 5: Revalued Net Asset Value (RNAV)**: Property GAV breakdown, NOI capitalization, land bank mark-to-market, and conglomerate discount.
-     - **Tab 6: Monte Carlo DCF**: 10,000-run simulation, VaR 95%, P10/P50/P90 distributions, and SVG frequency histogram.
-     - **Tab 7: Economic Value Added (EVA®)**: NOPAT, Invested Capital, ROIC vs WACC economic spread, 10-year EVA schedule, and MVA.
-     - **Tab 8: 5x5 WACC Sensitivity**: Matrix heatmap across WACC (9.42%–11.42%) vs $g$ (1.0%–2.0%).
-     - **Tab 9: Tornado & DuPont**: Two-sided sensitivity swing ranking + 5-stage DuPont ROE decomposition.
-     - **Tab 10: Step-by-Step KaTeX Proofs**: Substituted mathematical proof derivations rendered in KaTeX LaTeX.
-5. **`⌘4` 3-Statement Financial Model**:
-   - **View Mode Toggle**: Switch between **10-Year Pro Forma Forecast (2026E–2035E)** and **Audited Multi-Year Actuals (2021A–2025A)**.
-   - Dedicated statement selector: Balance Sheet, Income Statement, Cash Flow Statement, and Operational Drivers.
-   - **Zero-Balance Check Row**: Proves $\text{Assets} - (\text{Liabilities} + \text{Equity}) \equiv \text{IDR } 0.00$ with green checkmark across every period.
-   - **Data Provenance Mark**: Explicit badge and banner declaring whether data originated from **IDX Official XBRL** or **Yahoo Finance Harmonized**.
-6. **`⌘5` Model Assumptions & Parameter Editor**:
-   - **Phase 1: Explicit High Growth (Years 1–5)**: 5 individual sliders/inputs for high-growth explicit period.
-   - **Phase 2: Transition & Fade Phase (Years 6–10)**: 5 individual sliders/inputs for transition period.
-   - **⚡ Auto-Fade Helper (Y6–Y10)**: Linearly fades Year 5 growth into terminal $g$ ($1.5\%$).
-   - **⚡ "Recalculate Pro Forma" Engine**: Instant dynamic cascade updating all 3 statements and valuation outputs.
-   - **Damodaran Boundary Alert**: Flags if Year 10 growth is set higher than sustainable GDP ($5.0\%$) or WACC.
-   - **Fundamental CAPM Modeler**: Sliders and inputs for Beta ($\beta$), Risk-Free Rate ($R_f$), Mature Market ERP, Country Risk Premium (CRP), Pre-tax Cost of Debt ($K_d$), Debt Weight ($W_d$), and Tax Rate ($t$).
-   - **Interactive Weight Donut Chart**: Full support for setting any model weight to `0%` cleanly, with one-click presets (`50/50 DCF & RIM`, `100% DCF`, `4-Way Triangulation`, `Equal Weight`).
-7. **`⌘6` Buy / Sell Decision Workspace**:
-   - Investment thesis pillars, catalyst monitoring, and downside risk assessment.
-   - Portfolio Committee decision parameters (Entry/Exit targets, holding horizon, analyst memo).
-   - **Simulated Order Ticket (EMS Preview)**: Standard **IDX 100-share lot** quantity input, limit price, and gross notional calculation.
-8. **`⌘7` Watchlist & Comps Matrix**:
-   - Fundamental watchlist with side-by-side multiple and growth benchmarking.
-9. **`⌘8` Research Report Tear Sheet**:
-   - Investment banking equity research report layout.
-   - **"Print / Save PDF"** button (invoking `@media print` clean report layout).
-   - **"Download Excel Model (.xlsx)"** button with dynamic assumption parity.
-10. **Dedicated Pages**:
-    - **`⌘9` About Platform**: MM6026 Digital Business Valuation project details (SBM ITB), methodology pillars, non-banking scope rationale, and Executive Author Profile.
-    - **`⌘0` Contact Author**: Interactive inquiry form, unique reference ID generator (`#VALUEX-XXXXX`), campus coordinates, author email, and social channels.
-11. **Persistent "Inspector 🔍" KaTeX Flyout Drawer**:
-    - Slides out KaTeX LaTeX equations with substituted figures for WACC, Terminal Value, Enterprise Bridge, DDM, and Triangulation from any screen.
+| Shortcut | Workspace View | Primary Purpose & Analytical Tools |
+| :---: | :--- | :--- |
+| **Top Bar** | **Live Market Ribbon & Beacon** | Displays real-time IDX session status (`● IDX LIVE (15M)` vs `● MARKET CLOSED`), Jakarta clock (`WIB`), ticker marquee, breaking news sentiment wire, and the `DEMO SIM ON/OFF` classroom toggle. |
+| **`⌘1`** | **Executive Dashboard** | Coverage universe overview, market dislocation bar chart (Price vs. Composite Fair Value), and BUY/HOLD/SELL signal distribution. |
+| **`⌘2`** | **Company Screener** | Universal IDX ticker search, sector filtering, upside/market-cap sorting, and quick discovery pills. |
+| **`⌘3`** | **Valuation Workspace** | Interactive Target Price Cone / Football Field toggle + **10 deep-dive methodology sub-tabs** (DCF, Peer Comps, RIM, DDM, RNAV, Monte Carlo, EVA®, WACC Matrix, Tornado/DuPont, KaTeX Proofs). |
+| **`⌘4`** | **3-Statement Model** | 10-year articulated Income Statement, Balance Sheet, Cash Flow Statement, historical actuals toggle, data provenance badges, and zero-balance verification. |
+| **`⌘5`** | **Model Assumptions** | 10-year explicit growth/margin sliders, linear auto-fade helper, bottom-up CAPM/WACC calculator, Damodaran sanity alerts, and interactive triangulation weight donut. |
+| **`⌘6`** | **Order Ticket (EMS)** | Investment thesis builder, catalyst tracker, committee parameters, and simulated **IDX 100-share lot** order execution preview. |
+| **`⌘7`** | **Watchlist & Comps** | Side-by-side multi-company fundamental watchlist comparing valuation multiples, margins, ROE, and implied upside. |
+| **`⌘8`** | **Research Tear Sheet** | Print-ready equity research tear sheet (`@media print` PDF export) and 1-click **6-Sheet Formula-Active Excel Model (`.xlsx`)** download. |
+| **`⌘9` / `⌘0`** | **About & Contact Desk** | MM6026 SBM ITB academic documentation, methodology architecture, author biography, and research inquiry generator. |
+| **`🔍`** | **KaTeX Proof Inspector** | Persistent slide-out drawer rendering step-by-step substituted LaTeX mathematical derivations from anywhere in the terminal. |
 
 ---
 
-## 📐 Key Analytical & Modeling Capabilities
+## 📐 Deep-Dive: Analytical & Modeling Capabilities
 
-### 1. Universal Ingestion & Pre-Cached 110 Universe
-The platform provides a dual-engine data ingestion architecture:
-- **Pre-Cached 110 Universe**: Multi-year audited statements for **110 top non-financial IDX equities** (151 total files) pre-cached in `data/idx_cache/` that load in **3 to 10 milliseconds**.
-- **Universal On-The-Fly Ingestion**: Typing any arbitrary IDX ticker into the header or screener automatically queries live audited filings, converts multi-currency statements (e.g. natural resources reporting in USD) to IDR via Bank Indonesia exchange rates, maps line items to standardized PSAK schemas, and auto-caches them locally.
-- **Cloudflare Fast-Fail Circuit Breaker**: If the raw IDX scraper encounters Cloudflare Turnstile blocks (`HTTP 403`), it trips in under 300ms and engages the Universal Statement Harmonizer, eliminating long scraper freezes.
+### 1. Real-Life Yahoo Finance Feed & IDX Trading Session Clock
+Located in [`src/data/market_clock.py`](src/data/market_clock.py) and [`src/data/market_stream.py`](src/data/market_stream.py):
+- **Jakarta Timezone Engine (`Asia/Jakarta`, UTC+7)**: Evaluates official Indonesia Stock Exchange trading hours:
+  - **Monday – Thursday**: Session 1 (`09:00–12:00 WIB`), Lunch Break (`12:00–13:30 WIB`), Session 2 (`13:30–15:50 WIB`), Closing Auction (`15:50–16:15 WIB`), After-Hours (`16:15–08:45 WIB`).
+  - **Friday**: Session 1 (`09:00–11:30 WIB`), Friday Mid-Day Break (`11:30–14:00 WIB`), Session 2 (`14:00–15:50 WIB`).
+  - **Saturday – Sunday**: Weekend Market Closed.
+- **Session-Aware TTL Caching**: Uses a 20-second cache TTL during live trading hours to reflect genuine market movements without hitting API rate limits, and switches to a 300-second cache TTL when the market is closed so Friday's official closing price remains rock-solid.
 
-### 2. Explicit Data Provenance Markings (IDX vs Yahoo Finance)
-To ensure complete institutional transparency, every screen and sub-table displays explicit marks indicating data provenance:
-- **IDX Official XBRL**: Displays an emerald badge `SOURCE: IDX.CO.ID (XBRL)` or `DATA: IDX XBRL`.
-- **Yahoo Finance Harmonized**: Displays an amber/gold badge `SOURCE: YAHOO FINANCE` or `DATA: YAHOO FINANCE`.
-- Visible across the **Top Company Header**, the **Show Historical Actuals Toggle Button**, the **Historical Statements Banner**, and the **Sub-Table First-Column Headers** (`[IDX XBRL]` vs `[YAHOO FINANCE]`).
+### 2. Automated & Flexible Relative Valuation Peer Engine
+Located in [`src/data/peers.py`](src/data/peers.py) and [`src/models/multiples.py`](src/models/multiples.py):
+- Indexes all **112 pre-cached IDX companies** with pre-computed fundamental multiples (`EV/EBITDA`, `P/E`, `P/B`), ROE, EBITDA margin, and market cap in ~17ms.
+- Automatically recommends the 4 closest industry peers by sector taxonomy and log-market-cap proximity.
+- Supports 4 statistical aggregation methods: **Median** (outlier-resistant default), **Mean (Average)**, **Harmonic Mean** (institutional CFA standard for price ratios), and **25th Percentile** (conservative valuation).
 
-### 3. 12-Month Target Price Cone & Milestone Trajectory
-Visualizes 5-year historical price action against the Jakarta Composite Index (JCI) alongside forward scenario projections:
-$$\text{Trajectory Split: } 77\% \text{ Historical Actuals (Feb 2021 – Oct 2026)} \quad \longleftrightarrow \quad 23\% \text{ Forward 12M Scenario Cone}$$
-- Shaded green-to-slate cone expanding from current market price to **BULL TP**, **BASE TP**, and **BEAR TP**.
-- Strict monotonic ordering enforced: $\text{BEAR TP} < \text{BASE TP} < \text{BULL TP}$.
-- Interactive toggle button allows switching between the **Target Price Cone** and the **Valuation Methodology Football Field** without leaving the view.
+### 3. Multi-Stage FCFF DCF & Fundamental CAPM Modeler
+Located in [`src/models/dcf.py`](src/models/dcf.py), [`src/models/pro_forma.py`](src/models/pro_forma.py), and [`src/models/parameters.py`](src/models/parameters.py):
+- **10-Year Explicit FCFF Roll-Forward**:
+  $$\text{FCFF}_t = \text{EBIT}_t(1 - \tau) + \text{D\&A}_t - \text{CapEx}_t - \Delta\text{NWC}_t$$
+- **Bottom-Up WACC**: Incorporates Bank Indonesia 10Y Government Bond Yield ($R_f = 6.60\%$), 5-year Beta ($\beta$), Mature Market ERP ($5.00\%$), Damodaran Indonesia Country Risk Premium ($2.16\%$), and after-tax Cost of Debt.
+- **Dual Terminal Value**: Computes both Gordon Growth ($\text{TV} = \frac{\text{FCFF}_{10}(1+g)}{\text{WACC}-g}$) and Exit EV/EBITDA Multiple methods.
 
 ### 4. Dynamic 10-Year 3-Statement Financial Model
-Full mathematical articulation across Income Statement, Balance Sheet, and Cash Flow Statement:
-- **Cascading Recalculation Engine**: Modifying growth or margin assumptions cascades through all three statements:
-  - **Income Statement**: Revenue, EBITDA, EBIT, and Net Income dynamically update.
-  - **Balance Sheet**: Net Income flows into Retained Earnings; CapEx and Depreciation update Net PP&E; Cash acts as the dynamic liquidity plug.
-  - **Cash Flow Statement**: CFO, CFI, and CFF update in exact balance with $\Delta\text{Cash}$.
-- **Zero-Balance Identity**: Proves:
-  $$\text{Total Assets} \equiv \text{Total Liabilities} + \text{Total Equity} + \text{Minority Interest} \quad (\text{Balance Check} = 0.00)$$
+Located in [`src/models/three_statement.py`](src/models/three_statement.py):
+- Links the Income Statement, Balance Sheet, and Cash Flow Statement across 10 forecast years.
+- Enforces the strict accounting identity across every historical and projected period:
+  $$\text{Total Assets}_t - (\text{Total Liabilities}_t + \text{Total Equity}_t + \text{Minority Interest}_t) \equiv 0.00$$
 
-### 5. Corporate Finance Scope vs Banking ALM Guard
-The platform enforces a strict methodology guard:
-- **In-Scope: Non-Financial Corporates**: Demand-driven value creation ($P \times Q \rightarrow \text{Revenue} \rightarrow \text{Net Income} \rightarrow \text{FCFF}$) with physical working capital (DSO/DIO/DPO) and leverage-independent operating metrics (EBITDA).
-- **Out-of-Scope: Commercial Banks & Financial Institutions**: Searching tickers like `BBCA`, `BBRI`, `BMRI`, or `BBNI` triggers an educational guard modal. Because commercial banks treat debt and deposits as their core revenue-earning product, Enterprise Value (EV) and Unlevered Free Cash Flow (FCFF) are mathematically inapplicable, requiring regulatory Asset-Liability Management (ALM) modeling and Basel III / OJK Capital Adequacy Ratio (CAR) constraints.
+### 5. Specialized Valuation & Risk Engines
+- **Residual Income Model (`src/models/rim.py`)**: Clean-surplus valuation anchored on book value plus discounted excess ROE spreads: $\text{RI}_t = (\text{ROE}_t - K_e) \times B_{t-1}$.
+- **Multi-Stage DDM (`src/models/ddm.py`)**: 10-year explicit dividend cash flows discounted at Cost of Equity ($K_e$).
+- **Property RNAV (`src/models/rnav.py`)**: Direct capitalization of retail/hotel Net Operating Income (NOI), undeveloped land bank mark-to-market ($\text{IDR/m}^2$), and holding company conglomerate discounts.
+- **10,000-Run Vectorized Monte Carlo (`src/models/monte_carlo.py`)**: Correlated normal/triangular sampling of revenue growth, EBITDA margin, WACC, and terminal growth, outputting P10/P50/P90 percentiles, probability of undervaluation, and 95% Value at Risk (VaR).
+- **Stern Stewart EVA® & MVA (`src/models/eva.py`)**: $\text{EVA}_t = \text{NOPAT}_t - (\text{WACC} \times \text{Invested Capital}_{t-1})$.
+- **Tornado & 5-Stage DuPont ROE (`src/analytics/tornado.py`, `src/analytics/dupont.py`)**: Ranks two-sided $\pm 100\text{ bps}$ parameter swings and decomposes ROE into Tax Burden, Interest Burden, EBIT Margin, Asset Turnover, and Leverage.
 
-### 6. Multi-Model Valuation Triangulation & Weight Donut
-The platform computes a composite fair value from configurable weights:
-$$\text{Composite Target} = \sum_{m \in \{\text{DCF}, \text{Comps}, \text{RIM}, \text{DDM}\}} w_m \cdot P_m \quad \text{where } \sum w_m = 100\%$$
-- **0% Weight Flexibility**: Setting any model weight to `0%` cleanly zeroes its contribution without numeric errors or resets.
-- **Interactive SVG Donut**: Slices update in real-time with responsive tooltips and color matching.
-- **Dynamic KaTeX Proofs**: Substituted mathematical derivations automatically suppress zero-weighted methods and display active allocations.
-
-### 7. Fundamental CAPM & Cost of Capital Modeler
-Replaces single opaque WACC inputs with institutional bottom-up capital structure modeling:
-- **Equity Beta ($\beta$)**: Sourced from 5-year regression against the IHSG with sector baselines.
-- **Risk-Free Rate ($R_f$)**: Bank Indonesia 10-Year Sovereign Bond Yield (`INDOGB 10Y`: $6.60\%$).
-- **Mature Market ERP & Damodaran Country Risk Premium (CRP)**: Decomposed into mature equity premium ($5.00\%$) and Indonesian sovereign default/volatility premium ($2.16\%$).
-- **Cost of Debt ($K_d$)**: Pre-tax borrowing rate ($6.50\%$) with tax shield: $K_{d,\text{after}} = K_d \times (1 - 22.0\% \text{ Tax}) = 5.07\%$.
-- **Interactive Data Provenance Notes (`[ⓘ]`)**: Dark-mode popovers beside every parameter explaining sources, citations, and valuation sensitivities.
-
-### 8. Institutional RNAV for Real Estate Developers
-Tailored for Indonesian property developers (`PWON`, `BSDE`, `CTRA`, `SMRA`):
-- **Direct Capitalization of Retail Malls & Hotels**: Net Operating Income (NOI) capitalized at market cap rates ($8.5\%$).
-- **Land Bank Mark-to-Market (MTM)**: Undeveloped land reserves revalued from historical book value to market value ($IDR 4.5M/m^2$ vs $IDR 1.2M/m^2$).
-- **Presales Discounting**: Present value of unbilled property presales over delivery horizon.
-- **Target RNAV per Share**: Gross Asset Value (GAV) less net debt, applying holding-company conglomerate discounts ($25\%$).
-
-### 9. 10,000-Run Vectorized Monte Carlo Simulation & VaR
-Replaces single-point estimates with statistical probability distributions using NumPy:
-- **Stochastic Parameters**: Correlated sampling of revenue growth, EBITDA margin, WACC ($9.5\% \text{ to } 11.5\%$), and terminal $g$ ($1.0\% \text{ to } 2.0\%$).
-- **Statistical Outputs**: Mean target price, median (P50), standard deviation, 95% Confidence Interval, P10 (Bear), P90 (Bull).
-- **Value at Risk (VaR 95%)**: Downside risk relative to current market price.
-- **Probability of Undervaluation**: Percentage of runs where intrinsic value exceeds current market price ($P(\text{Target} > P_{\text{market}})$).
-- **SVG Frequency Histogram**: Visualized with market price and mean reference lines.
-
-### 10. Economic Value Added (EVA®) & MVA Engine
-Stern Stewart & Co. value-based management framework:
-- **Economic Profit Identity**:
-  $$\text{EVA}_t = \text{NOPAT}_t - (\text{WACC} \times \text{Invested Capital}_{t-1}) \equiv (\text{ROIC}_t - \text{WACC}) \times \text{Invested Capital}_{t-1}$$
-- **10-Year Schedule**: NOPAT, Invested Capital, ROIC, Economic Spread, and EVA discounted at WACC.
-- **Market Value Added (MVA)**: Present value of future EVA plus Invested Capital.
-
-### 11. Tornado Sensitivity & 5-Stage DuPont ROE
-- **Tornado Sensitivity**: Two-sided DCF sensitivity swings ($\pm 100 \text{ bps}$ on WACC, $g$, margins, growth, exit multiples) ranked in descending order of valuation impact.
-- **5-Stage DuPont ROE Decomposition**:
-  $$\text{ROE} = \left(\frac{\text{Net Income}}{\text{EBT}}\right) \times \left(\frac{\text{EBT}}{\text{EBIT}}\right) \times \left(\frac{\text{EBIT}}{\text{Revenue}}\right) \times \left(\frac{\text{Revenue}}{\text{Assets}}\right) \times \left(\frac{\text{Assets}}{\text{Equity}}\right)$$
-  Decomposes ROE into Tax Burden, Interest Burden, Operating Margin, Asset Turnover, and Financial Leverage, benchmarked against Indonesian sector averages.
-
-### 12. Formula-Active 6-Sheet Excel Exporter
-Generates institutional `.xlsx` workbooks via `openpyxl` with dynamic, uppercase Excel formulas:
-- **Live Assumption Parity**: Downloaded workbooks reflect any custom growth or margin assumptions selected in the terminal.
-- **Sheet 1: `Executive Summary`**: Valuation matrix, KPI cards, and methodology football field.
-- **Sheet 2: `10Y Pro Forma DCF`**: Explicit FCFF schedules with dynamic Excel formulas (`=B1*(1+B2)`, `=SUM(B3:B10)`).
-- **Sheet 3: `3-Statement Model`**: Full 10-year IS, BS, and CFS articulation with live zero-balance check rows.
-- **Sheet 4: `Property Comps`**: Peer multiple benchmarks (EV/EBITDA, P/E, P/B).
-- **Sheet 5: `RIM & DDM`**: Economic profit schedules, dividend discount schedules, and terminal values.
-- **Sheet 6: `Audit & Sensitivity`**: 5x5 WACC vs $g$ sensitivity matrix and mathematical proof summaries.
-
-### 13. Step-by-Step KaTeX LaTeX Mathematical Proofs
-Dedicated mathematical proof engine that renders substituted formulas for:
-- WACC Capital Asset Pricing Model derivation.
-- Gordon Growth and Exit Multiple Terminal Value derivations.
-- Enterprise-to-Equity Bridge calculation.
-- 10-Year DDM dividend aggregation.
-- RNAV Net Asset Value bridge.
-- Multi-Model Triangulation weighted composite target.
+### 6. Corporate Finance Scope vs. Banking ALM Guard
+Located in [`src/data/loader.py`](src/data/loader.py):
+- Commercial banks (`BBCA`, `BBRI`, `BMRI`, `BBNI`, etc.) use customer deposits and debt as operational raw materials rather than capital structure financing, making Enterprise Value (EV), EBITDA, and FCFF inapplicable. Searching a bank ticker triggers a dedicated educational modal explaining why banks require regulatory Asset-Liability Management (ALM) and Basel III / OJK Capital Adequacy Ratio (CAR) models, while offering 1-click non-financial alternatives.
 
 ---
 
-## 📊 Pre-Cached 110 IDX Universe Breakdown
+## 🏛️ System Architecture & Data Pipeline
 
-The repository ships with **110 pre-cached, audited non-financial equities** in [`data/idx_cache/`](data/idx_cache/) (151 total files, under 2 MB), providing instant load times out of the box:
+```mermaid
+flowchart TD
+    subgraph Data_Layer ["1. Data Ingestion, Market Clock & Provenance Layer (src/data/)"]
+        IDX["Official IDX XBRL Scraper\n(idx.co.id/primary/ListedCompany)"]
+        CB["Cloudflare Fast-Fail\nCircuit Breaker"]
+        YF["Universal Statement Harmonizer\n(yfinance Audited Fallback)"]
+        CLK["IDX Market Clock Engine\n(Asia/Jakarta WIB Session Tracker)"]
+        QUOTE["Live Market Stream Service\n(yfinance.fast_info + Session TTL Cache)"]
+        PEERS["Peer Universe Service\n(112 IDX Companies Indexed by Sector & Cap)"]
+        Cache[("Pre-Cached Audited Universe\n112 Emiten / 151 Files (data/idx_cache/)")]
 
-| Sector | Count | Tickers Pre-Cached |
+        IDX -->|WAF Challenge| CB --> YF --> Cache
+        IDX -->|XBRL Parsed| Cache
+        Cache --> PEERS
+        CLK --> QUOTE
+    end
+
+    subgraph Modeling_Layer ["2. Quantitative Modeling & Valuation Layer (src/models/, src/analytics/)"]
+        PF["10-Year Pro Forma Engine\n(Explicit Y1-Y5 + Auto-Fade Y6-Y10)"]
+        ThreeStmt["10-Year 3-Statement Model\n(IS, BS, CFS + Zero-Balance Check)"]
+        CAPM["Bottom-Up CAPM & WACC\n(INDOGB 10Y, Beta, ERP, Damodaran CRP)"]
+        Models["10 Valuation & Risk Models\n(DCF, Comps, RIM, DDM, RNAV, Monte Carlo, EVA, Tornado, DuPont)"]
+        Excel["6-Sheet Formula-Active Excel Exporter\n(openpyxl Uppercase Formulas)"]
+
+        Cache --> PF --> ThreeStmt --> CAPM --> Models --> Excel
+        PEERS --> Models
+        QUOTE --> Models
+    end
+
+    subgraph API_Layer ["3. Asynchronous Starlette REST Server (server.py)"]
+        API["REST Endpoints:\n/api/company • /api/recalculate • /api/peers\n/api/market/status • /api/market/quote • /api/news • /api/export/excel"]
+        Models & Excel --> API
+    end
+
+    subgraph Presentation_Layer ["4. VALUEX React 18 SPA Terminal (static/app_react.jsx)"]
+        UI["8 Institutional Workflow Views (⌘1–⌘8)\n+ Live Market Ribbon + Peer Group Manager + KaTeX Proof Inspector"]
+        API --> UI
+    end
+```
+
+---
+
+## 📊 Pre-Cached 112 IDX Universe Breakdown
+
+The repository ships with **112 pre-cached, audited non-financial equities** in [`data/idx_cache/`](data/idx_cache/) across **11 sectors**, providing instant ~5ms loading and automatic peer benchmarking:
+
+| Sector | Count | Pre-Cached IDX Tickers |
 | :--- | :---: | :--- |
-| **Consumer Staples** | 23 | `ICBP`, `INDF`, `UNVR`, `KLBF`, `MYOR`, `CPIN`, `JPFA`, `CMRY`, `AMRT`, `MIDI`, `GGRM`, `HMSP`, `WIIM`, `ROTI`, `ULTJ`, `CLEO`, `STTP`, `AALI`, `LSIP`, `SIMP`, `DSNG`, `TAPG`, `SSMS`, `TBLA` |
+| **Consumer Staples** | 24 | `ICBP`, `INDF`, `UNVR`, `KLBF`, `MYOR`, `CPIN`, `JPFA`, `CMRY`, `AMRT`, `MIDI`, `GGRM`, `HMSP`, `WIIM`, `ROTI`, `ULTJ`, `CLEO`, `STTP`, `AALI`, `LSIP`, `SIMP`, `DSNG`, `TAPG`, `SSMS`, `TBLA` |
 | **Energy, Coal, Oil & Gas** | 18 | `ADRO`, `PTBA`, `ITMG`, `MEDC`, `AKRA`, `PGAS`, `HRUM`, `ESSA`, `INDY`, `BUMI`, `DOID`, `ENRG`, `ELSA`, `PGEO`, `BREN`, `MBMA`, `ARKO`, `RAJA` |
 | **Real Estate & Construction** | 12 | `PWON`, `BSDE`, `CTRA`, `SMRA`, `ASRI`, `SSIA`, `DMAS`, `DILD`, `PTPP`, `WIKA`, `ADHI`, `TOTL` |
-| **Telecommunications & Tech** | 11 | `TLKM`, `ISAT`, `EXCL`, `TOWR`, `TBIG`, `MTEL`, `GOTO`, `BUKA`, `MTDL`, `EMTK`, `SCMA`, `MNCN` |
+| **Telecommunications & Tech** | 12 | `TLKM`, `ISAT`, `EXCL`, `TOWR`, `TBIG`, `MTEL`, `GOTO`, `BUKA`, `MTDL`, `EMTK`, `SCMA`, `MNCN` |
 | **Basic Materials, Cement & Paper** | 9 | `BRPT`, `TPIA`, `INTP`, `SMGR`, `INKP`, `TKIM`, `AVIA`, `AMMN`, `SMBR` |
 | **Healthcare, Pharma & Hospitals** | 7 | `MIKA`, `HEAL`, `SILO`, `TSPC`, `PRDA`, `SAME`, `SIDO` |
 | **Mining & Metals** | 7 | `ANTM`, `INCO`, `MDKA`, `TINS`, `NCKL`, `CITA`, `PSAB` |
 | **Consumer Discretionary & Retail** | 7 | `ACES`, `MAPI`, `MAPA`, `MAPB`, `ERAA`, `RALS`, `LPPF` |
 | **Industrials & Heavy Equipment** | 6 | `ASII`, `UNTR`, `AUTO`, `HEXA`, `DRMA`, `SMSM` |
 | **Logistics, Shipping & Transport** | 5 | `BIRD`, `SMDR`, `ASSA`, `TMAS`, `PSSI` |
-| **Infrastructure & Utilities** | 3 | `JSMR`, `POWR`, `KEEN` |
-| **Total Universe** | **110** | **100% Audited, Zero-Balance Discrepancy, Instant Loading (~5ms)** |
-
----
-
-## 👤 Author Profile & Engineering Pedigree
-
-The VALUEX platform was conceptualized, engineered, and calibrated by:
-
-### **Ahmad Farhan (Abas)**
-*Engineering Physics (ITS) • MBA Candidate, Finance (SBM ITB)*
-
-Operating at the intersection of quantitative engineering and financial modeling, Ahmad Farhan developed this platform to translate complex multi-stage discounted cash flows, 10-year articulated financial modeling, and intrinsic business valuation frameworks into an intuitive, accessible tool for students, equity analysts, and finance practitioners.
-
-#### Connect & Research Feedback Channels:
-- **LinkedIn**: [linkedin.com/in/afenterprisefarhan](https://www.linkedin.com/in/afenterprisefarhan)
-- **GitHub**: [@celeebi (github.com/celeebi)](https://github.com/celeebi)
-- **Instagram**: [@abas.space (instagram.com/abas.space)](https://instagram.com/abas.space)
-- **Personal Email**: [`afenterprisefarhan@gmail.com`](mailto:afenterprisefarhan@gmail.com)
-- **University Email**: [`29125329@mahasiswa.itb.ac.id`](mailto:29125329@mahasiswa.itb.ac.id)
-- **Campus Coordinates**: School of Business and Management, Institut Teknologi Bandung (SBM ITB), Jl. Ganesha No. 10, Bandung, Indonesia.
+| **Infrastructure & Utilities** | 5 | `JSMR`, `POWR`, `KEEN`, `AADI`, `MLBI` |
+| **Total Audited Universe** | **112** | **100% Audited Filings • Zero Balance Sheet Discrepancy • Instant Load (~5ms)** |
 
 ---
 
 ## 📁 Repository Structure
 
-```
+```text
 Project BA/
 ├── run_app.bat                           # 1-Click Windows launcher (Starlette server @ localhost:8000)
 ├── create_desktop_shortcut.bat           # Windows desktop shortcut generator
-├── server.py                             # High-performance asynchronous backend server (Starlette/Uvicorn)
-├── app.py                                # Companion Streamlit interface
-├── requirements.txt                      # Python dependencies (openpyxl, pandas, numpy, uvicorn, starlette, etc.)
-├── README.md                             # Comprehensive institutional documentation
-├── USER_GUIDE.md                         # Detailed terminal user manual
-├── PLAN.md                               # Architectural execution roadmap
-├── AI_DISCLOSURE.md                      # Academic AI disclosure and compliance statement
+├── server.py                             # Asynchronous Starlette/Uvicorn REST API server
+├── app.py                                # Companion Streamlit analytics interface
+├── requirements.txt                      # Python dependencies
+├── README.md                             # Flagship project documentation
+├── USER_GUIDE.md                         # End-to-end terminal user manual
+├── AI_DISCLOSURE.md                      # Academic AI disclosure & verification statement
 ├── LICENSE                               # MIT License
 ├── data/
-│   └── idx_cache/                        # 151 pre-cached audited statement files (110 IDX equities)
+│   └── idx_cache/                        # 151 pre-cached audited statement files (112 IDX equities)
 ├── scripts/
-│   └── precache_universe.py              # Automated batch pre-caching utility for top IDX universe
+│   └── precache_universe.py              # Batch pre-caching utility for IDX universe
 ├── static/
-│   ├── img/                              # Institutional co-branding and crest logos
-│   │   ├── university_logo.png           # SBM ITB / University crest
-│   │   └── course_logo.png               # MM6026 Digital Business Valuation course logo
+│   ├── img/                              # SBM ITB & MM6026 institutional logos
 │   ├── index.html                        # React 18 production shell (Tailwind CDN, Lucide, KaTeX)
-│   ├── app_react.jsx                     # VALUEX Terminal (8 workflow views, Cone chart, 10 subtabs, Provenance)
-│   ├── coverage_data.js                  # Initial property universe data (PWON, BSDE, CTRA, SMRA, ASII)
-│   ├── index_legacy.html                 # Prior frontend backup
-│   ├── app.js                            # Legacy vanilla JS controller
-│   └── draft.tsx                         # Institutional design reference template
+│   ├── app_react.jsx                     # VALUEX SPA Terminal (8 views, Live Clock, Peer Manager, 10 subtabs)
+│   └── coverage_data.js                  # Initial baseline universe metadata
 ├── src/
 │   ├── data/
-│   │   ├── loader.py                     # Universal statement harmonizer, loader & banking scope guard
-│   │   ├── coverage.py                   # Property universe metadata & defaults
-│   │   ├── country_data.py               # Indonesian macroeconomic parameters (INDOGB 10Y, BI-Rate, Tax)
-│   │   ├── normalizer.py                 # Statement standardization routines
+│   │   ├── market_clock.py               # IDX Jakarta Time (WIB / UTC+7) trading session clock engine
+│   │   ├── market_stream.py              # Real-life Yahoo Finance quote service with session-aware TTL cache
+│   │   ├── peers.py                      # Automated 112-company IDX peer discovery & multiple service
+│   │   ├── news_service.py               # Live financial news aggregator & sentiment classifier
+│   │   ├── loader.py                     # Universal statement harmonizer & banking ALM scope guard
+│   │   ├── coverage.py                   # Sector coverage metadata & calibrated defaults
+│   │   ├── country_data.py               # Indonesian macro parameters (INDOGB 10Y, BI-Rate, CRP, Tax)
 │   │   └── adapters/
-│   │       ├── idx_adapter.py            # Official IDX XBRL adapter, cache manager & USD conversion
-│   │       └── idx_scraper/              # Reverse-engineered IDX XBRL multi-year financial scraper
-│   │           ├── client.py             # HTTP client with Cloudflare fast-fail circuit breaker
-│   │           ├── api.py                # IDX report query loops & payload extractors
-│   │           ├── statement.py          # XBRL financial report parser
-│   │           └── proforma/             # Statement normalization & financial ratio calculators
+│   │       ├── idx_adapter.py            # Official IDX XBRL adapter, cache router & FX converter
+│   │       └── idx_scraper/              # Multi-year IDX XBRL financial statement scraper
 │   ├── models/
-│   │   ├── three_statement.py            # Dynamic 10-year 3-statement model with zero-balance checks
-│   │   ├── pro_forma.py                  # 10-year pro forma roll-forward & auto-fade generator
-│   │   ├── parameters.py                 # Capital structure WACC & fundamental CAPM
-│   │   ├── dcf.py                        # Multi-stage FCFF DCF model with dual terminal value
-│   │   ├── multiples.py                  # Relative valuation peer multiples (EV/EBITDA, P/E, P/B)
-│   │   ├── rim.py                        # Residual Income Model (clean surplus framework)
-│   │   ├── ddm.py                        # Multi-stage Dividend Discount Model with Gordon Growth TV
-│   │   ├── rnav.py                       # Revalued Net Asset Value (GAV, Land MTM, Conglomerate Discount)
-│   │   ├── monte_carlo.py                # 10,000-run vectorized Monte Carlo simulation with 95% VaR
+│   │   ├── three_statement.py            # Dynamic 10-year 3-statement model with zero-balance check
+│   │   ├── pro_forma.py                  # 10-year pro forma roll-forward & linear auto-fade engine
+│   │   ├── parameters.py                 # Bottom-up CAPM & WACC capital structure modeler
+│   │   ├── dcf.py                        # Multi-stage FCFF DCF engine (Gordon Growth & Exit Multiple)
+│   │   ├── multiples.py                  # Flexible peer relative valuation (Median, Mean, Harmonic, P25)
+│   │   ├── rim.py                        # Residual Income Model (Clean Surplus ROE spread)
+│   │   ├── ddm.py                        # Multi-stage Dividend Discount Model
+│   │   ├── rnav.py                       # Revalued Net Asset Value (NOI cap + Land Bank MTM)
+│   │   ├── monte_carlo.py                # 10,000-run vectorized Monte Carlo simulation & 95% VaR
 │   │   ├── eva.py                        # Stern Stewart Economic Value Added (EVA®) & MVA engine
-│   │   ├── ensemble.py                   # Multi-model triangulation aggregator with 0% weight support
+│   │   ├── ensemble.py                   # Multi-model valuation triangulation aggregator
 │   │   └── scenarios.py                  # Strictly monotonic Bear / Base / Bull scenario forecaster
 │   ├── rules/
-│   │   ├── sanity_checks.py              # Damodaran boundary constraints (g < GDP, WACC guardrails)
-│   │   └── recommendations.py            # Margin-of-safety recommendation engine (BUY/HOLD/SELL)
+│   │   ├── sanity_checks.py              # Damodaran boundary guardrails (g < GDP, WACC constraints)
+│   │   └── recommendations.py            # Margin-of-safety recommendation engine (BUY / HOLD / SELL)
 │   └── analytics/
-│       ├── tornado.py                    # Two-sided sensitivity swing ranking (Tornado diagram)
-│       ├── dupont.py                     # 5-stage DuPont ROE decomposition with sector benchmarks
+│       ├── tornado.py                    # Two-sided parameter sensitivity swing ranking
+│       ├── dupont.py                     # 5-stage DuPont ROE decomposition
 │       ├── exporter.py                   # Formula-active 6-sheet Microsoft Excel exporter (.xlsx)
-│       ├── audit_trail.py                # LaTeX mathematical proof generator
-│       ├── sensitivity.py                # 2D WACC vs g sensitivity matrix
-│       └── visualizer.py                 # Plotly visualization engine
-└── tests/
-    ├── test_dcf_and_exporter.py          # DCF discounting math and active formula Excel tests
-    ├── test_ddm.py                       # Multi-stage DDM, 4-way triangulation, and Excel export tests
-    ├── test_pro_forma.py                 # 10-year pro forma roll-forward, WACC, and auto-fade tests
-    ├── test_sanity_checks.py             # Terminal growth, negative multiple, and EV bridge tests
-    ├── test_three_statement.py           # 10-year 3-statement articulation and zero-balance tests
-    ├── test_rnav.py                      # RNAV GAV, land bank MTM, and target price tests
-    ├── test_monte_carlo.py               # Monte Carlo 10k simulations, percentiles, and VaR tests
-    ├── test_eva.py                       # EVA mathematical identity, 10Y schedule, and MVA tests
-    ├── test_analytics_advanced.py        # Tornado sensitivity and DuPont identity tests
-    ├── test_api_endpoints.py             # Starlette REST API endpoints, recalculation & Excel parity tests
-    └── test_universal_pipeline_and_scenarios.py # Universal harmonizer, scenario ordering & provenance tests
+│       ├── audit_trail.py                # Step-by-step KaTeX LaTeX mathematical proof generator
+│       └── sensitivity.py                # 2D WACC vs. terminal growth sensitivity matrix
+└── tests/                                # 118 automated unit & integration tests across 16 test modules
+    ├── test_market_clock.py              # Jakarta timezone & IDX session transition tests
+    ├── test_market_stream.py             # Live Yahoo Finance quote caching & fallback tests
+    ├── test_server_market_api.py         # /api/market/status and /api/market/quote endpoint tests
+    ├── test_peers.py                     # PeerUniverseService & statistical benchmark tests
+    ├── test_audited_historical_statements.py # Multi-company accounting identity & linearity tests
+    ├── test_news_service.py              # Live news ingestion & sentiment classification tests
+    ├── test_dcf_and_exporter.py          # DCF discounting math & formula-active Excel export tests
+    ├── test_three_statement.py           # 10-year 3-statement articulation & zero-balance tests
+    ├── test_rnav.py                      # RNAV property valuation tests
+    ├── test_monte_carlo.py               # 10,000-run Monte Carlo reproducibility & VaR tests
+    ├── test_eva.py                       # EVA & MVA mathematical identity tests
+    ├── test_analytics_advanced.py        # Tornado sensitivity & 5-stage DuPont ROE tests
+    └── test_api_endpoints.py             # Full Starlette REST API & assumption parity tests
 ```
 
 ---
 
-## 🛡️ Git Branching & Safety Policy
+## 🛡️ Git Branching & Release Milestones
 
-| Branch / Tag | Status | Description | Anchor Commit |
-| :--- | :--- | :--- | :--- |
-| **`Valuex-v1.2`** ⭐ | **Active Production** | Current production release: 110 pre-cached equities, explicit data provenance marks (IDX vs Yahoo Finance), 12M Target Price Cone toggle, monotonic scenarios, fast-fail circuit breaker, and 92 passed unit tests. | `03a3e6e` |
-| **`Valuex-v1.1`** | **Milestone Release** | Expanded 10Y pro-forma 3-statement model, Excel formula assumption parity, RNAV, 10k Monte Carlo, EVA, and 34 passed tests. | `ad7e0bf` |
-| **`Valuex-v1.0`** | **Foundation Release** | Verified baseline 4-way valuation models (DCF, Comps, RIM, DDM), Excel exporter, and core valuation architecture. | `36a99e3` |
-| **`develop_further`** | **Development Anchor** | Preserved development branch with universal harmonizer milestones. | `c74c0f9` |
-| **`v1.2`** (Tag) | Release Tag | Official Version 1.2 release tag. | `03a3e6e` |
-| **`v1.1`** (Tag) | Release Tag | Official Version 1.1 release tag. | `ad7e0bf` |
-| **`v1.0`** (Tag) | Release Tag | Official Version 1.0 release tag. | `36a99e3` |
-
-To switch back to a previous milestone release at any time:
-```powershell
-git checkout Valuex-v1.1
-# or
-git checkout Valuex-v1.0
-```
+| Branch / Tag | Status | Key Capabilities Included |
+| :--- | :--- | :--- |
+| **`Valuex-v1.2`** ⭐ | **Active Production** | Live Hugging Face Cloud sync, real-life Yahoo Finance market feed + IDX session clock, automated & custom 112-company peer comps engine, Search-First terminal, explicit data provenance badges, and 118 automated tests. |
+| **`Valuex-v1.1`** | **Milestone Release** | Expanded 10-year pro forma 3-statement model, formula-active Excel assumption parity, RNAV, 10,000-run Monte Carlo, and EVA® engine. |
+| **`Valuex-v1.0`** | **Foundation Release** | Core 4-way valuation models (DCF, Comps, RIM, DDM), baseline Excel exporter, and modular Python architecture. |
 
 ---
 
-## 📄 License & Academic Disclosure
+## 👤 Author Profile & Engineering Pedigree
 
-- **Degree Program:** Master of Business Administration (MBA)
-- **Course:** MM6026 Digital Business Valuation  
-- **Institution:** School of Business and Management, Institut Teknologi Bandung (SBM ITB)
-- **License:** MIT License. See [`LICENSE`](LICENSE) for terms.  
-- **Academic AI Disclosure:** All AI assistance utilized in constructing and verifying this platform complies with institutional academic standards. See [`AI_DISCLOSURE.md`](AI_DISCLOSURE.md).
+The **VALUEX Institutional Digital Business Valuation Platform** was conceptualized, architected, and calibrated by:
+
+### **Ahmad Farhan (Abas)**
+*B.Eng. in Engineering Physics (ITS) • MBA Candidate in Finance (SBM ITB)*
+
+Operating at the intersection of quantitative physical systems engineering and institutional corporate finance, Ahmad Farhan engineered VALUEX to transform theoretical valuation methodologies—multi-stage discounted cash flows, clean-surplus residual income, stochastic Monte Carlo simulations, and 10-year articulated financial statements—into an interactive, transparent, and auditable decision-support terminal for equity analysts, finance practitioners, and business school researchers.
+
+#### 🔗 Connect & Research Channels
+- **LinkedIn**: [linkedin.com/in/afenterprisefarhan](https://www.linkedin.com/in/afenterprisefarhan)
+- **GitHub**: [@celeebi (github.com/celeebi)](https://github.com/celeebi)
+- **Hugging Face**: [huggingface.co/celeebi](https://huggingface.co/celeebi) • [Live VALUEX Space](https://celeebi-valuex.hf.space)
+- **Instagram**: [@abas.space (instagram.com/abas.space)](https://instagram.com/abas.space)
+- **Personal Email**: [`afenterprisefarhan@gmail.com`](mailto:afenterprisefarhan@gmail.com)
+- **University Email**: [`29125329@mahasiswa.itb.ac.id`](mailto:29125329@mahasiswa.itb.ac.id)
+- **Institution**: School of Business and Management, Institut Teknologi Bandung (SBM ITB), Jl. Ganesha No. 10, Bandung, West Java, Indonesia.
+
+---
+
+## 📄 License, Academic AI Disclosure & Disclaimer
+
+### 1. Open-Source License (MIT)
+This project is licensed under the **MIT License**. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files to deal in the Software without restriction, subject to the conditions in the [`LICENSE`](LICENSE) file.
+
+### 2. Academic AI Disclosure & Deterministic Integrity
+Developed for **MM6026 Digital Business Valuation** at **SBM ITB**. In full compliance with academic transparency standards:
+- **Pair-Programming & Scaffolding**: AI coding assistance (Google DeepMind Antigravity) was utilized to accelerate UI scaffolding, data normalization pipelines, and automated unit test generation.
+- **100% Deterministic Financial Math**: **Zero black-box LLM APIs are invoked at runtime for financial calculations**. Every WACC, FCFF, terminal value, peer multiple, balance sheet roll-forward, and Monte Carlo simulation is executed by deterministic Python code reconciled against *Damodaran on Valuation* and *McKinsey Valuation*, and verified by the Calculation Inspector and `pytest` suite.
+- For the full breakdown of human analyst ownership versus AI scaffolding, see [`AI_DISCLOSURE.md`](AI_DISCLOSURE.md).
+
+### 3. Institutional & Educational Disclaimer
+*All financial models, intrinsic value estimates, scenario cones, and BUY/HOLD/SELL signals generated by VALUEX are strictly for **academic research and educational demonstration purposes** within the Master of Business Administration (MBA) curriculum at SBM ITB. Nothing in this software constitutes licensed investment advice or a solicitation to buy or sell securities on the Indonesia Stock Exchange (IDX).*
