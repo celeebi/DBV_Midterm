@@ -183,7 +183,7 @@ Located in [`src/data/peers.py`](src/data/peers.py) and [`src/models/multiples.p
 ### 3. Multi-Stage FCFF DCF & Fundamental CAPM Modeler
 Located in [`src/models/dcf.py`](src/models/dcf.py), [`src/models/pro_forma.py`](src/models/pro_forma.py), and [`src/models/parameters.py`](src/models/parameters.py):
 - **10-Year Explicit FCFF Roll-Forward**:
-  $$\text{FCFF}_t = \text{EBIT}_t(1 - \tau) + \text{D\&A}_t - \text{CapEx}_t - \Delta\text{NWC}_t$$
+  $$\text{FCFF}_t = \text{EBIT}_t(1 - \tau) + \text{DA}_t - \text{CapEx}_t - \Delta\text{NWC}_t$$
 - **Bottom-Up WACC**: Incorporates Bank Indonesia 10Y Government Bond Yield ($R_f = 6.60\%$), 5-year Beta ($\beta$), Mature Market ERP ($5.00\%$), Damodaran Indonesia Country Risk Premium ($2.16\%$), and after-tax Cost of Debt.
 - **Dual Terminal Value**: Computes both Gordon Growth ($\text{TV} = \frac{\text{FCFF}_{10}(1+g)}{\text{WACC}-g}$) and Exit EV/EBITDA Multiple methods.
 
