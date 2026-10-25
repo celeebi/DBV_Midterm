@@ -134,21 +134,25 @@ DEFAULT_PEERS_MAP: Dict[str, List[str]] = {
     "CTRA.JK": ["PWON.JK", "BSDE.JK", "SMRA.JK", "ASRI.JK"],
     "SMRA.JK": ["PWON.JK", "BSDE.JK", "CTRA.JK", "ASRI.JK"],
     "ASRI.JK": ["PWON.JK", "BSDE.JK", "CTRA.JK", "SMRA.JK"],
+    # Mining / Metals
+    "ANTM.JK": ["INCO.JK", "MDKA.JK", "TINS.JK", "MBMA.JK", "NCKL.JK"],
+    "INCO.JK": ["ANTM.JK", "MDKA.JK", "TINS.JK", "MBMA.JK"],
+    "MDKA.JK": ["ANTM.JK", "INCO.JK", "MBMA.JK", "NCKL.JK"],
     # Automotive / Conglomerates
-    "ASII.JK": ["UNTR.JK", "AUTO.JK", "IMAS.JK"],
+    "ASII.JK": ["UNTR.JK", "AUTO.JK", "DRMA.JK", "SMSM.JK"],
     "UNTR.JK": ["ASII.JK", "HEXA.JK", "DOID.JK"],
     "AUTO.JK": ["ASII.JK", "SMSM.JK", "DRMA.JK"],
     # Telecommunications
-    "TLKM.JK": ["ISAT.JK", "EXCL.JK", "TOWR.JK"],
-    "ISAT.JK": ["TLKM.JK", "EXCL.JK", "FREN.JK"],
+    "TLKM.JK": ["ISAT.JK", "EXCL.JK", "TOWR.JK", "MTEL.JK", "TBIG.JK"],
+    "ISAT.JK": ["TLKM.JK", "EXCL.JK", "TOWR.JK"],
     "EXCL.JK": ["TLKM.JK", "ISAT.JK", "TOWR.JK"],
     # Consumer Goods
     "ICBP.JK": ["INDF.JK", "MYOR.JK", "UNVR.JK"],
     "INDF.JK": ["ICBP.JK", "MYOR.JK", "GGRM.JK"],
     "UNVR.JK": ["ICBP.JK", "MYOR.JK", "KLBF.JK"],
     # Mining / Energy
-    "ADRO.JK": ["PTBA.JK", "ITMG.JK", "INDY.JK"],
-    "PTBA.JK": ["ADRO.JK", "ITMG.JK", "MEDC.JK"],
+    "ADRO.JK": ["PTBA.JK", "ITMG.JK", "INDY.JK", "BUMI.JK"],
+    "PTBA.JK": ["ADRO.JK", "ITMG.JK", "INDY.JK", "BUMI.JK"],
 }
 
 # Industry valuation guidance rules

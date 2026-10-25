@@ -24,6 +24,7 @@ class RelativeValuationModel:
     @staticmethod
     def calculate_comps(
         peers_data: Optional[List[Dict[str, Any]]] = None,
+        ticker: Optional[str] = None,
         target_ebitda: float = 3.38,  # Rp T (Audited 2024 from IDX XBRL)
         target_net_income: float = 2.42,  # Rp T
         target_equity: float = 24.74,  # Rp T
@@ -31,35 +32,76 @@ class RelativeValuationModel:
         cash: float = 9.20,
         debt: float = 6.44,
         minority_interest: float = 4.77,
-        stat_method: str = "median",  # 'median', '25th', 'harmonic_mean'
+        stat_method: str = "median",  # 'median', 'average', 'mean', '25th', 'harmonic_mean'
         filter_outliers: bool = True
     ) -> Dict[str, Any]:
         """
         Computes benchmark peer multiples and implies target share price.
         """
-        peers = peers_data if peers_data is not None else RelativeValuationModel.DEFAULT_IDX_PEERS
-        df_peers = pd.DataFrame(peers)
+        if peers_data is not None and len(peers_data) > 0:
+            peers = peers_data
+        elif ticker:
+            try:
+                from src.data.peers import PeerUniverseService
+                peers = PeerUniverseService.get_instance().get_recommended_peers(ticker)
+            except Exception:
+                peers = RelativeValuationModel.DEFAULT_IDX_PEERS
+        else:
+            peers = RelativeValuationModel.DEFAULT_IDX_PEERS
 
+        def to_float(val: Any) -> Optional[float]:
+            if val is None or val == "" or str(val).lower() in ("nan", "none", "null"):
+                return None
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                return None
+
+        # Clean peers list for table presentation
+        cleaned_peers = []
         ev_ebitda_list = []
         pe_list = []
         pb_list = []
 
         for p in peers:
-            ev_eb = float(p.get("ev_ebitda", 0.0))
-            pe = float(p.get("pe", 0.0))
-            pb = float(p.get("pb", 0.0))
+            ev_eb = to_float(p.get("ev_ebitda") if "ev_ebitda" in p else p.get("evEbitda"))
+            pe = to_float(p.get("pe"))
+            pb = to_float(p.get("pb"))
+            mcap = to_float(p.get("mcap"))
+            rev_growth = to_float(p.get("rev_growth") if "rev_growth" in p else p.get("revGrowth"))
+            margin = to_float(p.get("ebitda_margin") if "ebitda_margin" in p else p.get("ebitdaMargin"))
 
-            if filter_outliers:
-                if 1.0 <= ev_eb <= 25.0:
+            peer_clean = {
+                "name": p.get("name", "Peer"),
+                "ticker": p.get("ticker", "PEER.JK"),
+                "clean_ticker": p.get("clean_ticker", str(p.get("ticker", "")).replace(".JK", "")),
+                "sector": p.get("sector", ""),
+                "industry": p.get("industry", ""),
+                "mcap": mcap,
+                "ev_ebitda": ev_eb,
+                "evEbitda": ev_eb,
+                "pe": pe,
+                "pb": pb,
+                "rev_growth": rev_growth if rev_growth is not None else 0.0,
+                "revGrowth": rev_growth if rev_growth is not None else 0.0,
+                "ebitda_margin": margin if margin is not None else 0.0,
+                "ebitdaMargin": margin if margin is not None else 0.0
+            }
+            cleaned_peers.append(peer_clean)
+
+            if ev_eb is not None and ev_eb > 0:
+                if not filter_outliers or (1.0 <= ev_eb <= 40.0):
                     ev_ebitda_list.append(ev_eb)
-                if 2.0 <= pe <= 35.0:
+
+            if pe is not None and pe > 0:
+                if not filter_outliers or (2.0 <= pe <= 50.0):
                     pe_list.append(pe)
-                if 0.2 <= pb <= 8.0:
+
+            if pb is not None and pb > 0:
+                if not filter_outliers or (0.2 <= pb <= 10.0):
                     pb_list.append(pb)
-            else:
-                if ev_eb > 0: ev_ebitda_list.append(ev_eb)
-                if pe > 0: pe_list.append(pe)
-                if pb > 0: pb_list.append(pb)
+
+        df_peers = pd.DataFrame(cleaned_peers)
 
         # Calculate statistics
         b_ev_ebitda = RelativeValuationModel._compute_stat(ev_ebitda_list, stat_method, default=4.5)
@@ -67,13 +109,11 @@ class RelativeValuationModel:
         b_pb = RelativeValuationModel._compute_stat(pb_list, stat_method, default=1.1)
 
         # Implied Price from EV/EBITDA
-        # Implied EV = Target EBITDA * Benchmark EV/EBITDA
         implied_ev = target_ebitda * b_ev_ebitda
         implied_equity_from_ev = implied_ev + cash - debt - minority_interest
         price_ev_ebitda = max(0.0, (implied_equity_from_ev * 1000.0) / shares_outstanding)
 
         # Implied Price from P/E
-        # Implied Equity = Target Net Income * Benchmark P/E
         implied_equity_from_pe = target_net_income * b_pe
         price_pe = max(0.0, (implied_equity_from_pe * 1000.0) / shares_outstanding)
 
@@ -108,9 +148,12 @@ class RelativeValuationModel:
         if not vals:
             return default
         arr = np.array(vals)
-        if method == "25th":
+        norm_m = method.lower().strip()
+        if norm_m in ("average", "mean"):
+            return float(np.mean(arr))
+        elif norm_m == "25th":
             return float(np.percentile(arr, 25))
-        elif method == "harmonic_mean":
+        elif norm_m == "harmonic_mean":
             # Harmonic mean = n / sum(1/x)
             return float(len(arr) / np.sum(1.0 / arr))
         else:  # median

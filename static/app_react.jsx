@@ -2671,6 +2671,14 @@ function App() {
 
   const [customAssumptionsMap, setCustomAssumptionsMap] = useState({});
 
+  // Relative Comps dynamic peer state per security
+  const [universeCatalog, setUniverseCatalog] = useState([]);
+  const [customPeersMap, setCustomPeersMap] = useState({});
+  const [excludedPeersMap, setExcludedPeersMap] = useState({});
+  const [compsStatMethodMap, setCompsStatMethodMap] = useState({});
+  const [compsFilterOutliersMap, setCompsFilterOutliersMap] = useState({});
+  const [selectedCatalogTicker, setSelectedCatalogTicker] = useState('');
+
 
 
   const [activityLog, setActivityLog] = useState([
@@ -2739,6 +2747,14 @@ function App() {
   // Starts with 0 pre-selected companies. Equities are ingested dynamically via handleLoadCustomTicker on demand.
   useEffect(() => {
     console.log('ValueX Universal Indonesian Terminal initialized in Search-First mode.');
+    fetch('/api/peers?ticker=PWON.JK')
+      .then(r => r.json())
+      .then(d => {
+        if (d && Array.isArray(d.universe_catalog) && d.universe_catalog.length > 0) {
+          setUniverseCatalog(d.universe_catalog);
+        }
+      })
+      .catch(e => console.warn('Could not pre-load universe catalog:', e));
   }, []);
 
 
@@ -2919,6 +2935,10 @@ function App() {
 
 
 
+        if (d.universe_catalog && Array.isArray(d.universe_catalog) && d.universe_catalog.length > 0) {
+          setUniverseCatalog(d.universe_catalog);
+        }
+
         const newCompany = {
 
           id: slug,
@@ -2989,9 +3009,9 @@ function App() {
 
           comps: [
 
-            { name: "Industry Peer 1", ticker: "PEER1", mcap: 15000, evEbitda: 7.2, pe: 10.5, revGrowth: 8.5, ebitdaMargin: 24.0 },
+            ...(d.comps && Array.isArray(d.comps) && d.comps.length > 0 ? d.comps : [{ name: "Bumi Serpong Damai", ticker: "BSDE.JK", clean_ticker: "BSDE", mcap: 10600, evEbitda: 3.71, pe: 4.14, revGrowth: -7.3, ebitdaMargin: 35.1 }, { name: "Ciputra Development", ticker: "CTRA.JK", clean_ticker: "CTRA", mcap: 10700, evEbitda: 2.55, pe: 4.01, revGrowth: 12.8, ebitdaMargin: 31.5 }])
 
-            { name: "Industry Peer 2", ticker: "PEER2", mcap: 22000, evEbitda: 6.8, pe: 9.8, revGrowth: 7.2, ebitdaMargin: 26.5 },
+
 
           ],
 
@@ -3169,6 +3189,16 @@ function App() {
 
       };
 
+    }
+
+    const activePeers = customPeersMap[ticker] || (coverageCompanies.find(c => c.ticker === ticker)?.comps) || [];
+    const excludedList = excludedPeersMap[ticker] || [];
+    if (activePeers.length > 0 || compsStatMethodMap[ticker]) {
+      payload.comps_params = {
+        peers: activePeers.filter(p => !excludedList.includes(p.ticker)),
+        stat_method: compsStatMethodMap[ticker] || 'median',
+        filter_outliers: compsFilterOutliersMap[ticker] !== undefined ? compsFilterOutliersMap[ticker] : true
+      };
     }
 
     fetch('/api/recalculate', {
@@ -5240,6 +5270,26 @@ function App() {
 
               onDownloadExcel={handleDownloadExcel}
 
+              universeCatalog={universeCatalog}
+
+              customPeersMap={customPeersMap}
+
+              setCustomPeersMap={setCustomPeersMap}
+
+              excludedPeersMap={excludedPeersMap}
+
+              setExcludedPeersMap={setExcludedPeersMap}
+
+              compsStatMethodMap={compsStatMethodMap}
+
+              setCompsStatMethodMap={setCompsStatMethodMap}
+
+              compsFilterOutliersMap={compsFilterOutliersMap}
+
+              setCompsFilterOutliersMap={setCompsFilterOutliersMap}
+
+              onTriggerToast={triggerToast}
+
             />
 
           )}
@@ -6913,7 +6963,28 @@ function VisualAnalyticsTab({ company, backendData }) {
 
 // 3. VALUATION WORKSPACE (DCF, COMPS, RIM, DDM, FOOTBALL FIELD)
 
-function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshCalculation, onUpdateAssumption, onResetAssumptions, onToggleWatchlist, onNavigate, onOpenInspector, onDownloadExcel }) {
+function ValuationWorkspace({
+  company,
+  backendData,
+  isLoadingBackend,
+  onRefreshCalculation,
+  onUpdateAssumption,
+  onResetAssumptions,
+  onToggleWatchlist,
+  onNavigate,
+  onOpenInspector,
+  onDownloadExcel,
+  universeCatalog = [],
+  customPeersMap = {},
+  setCustomPeersMap = () => {},
+  excludedPeersMap = {},
+  setExcludedPeersMap = () => {},
+  compsStatMethodMap = {},
+  setCompsStatMethodMap = () => {},
+  compsFilterOutliersMap = {},
+  setCompsFilterOutliersMap = () => {},
+  onTriggerToast = () => {}
+}) {
 
   if (!company) return null;
 
@@ -6921,6 +6992,8 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
 
   const [footballView, setFootballView] = useState('bars');
   const [priceChartView, setPriceChartView] = useState('track');
+  const triggerToast = onTriggerToast || (() => {});
+  const [selectedCatalogTicker, setSelectedCatalogTicker] = useState('');
 
   const v = company.valuation || {};
 
@@ -7963,116 +8036,364 @@ function ValuationWorkspace({ company, backendData, isLoadingBackend, onRefreshC
 
 
         {/* TAB 2: COMPS */}
+        {activeTab === 'comps' && (() => {
+          const activePeers = customPeersMap[company.ticker] || (backendData?.comps?.peers && backendData.comps.peers.length > 0 ? backendData.comps.peers : (company.comps || []));
+          const excludedList = excludedPeersMap[company.ticker] || [];
+          const currentStatMethod = compsStatMethodMap[company.ticker] || (backendData?.comps?.stat_method || 'median');
+          const currentFilterOutliers = compsFilterOutliersMap[company.ticker] !== undefined ? compsFilterOutliersMap[company.ticker] : true;
 
-        {activeTab === 'comps' && (
+          const handleTogglePeer = (peerTicker) => {
+            setExcludedPeersMap(prev => {
+              const current = prev[company.ticker] || [];
+              const updated = current.includes(peerTicker)
+                ? current.filter(t => t !== peerTicker)
+                : [...current, peerTicker];
+              return { ...prev, [company.ticker]: updated };
+            });
+            setTimeout(() => {
+              if (onRefreshCalculation) onRefreshCalculation();
+            }, 50);
+          };
 
-          <div className="p-4 space-y-4">
+          const handleRemovePeer = (peerTicker) => {
+            const updated = activePeers.filter(p => p.ticker !== peerTicker);
+            setCustomPeersMap(prev => ({ ...prev, [company.ticker]: updated }));
+            setTimeout(() => {
+              if (onRefreshCalculation) onRefreshCalculation();
+            }, 50);
+          };
 
-            <div className="flex items-center justify-between">
+          const handleAddPeerFromCatalog = (catTicker) => {
+            if (!catTicker) return;
+            const item = universeCatalog.find(c => c.ticker === catTicker);
+            if (!item) return;
+            if (activePeers.some(p => p.ticker === catTicker)) {
+              triggerToast(`${catTicker} is already in the comparable peer list.`);
+              return;
+            }
+            const newPeer = {
+              name: item.name,
+              ticker: item.ticker,
+              clean_ticker: item.clean_ticker,
+              sector: item.sector,
+              industry: item.industry,
+              mcap: item.mcap,
+              evEbitda: item.ev_ebitda,
+              ev_ebitda: item.ev_ebitda,
+              pe: item.pe,
+              pb: item.pb,
+              revGrowth: 0.0,
+              ebitdaMargin: 0.0
+            };
+            const updated = [...activePeers, newPeer];
+            setCustomPeersMap(prev => ({ ...prev, [company.ticker]: updated }));
+            setSelectedCatalogTicker('');
+            triggerToast(`Added ${catTicker} (${item.name}) to peer comps.`);
+            setTimeout(() => {
+              if (onRefreshCalculation) onRefreshCalculation();
+            }, 50);
+          };
 
-              <div>
+          const handleResetPeers = async () => {
+            try {
+              const res = await fetch(`/api/peers?ticker=${company.ticker}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data.recommended_peers) {
+                  setCustomPeersMap(prev => ({ ...prev, [company.ticker]: data.recommended_peers }));
+                  setExcludedPeersMap(prev => ({ ...prev, [company.ticker]: [] }));
+                  triggerToast(`Reset to institutional peer defaults for ${company.ticker}`);
+                  if (onRefreshCalculation) onRefreshCalculation();
+                }
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          };
 
-                <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+          const handleSetStatMethod = (method) => {
+            setCompsStatMethodMap(prev => ({ ...prev, [company.ticker]: method }));
+            setTimeout(() => {
+              if (onRefreshCalculation) onRefreshCalculation();
+            }, 50);
+          };
 
-                  Cross-Industry Peer Trading Multiples Matrix
+          const handleToggleOutliers = () => {
+            setCompsFilterOutliersMap(prev => {
+              const nextVal = !(prev[company.ticker] !== undefined ? prev[company.ticker] : true);
+              return { ...prev, [company.ticker]: nextVal };
+            });
+            setTimeout(() => {
+              if (onRefreshCalculation) onRefreshCalculation();
+            }, 50);
+          };
 
-                </h3>
+          // Group universe catalog by sector for the selector
+          const catalogBySector = {};
+          (universeCatalog || []).forEach(cat => {
+            const sec = cat.sector || 'General';
+            if (!catalogBySector[sec]) catalogBySector[sec] = [];
+            catalogBySector[sec].push(cat);
+          });
 
-                <p className="text-xs text-slate-500">
+          // Subject company live ratios
+          const subjMcap = v.marketCap;
+          const subjEbitda = proFormaRows[0]?.ebitda || (lastHist.ebitda || 1);
+          const subjEv = (subjMcap || 0) + (company.totalDebt || 0) - (company.cashAndEquivalents || 0);
+          const subjEvEbitda = subjEbitda > 0 ? (subjEv / subjEbitda).toFixed(2) + 'x' : 'N/A';
+          const subjPe = (lastHist.netIncome && lastHist.netIncome > 0) ? (subjMcap / lastHist.netIncome).toFixed(2) + 'x' : 'N/A';
+          const subjPb = (v.startingEquity && v.startingEquity > 0) ? (subjMcap / v.startingEquity).toFixed(2) + 'x' : 'N/A';
+          const subjRevGrowth = proFormaRows[0] && lastHist.revenue ? (((proFormaRows[0].revenue - lastHist.revenue) / lastHist.revenue) * 100).toFixed(1) + '%' : '+0.0%';
+          const subjMargin = proFormaRows[0] && proFormaRows[0].revenue ? ((subjEbitda / proFormaRows[0].revenue) * 100).toFixed(1) + '%' : '0.0%';
 
-                  Benchmark peer valuation using median EV/EBITDA ({v.avgCompEvEbitda}x), P/E, and P/B.
+          const displayCompsPrice = backendData?.comps?.comps_target_price !== undefined ? Math.round(backendData.comps.comps_target_price) : v.compsSharePrice;
+          const displayPriceEvEbitda = backendData?.comps?.price_ev_ebitda !== undefined ? Math.round(backendData.comps.price_ev_ebitda) : Math.round(v.compsSharePrice * 1.05);
+          const displayPricePe = backendData?.comps?.price_pe !== undefined ? Math.round(backendData.comps.price_pe) : Math.round(v.compsSharePrice * 0.95);
+          const displayPricePb = backendData?.comps?.price_pb !== undefined ? Math.round(backendData.comps.price_pb) : Math.round(v.compsSharePrice * 0.90);
 
-                </p>
+          const benchmarkEvEbitda = backendData?.comps?.benchmark_ev_ebitda || v.avgCompEvEbitda || 6.5;
+          const benchmarkPe = backendData?.comps?.benchmark_pe || 8.5;
+          const benchmarkPb = backendData?.comps?.benchmark_pb || 1.1;
 
+          return (
+            <div className="p-4 space-y-4">
+              {/* Header and Summary */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50 border border-slate-200 p-3 rounded-xs">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 rounded-xs font-mono">
+                      Institutional Peers
+                    </span>
+                    <h3 className="text-xs font-bold uppercase font-mono text-slate-800">
+                      Cross-Industry Peer Trading Multiples Matrix
+                    </h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Benchmark peer valuation using <span className="font-semibold text-slate-700">{currentStatMethod.toUpperCase()}</span>: EV/EBITDA ({benchmarkEvEbitda}x), P/E ({benchmarkPe}x), and P/B ({benchmarkPb}x).
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-right font-mono">
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-500 block uppercase">Benchmark EV/EBITDA</span>
+                    <span className="text-sm font-bold text-slate-900">{benchmarkEvEbitda}x</span>
+                  </div>
+                  <div className="text-right border-l border-slate-300 pl-3">
+                    <span className="text-[10px] text-slate-500 block uppercase">Implied Comps Price</span>
+                    <span className="text-base font-bold text-blue-700">IDR {displayCompsPrice.toLocaleString()} / sh</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="text-right font-mono">
+              {/* Interactive Toolbar: Statistics, Outlier filter, Add Peer from Universe */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-white border border-slate-200 rounded-xs text-xs font-mono">
+                {/* Stat Method Selector */}
+                <div className="flex items-center gap-1">
+                  <span className="text-[11px] font-bold text-slate-500 mr-1 uppercase">Metric:</span>
+                  {[
+                    { id: 'median', label: 'Median' },
+                    { id: 'average', label: 'Mean' },
+                    { id: 'harmonic_mean', label: 'Harmonic' },
+                    { id: '25th', label: '25th Pct' }
+                  ].map(m => (
+                    <button
+                      key={m.id}
+                      onClick={() => handleSetStatMethod(m.id)}
+                      className={`px-2 py-1 text-[11px] font-bold rounded-xs cursor-pointer transition ${
+                        currentStatMethod === m.id
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
 
-                <span className="text-[10px] text-slate-500 block uppercase">Implied Comps Price</span>
+                {/* Outlier filter toggle */}
+                <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 select-none">
+                  <input
+                    type="checkbox"
+                    checked={currentFilterOutliers}
+                    onChange={handleToggleOutliers}
+                    className="rounded-xs text-blue-600 focus:ring-0 cursor-pointer"
+                  />
+                  <span className="text-[11px]">Filter Outliers (EV 1-40x, PE 2-50x)</span>
+                </label>
 
-                <span className="text-base font-bold text-blue-700">IDR {v.compsSharePrice} / sh</span>
-
+                {/* Add Peer from Universe Dropdown */}
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={selectedCatalogTicker}
+                    onChange={(e) => setSelectedCatalogTicker(e.target.value)}
+                    className="border border-slate-300 rounded-xs px-2 py-1 text-[11px] bg-slate-50 text-slate-800 max-w-[210px]"
+                  >
+                    <option value="">+ Add peer from 112 universe...</option>
+                    {Object.keys(catalogBySector).sort().map(sec => (
+                      <optgroup key={sec} label={sec}>
+                        {catalogBySector[sec].map(item => (
+                          <option key={item.ticker} value={item.ticker}>
+                            {item.clean_ticker} - {item.name.slice(0, 24)} ({item.mcap ? item.mcap.toFixed(1) + 'T' : '-'})
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => handleAddPeerFromCatalog(selectedCatalogTicker)}
+                    disabled={!selectedCatalogTicker}
+                    className="px-2.5 py-1 text-[11px] font-bold bg-emerald-700 text-white rounded-xs hover:bg-emerald-800 disabled:opacity-40 cursor-pointer transition"
+                  >
+                    Add
+                  </button>
+                  <button
+                    onClick={handleResetPeers}
+                    className="px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xs transition cursor-pointer"
+                    title="Reset to recommended sector peers"
+                  >
+                    Reset Defaults
+                  </button>
+                </div>
               </div>
 
+              {/* Peers Table */}
+              <div className="border border-slate-200 rounded-xs overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-slate-300 bg-slate-100 text-[10px] uppercase text-slate-600">
+                      <th className="py-2.5 px-3 w-8 text-center" title="Include/Exclude from benchmark">Inc</th>
+                      <th className="py-2.5 px-3 font-sans">Peer Company</th>
+                      <th className="py-2.5 px-3">Ticker</th>
+                      <th className="py-2.5 px-3 text-right">Market Cap</th>
+                      <th className="py-2.5 px-3 text-right">EV / EBITDA</th>
+                      <th className="py-2.5 px-3 text-right">P / E</th>
+                      <th className="py-2.5 px-3 text-right">P / B</th>
+                      <th className="py-2.5 px-3 text-right">Rev Growth (%)</th>
+                      <th className="py-2.5 px-3 text-right">EBITDA Margin (%)</th>
+                      <th className="py-2.5 px-3 w-10 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {activePeers.map((peer, idx) => {
+                      const isExcluded = excludedList.includes(peer.ticker);
+                      const evEbVal = peer.evEbitda !== undefined ? peer.evEbitda : peer.ev_ebitda;
+                      const peVal = peer.pe;
+                      const pbVal = peer.pb;
+                      const revGrVal = peer.revGrowth !== undefined ? peer.revGrowth : peer.rev_growth;
+                      const marginVal = peer.ebitdaMargin !== undefined ? peer.ebitdaMargin : peer.ebitda_margin;
+
+                      return (
+                        <tr
+                          key={peer.ticker || idx}
+                          className={`hover:bg-slate-50 transition ${
+                            isExcluded ? 'opacity-40 line-through bg-slate-50 text-slate-400' : ''
+                          }`}
+                        >
+                          <td className="py-2 px-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={!isExcluded}
+                              onChange={() => handleTogglePeer(peer.ticker)}
+                              className="rounded-xs text-blue-600 focus:ring-0 cursor-pointer"
+                              title={isExcluded ? "Click to include in benchmark" : "Click to exclude from benchmark"}
+                            />
+                          </td>
+                          <td className="py-2 px-3 font-sans font-medium text-slate-900">
+                            {peer.name}
+                            {peer.industry && (
+                              <span className="block text-[10px] text-slate-400 font-sans font-normal">
+                                {peer.industry}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3 font-bold text-slate-700">
+                            <span className="px-1.5 py-0.5 bg-slate-100 rounded-xs text-[11px]">
+                              {peer.ticker}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-right font-semibold">
+                            {peer.mcap ? fmtCompact(peer.mcap) : '-'}
+                          </td>
+                          <td className="py-2 px-3 text-right font-bold text-slate-800">
+                            {evEbVal !== null && evEbVal !== undefined && evEbVal > 0
+                              ? `${Number(evEbVal).toFixed(2)}x`
+                              : <span className="text-slate-400 font-normal">N/A</span>}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {peVal !== null && peVal !== undefined && peVal > 0
+                              ? `${Number(peVal).toFixed(2)}x`
+                              : <span className="text-slate-400 font-normal">N/A (Loss)</span>}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {pbVal !== null && pbVal !== undefined && pbVal > 0
+                              ? `${Number(pbVal).toFixed(2)}x`
+                              : <span className="text-slate-400 font-normal">-</span>}
+                          </td>
+                          <td className={`py-2 px-3 text-right font-semibold ${
+                            (revGrVal || 0) >= 0 ? 'text-emerald-700' : 'text-rose-600'
+                          }`}>
+                            {(revGrVal || 0) >= 0 ? `+${Number(revGrVal || 0).toFixed(1)}%` : `${Number(revGrVal || 0).toFixed(1)}%`}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {marginVal !== null && marginVal !== undefined ? `${Number(marginVal).toFixed(1)}%` : '-'}
+                          </td>
+                          <td className="py-2 px-3 text-center">
+                            <button
+                              onClick={() => handleRemovePeer(peer.ticker)}
+                              className="text-slate-400 hover:text-rose-600 transition text-xs font-bold cursor-pointer"
+                              title="Remove peer from comps"
+                            >
+                              ✕
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                    {/* Subject Company Row */}
+                    <tr className="bg-blue-50/70 border-t-2 border-blue-400 font-bold text-slate-900">
+                      <td className="py-2.5 px-3 text-center text-blue-600">★</td>
+                      <td className="py-2.5 px-3 font-sans font-bold text-blue-900">
+                        {company.name} <span className="text-[10px] uppercase bg-blue-200 text-blue-800 px-1 py-0.5 rounded-xs ml-1 font-mono">Subject Target</span>
+                      </td>
+                      <td className="py-2.5 px-3 text-blue-700 font-bold">{company.ticker}</td>
+                      <td className="py-2.5 px-3 text-right font-bold">{fmtCompact(subjMcap)}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-blue-800">{subjEvEbitda}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-blue-800">{subjPe}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-blue-800">{subjPb}</td>
+                      <td className="py-2.5 px-3 text-right text-emerald-700">{subjRevGrowth}</td>
+                      <td className="py-2.5 px-3 text-right">{subjMargin}</td>
+                      <td className="py-2.5 px-3 text-center text-slate-400 text-[10px]">—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Implied Share Price Breakdown Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs pt-1">
+                <div className="bg-white border border-slate-200 p-3 rounded-xs shadow-2xs">
+                  <span className="text-[10px] text-slate-500 uppercase block">1. Implied by EV/EBITDA ({benchmarkEvEbitda}x)</span>
+                  <span className="text-base font-bold text-emerald-700 mt-1 block">IDR {displayPriceEvEbitda.toLocaleString()}</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">EV = EBITDA × {benchmarkEvEbitda}x + Net Cash</span>
+                </div>
+                <div className="bg-white border border-slate-200 p-3 rounded-xs shadow-2xs">
+                  <span className="text-[10px] text-slate-500 uppercase block">2. Implied by P/E ({benchmarkPe}x)</span>
+                  <span className="text-base font-bold text-blue-700 mt-1 block">IDR {displayPricePe.toLocaleString()}</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Equity = Net Income × {benchmarkPe}x</span>
+                </div>
+                <div className="bg-white border border-slate-200 p-3 rounded-xs shadow-2xs">
+                  <span className="text-[10px] text-slate-500 uppercase block">3. Implied by P/B ({benchmarkPb}x)</span>
+                  <span className="text-base font-bold text-indigo-700 mt-1 block">IDR {displayPricePb.toLocaleString()}</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Equity = Book Value × {benchmarkPb}x</span>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-300 p-3 rounded-xs shadow-2xs">
+                  <span className="text-[10px] text-emerald-800 uppercase block font-bold">★ Composite Comps Target</span>
+                  <span className="text-base font-black text-emerald-900 mt-1 block">IDR {displayCompsPrice.toLocaleString()} / sh</span>
+                  <span className="text-[10px] text-emerald-700 block mt-0.5">Weighted 60% EV/EBITDA + 40% P/E</span>
+                </div>
+              </div>
             </div>
-
-
-
-            <table className="w-full text-left border-collapse text-xs font-mono">
-
-              <thead>
-
-                <tr className="border-b border-slate-300 bg-slate-100 text-[10px] uppercase text-slate-600">
-
-                  <th className="py-2.5 px-3 font-sans">Peer Company</th>
-
-                  <th className="py-2.5 px-3">Ticker</th>
-
-                  <th className="py-2.5 px-3 text-right">Market Cap</th>
-
-                  <th className="py-2.5 px-3 text-right">EV / EBITDA</th>
-
-                  <th className="py-2.5 px-3 text-right">P / E</th>
-
-                  <th className="py-2.5 px-3 text-right">Rev Growth (%)</th>
-
-                  <th className="py-2.5 px-3 text-right">EBITDA Margin (%)</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody className="divide-y divide-slate-200">
-
-                {(company.comps || []).map((peer, idx) => (
-
-                  <tr key={idx} className="hover:bg-slate-50">
-
-                    <td className="py-2 px-3 font-sans font-medium text-slate-900">{peer.name}</td>
-
-                    <td className="py-2 px-3 font-bold text-slate-700">{peer.ticker}.JK</td>
-
-                    <td className="py-2 px-3 text-right">{fmtCompact(peer.mcap)}</td>
-
-                    <td className="py-2 px-3 text-right font-semibold">{peer.evEbitda?.toFixed(2)}x</td>
-
-                    <td className="py-2 px-3 text-right">{peer.pe?.toFixed(2)}x</td>
-
-                    <td className="py-2 px-3 text-right text-emerald-700">+{peer.revGrowth?.toFixed(1)}%</td>
-
-                    <td className="py-2 px-3 text-right">{peer.ebitdaMargin?.toFixed(1)}%</td>
-
-                  </tr>
-
-                ))}
-
-                <tr className="bg-blue-50/60 font-bold text-slate-900">
-
-                  <td className="py-2.5 px-3 font-sans">{company.name} (Subject)</td>
-
-                  <td className="py-2.5 px-3 text-blue-700">{company.ticker}</td>
-
-                  <td className="py-2.5 px-3 text-right">{fmtCompact(v.marketCap)}</td>
-
-                  <td className="py-2.5 px-3 text-right font-bold text-emerald-700">5.40x</td>
-
-                  <td className="py-2.5 px-3 text-right font-bold text-emerald-700">5.53x</td>
-
-                  <td className="py-2.5 px-3 text-right text-emerald-700">+12.0%</td>
-
-                  <td className="py-2.5 px-3 text-right">51.5%</td>
-
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        )}
-
-
+          );
+        })()}
 
         {/* TAB 3: RIM */}
 

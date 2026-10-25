@@ -11,6 +11,7 @@ Uses Starlette & Uvicorn (zero external node.js or npm dependencies).
 
 
 import os
+import math
 
 import sys
 
@@ -43,6 +44,7 @@ from src.data.adapters.idx_scraper.proforma.dispatcher import is_banking_or_fina
 from src.data.country_data import INDONESIA_MACRO
 
 from src.data.coverage import COVERAGE_UNIVERSE
+from src.data.peers import PeerUniverseService
 from src.data.news_service import InstitutionalNewsService
 
 from src.rules.sanity_checks import ModelSanityChecker
@@ -106,7 +108,7 @@ async def index(request):
 
             content = f.read()
 
-        return HTMLResponse(content)
+        return HTMLResponse(content, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
     return HTMLResponse("<h1>Loading Valuation Platform...</h1>")
 
@@ -157,6 +159,12 @@ async def get_company(request):
     try:
 
         data = FinancialDataLoader.fetch_company_data(ticker, source=source)
+        try:
+            svc = PeerUniverseService.get_instance()
+            data["comps"] = svc.get_recommended_peers(ticker)
+            data["universe_catalog"] = svc.get_universe_catalog()
+        except Exception:
+            pass
 
         return JSONResponse({"status": "success", "data": data})
 
@@ -189,6 +197,23 @@ async def get_coverage(request):
     """Returns the pre-configured coverage universe for Indonesian property equities and conglomerates."""
 
     return JSONResponse({"status": "success", "data": COVERAGE_UNIVERSE})
+
+
+async def get_peers(request):
+    """Returns recommended authentic peers and universe catalog for a given ticker."""
+    ticker = request.query_params.get("ticker", "PWON.JK").strip().upper()
+    try:
+        svc = PeerUniverseService.get_instance()
+        rec_peers = svc.get_recommended_peers(ticker)
+        catalog = svc.get_universe_catalog()
+        return JSONResponse({
+            "status": "success",
+            "ticker": ticker,
+            "recommended_peers": rec_peers,
+            "universe_catalog": catalog
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 
 
@@ -367,11 +392,14 @@ async def recalculate(request):
         stat_method = comps_params.get("stat_method", "median")
 
         filter_outliers = comps_params.get("filter_outliers", True)
+        user_peers = comps_params.get("peers")
 
         
 
         comps_res = RelativeValuationModel.calculate_comps(
 
+            peers_data=payload.get("comps_params", {}).get("peers"),
+            ticker=ticker,
             target_ebitda=float(pf_res["schedule"].iloc[0]["ebit"] + pf_res["schedule"].iloc[0]["depr"]),
 
             target_net_income=float(hist.get("net_income", [2.42])[-1]),
@@ -943,7 +971,10 @@ async def recalculate(request):
 
                 "benchmark_pb": comps_res["benchmark_pb"],
 
-                "peers": comps_res["peers_table"].to_dict(orient="records")
+                "peers": [
+                    {k: (None if (isinstance(v, float) and (math.isnan(v) or math.isinf(v))) else v) for k, v in row.items()}
+                    for row in (comps_res["peers_table"].to_dict(orient="records") if hasattr(comps_res["peers_table"], "to_dict") else comps_res["peers_table"])
+                ]
 
             },
 
@@ -1107,6 +1138,8 @@ async def export_excel(request):
 
         comps_res = RelativeValuationModel.calculate_comps(
 
+            peers_data=payload.get("comps_params", {}).get("peers"),
+            ticker=ticker,
             target_ebitda=float(pf_res["schedule"].iloc[0]["ebit"] + pf_res["schedule"].iloc[0]["depr"]),
 
             shares_outstanding=shares_b, cash=cash, debt=debt, minority_interest=mi
@@ -1528,6 +1561,7 @@ routes = [
     Route("/", endpoint=index, methods=["GET"]),
 
     Route("/api/coverage", endpoint=get_coverage, methods=["GET"]),
+    Route("/api/peers", endpoint=get_peers, methods=["GET"]),
 
     Route("/api/company", endpoint=get_company, methods=["GET"]),
 
